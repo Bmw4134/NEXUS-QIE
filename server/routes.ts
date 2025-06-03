@@ -477,6 +477,185 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== NEXUS RESEARCH AUTOMATION API ====================
+  
+  // Get all research targets
+  app.get("/api/research/targets", async (req, res) => {
+    try {
+      const targets = nexusResearch.getResearchTargets();
+      res.json(targets);
+    } catch (error) {
+      console.error('Error fetching research targets:', error);
+      res.status(500).json({ message: "Failed to fetch research targets" });
+    }
+  });
+
+  // Add new research target
+  app.post("/api/research/targets", async (req, res) => {
+    try {
+      const { name, url, type, selectors, frequency } = req.body;
+      
+      if (!name || !url || !type) {
+        return res.status(400).json({ message: "Name, URL, and type are required" });
+      }
+
+      const targetId = nexusResearch.addResearchTarget({
+        id: `target_${Date.now()}`,
+        name,
+        url,
+        type,
+        selectors: selectors || {},
+        frequency: frequency || 10,
+        isActive: true
+      });
+
+      res.json({ id: targetId, message: "Research target added successfully" });
+    } catch (error) {
+      console.error('Error adding research target:', error);
+      res.status(500).json({ message: "Failed to add research target" });
+    }
+  });
+
+  // Remove research target
+  app.delete("/api/research/targets/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const removed = nexusResearch.removeResearchTarget(id);
+      
+      if (removed) {
+        res.json({ message: "Research target removed successfully" });
+      } else {
+        res.status(404).json({ message: "Research target not found" });
+      }
+    } catch (error) {
+      console.error('Error removing research target:', error);
+      res.status(500).json({ message: "Failed to remove research target" });
+    }
+  });
+
+  // Get automation rules
+  app.get("/api/research/rules", async (req, res) => {
+    try {
+      const rules = nexusResearch.getAutomationRules();
+      res.json(rules);
+    } catch (error) {
+      console.error('Error fetching automation rules:', error);
+      res.status(500).json({ message: "Failed to fetch automation rules" });
+    }
+  });
+
+  // Add automation rule
+  app.post("/api/research/rules", async (req, res) => {
+    try {
+      const { name, trigger, conditions, actions } = req.body;
+      
+      if (!name || !trigger || !conditions || !actions) {
+        return res.status(400).json({ message: "Name, trigger, conditions, and actions are required" });
+      }
+
+      const ruleId = nexusResearch.addAutomationRule({
+        id: `rule_${Date.now()}`,
+        name,
+        trigger,
+        conditions,
+        actions,
+        isActive: true
+      });
+
+      res.json({ id: ruleId, message: "Automation rule added successfully" });
+    } catch (error) {
+      console.error('Error adding automation rule:', error);
+      res.status(500).json({ message: "Failed to add automation rule" });
+    }
+  });
+
+  // Get research metrics and status
+  app.get("/api/research/metrics", async (req, res) => {
+    try {
+      const metrics = nexusResearch.getResearchMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error('Error fetching research metrics:', error);
+      res.status(500).json({ message: "Failed to fetch research metrics" });
+    }
+  });
+
+  // Manual research execution
+  app.post("/api/research/execute", async (req, res) => {
+    try {
+      const { targetId } = req.body;
+      
+      if (!targetId) {
+        return res.status(400).json({ message: "Target ID is required" });
+      }
+
+      // Execute research for specific target
+      const result = await (nexusResearch as any).executeResearch(targetId);
+      
+      if (result) {
+        res.json({ 
+          message: "Research executed successfully", 
+          data: {
+            id: result.id,
+            quality: result.quality,
+            confidence: result.confidence,
+            timestamp: result.timestamp
+          }
+        });
+      } else {
+        res.status(500).json({ message: "Research execution failed" });
+      }
+    } catch (error) {
+      console.error('Error executing research:', error);
+      res.status(500).json({ message: "Failed to execute research" });
+    }
+  });
+
+  // Research data search
+  app.post("/api/research/search", async (req, res) => {
+    try {
+      const { query, type, startDate, endDate } = req.body;
+      
+      if (!query) {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+
+      // Get quantum knowledge nodes from research
+      const nodes = await storage.getAllQuantumKnowledgeNodes();
+      
+      const researchNodes = nodes.filter(node => {
+        const matchesQuery = node.content.toLowerCase().includes(query.toLowerCase()) ||
+                           node.context?.toLowerCase().includes(query.toLowerCase());
+        const isResearchNode = node.learnedFrom === 'nexus_automation';
+        const matchesType = !type || node.quantumSignature?.includes(type);
+        
+        let matchesDate = true;
+        if (startDate || endDate) {
+          const nodeDate = new Date(node.timestamp);
+          if (startDate) matchesDate = matchesDate && nodeDate >= new Date(startDate);
+          if (endDate) matchesDate = matchesDate && nodeDate <= new Date(endDate);
+        }
+        
+        return matchesQuery && isResearchNode && matchesType && matchesDate;
+      });
+
+      res.json({
+        results: researchNodes.map(node => ({
+          id: node.nodeId,
+          content: node.content,
+          context: node.context,
+          confidence: node.confidence,
+          timestamp: node.timestamp,
+          type: node.quantumSignature?.split('_')[1] || 'unknown'
+        })),
+        total: researchNodes.length
+      });
+    } catch (error) {
+      console.error('Error searching research data:', error);
+      res.status(500).json({ message: "Failed to search research data" });
+    }
+  });
+
   // Setup market data callbacks for real-time updates
   marketHub.onDataUpdate((data) => {
     broadcast({
