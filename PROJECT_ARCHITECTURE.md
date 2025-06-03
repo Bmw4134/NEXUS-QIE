@@ -1,4 +1,4 @@
-# TRAXOVO Quantum AI Database - Project Architecture
+# NEXUS Quantum Intelligence Platform - Project Architecture
 
 ## Overview
 A full-stack TypeScript web application for managing quantum AI knowledge nodes with real-time learning visualization, built on Replit with PostgreSQL database integration.

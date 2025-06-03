@@ -25,7 +25,7 @@ export interface QuantumQueryResponse {
   timestamp: Date;
 }
 
-export class QuantumIntelligenceDatabase {
+export class NexusQuantumDatabase {
   private asiEnhancementFactor: number = 1.0;
   private knowledgeGraph: Map<string, QuantumKnowledgeNodeData> = new Map();
   private initializationTime: Date;

@@ -3,7 +3,7 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { v4 as uuidv4 } from 'uuid';
 import * as cron from 'node-cron';
-import { TRAXOVOQuantumDatabase } from './quantum-database';
+import { NexusQuantumDatabase } from './quantum-database';
 import { QuantumMLEngine } from './quantum-ml-engine';
 
 export interface IntelligenceSource {
@@ -30,13 +30,13 @@ export interface ScrapedData {
 
 export class AutonomousIntelligenceSystem {
   private browser: Browser | null = null;
-  private quantumDB: TRAXOVOQuantumDatabase;
+  private quantumDB: NexusQuantumDatabase;
   private mlEngine: QuantumMLEngine;
   private intelligenceSources: IntelligenceSource[] = [];
   private scrapedData: ScrapedData[] = [];
   private isCollecting = false;
 
-  constructor(quantumDB: TRAXOVOQuantumDatabase, mlEngine: QuantumMLEngine) {
+  constructor(quantumDB: NexusQuantumDatabase, mlEngine: QuantumMLEngine) {
     this.quantumDB = quantumDB;
     this.mlEngine = mlEngine;
     this.initializeIntelligenceSources();

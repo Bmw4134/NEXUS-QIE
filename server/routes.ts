@@ -2,8 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { QuantumIntelligenceDatabase } from "./quantum-database";
+import { NexusQuantumDatabase } from "./quantum-database";
 import { marketHub } from "./market-intelligence-hub";
+import { nexusResearch } from "./nexus-research-automation";
 import { 
   insertQuantumKnowledgeNodeSchema,
   insertLlmInteractionSchema,
@@ -12,7 +13,7 @@ import {
 import crypto from 'crypto';
 
 // Initialize quantum database
-const quantumDB = new QuantumIntelligenceDatabase();
+const quantumDB = new NexusQuantumDatabase();
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
