@@ -7,6 +7,7 @@ import { LearningProgress } from "@/components/dashboard/learning-progress";
 import { KnowledgeGraph } from "@/components/dashboard/knowledge-graph";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { PerformanceAnalytics } from "@/components/dashboard/performance-analytics";
+import { QuantumAdminControl } from "@/components/quantum-admin-control";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Bell, Menu, Search } from "lucide-react";
@@ -109,6 +110,9 @@ export default function Dashboard() {
           <PerformanceAnalytics />
         </main>
       </div>
+
+      {/* Floating Quantum Admin Control */}
+      <QuantumAdminControl />
     </div>
   );
 }
