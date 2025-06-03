@@ -18,6 +18,8 @@ import {
   type ActivityItem,
   type LearningProgress
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -353,4 +355,164 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Database Storage Implementation
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async getQuantumKnowledgeNode(nodeId: string): Promise<QuantumKnowledgeNode | undefined> {
+    const [node] = await db.select().from(quantumKnowledgeNodes).where(eq(quantumKnowledgeNodes.nodeId, nodeId));
+    return node || undefined;
+  }
+
+  async getAllQuantumKnowledgeNodes(): Promise<QuantumKnowledgeNode[]> {
+    return await db.select().from(quantumKnowledgeNodes);
+  }
+
+  async createQuantumKnowledgeNode(node: InsertQuantumKnowledgeNode): Promise<QuantumKnowledgeNode> {
+    const [created] = await db
+      .insert(quantumKnowledgeNodes)
+      .values(node)
+      .returning();
+    return created;
+  }
+
+  async updateQuantumKnowledgeNode(nodeId: string, updates: Partial<QuantumKnowledgeNode>): Promise<QuantumKnowledgeNode | undefined> {
+    const [updated] = await db
+      .update(quantumKnowledgeNodes)
+      .set(updates)
+      .where(eq(quantumKnowledgeNodes.nodeId, nodeId))
+      .returning();
+    return updated || undefined;
+  }
+
+  async getLlmInteraction(interactionId: string): Promise<LlmInteraction | undefined> {
+    const [interaction] = await db.select().from(llmInteractions).where(eq(llmInteractions.interactionId, interactionId));
+    return interaction || undefined;
+  }
+
+  async getAllLlmInteractions(): Promise<LlmInteraction[]> {
+    return await db.select().from(llmInteractions);
+  }
+
+  async createLlmInteraction(interaction: InsertLlmInteraction): Promise<LlmInteraction> {
+    const [created] = await db
+      .insert(llmInteractions)
+      .values(interaction)
+      .returning();
+    return created;
+  }
+
+  async getQuantumLearning(learningId: string): Promise<QuantumLearning | undefined> {
+    const [learning] = await db.select().from(quantumLearning).where(eq(quantumLearning.learningId, learningId));
+    return learning || undefined;
+  }
+
+  async getAllQuantumLearning(): Promise<QuantumLearning[]> {
+    return await db.select().from(quantumLearning);
+  }
+
+  async createQuantumLearning(learning: InsertQuantumLearning): Promise<QuantumLearning> {
+    const [created] = await db
+      .insert(quantumLearning)
+      .values(learning)
+      .returning();
+    return created;
+  }
+
+  async getAsiDecision(decisionId: string): Promise<AsiDecision | undefined> {
+    const [decision] = await db.select().from(asiDecisions).where(eq(asiDecisions.decisionId, decisionId));
+    return decision || undefined;
+  }
+
+  async getAllAsiDecisions(): Promise<AsiDecision[]> {
+    return await db.select().from(asiDecisions);
+  }
+
+  async createAsiDecision(decision: InsertAsiDecision): Promise<AsiDecision> {
+    const [created] = await db
+      .insert(asiDecisions)
+      .values(decision)
+      .returning();
+    return created;
+  }
+
+  async getDatabaseStats(): Promise<DatabaseStats> {
+    const nodes = await db.select().from(quantumKnowledgeNodes);
+    const interactions = await db.select().from(llmInteractions);
+    
+    const totalNodes = nodes.length;
+    const avgConfidence = nodes.reduce((sum, node) => sum + node.confidence, 0) / totalNodes || 0;
+    const avgAsiLevel = nodes.reduce((sum, node) => sum + node.asiEnhancementLevel, 0) / totalNodes || 0;
+    const totalConnections = nodes.reduce((sum, node) => sum + (node.connections?.length || 0), 0);
+    
+    return {
+      quantumNodes: totalNodes,
+      asiFactor: avgAsiLevel,
+      successRate: avgConfidence,
+      connections: totalConnections,
+      queriesPerHour: interactions.length,
+      avgQueryTime: 150
+    };
+  }
+
+  async getRecentActivity(): Promise<ActivityItem[]> {
+    const nodes = await db.select().from(quantumKnowledgeNodes).limit(5);
+    const interactions = await db.select().from(llmInteractions).limit(5);
+    
+    const activities: ActivityItem[] = [
+      ...nodes.map(node => ({
+        id: `node_${node.id}`,
+        type: 'node_created' as const,
+        title: 'Quantum Node Created',
+        description: `Node ${node.nodeId} with confidence ${node.confidence.toFixed(2)}`,
+        timestamp: node.timestamp.toISOString(),
+        icon: 'brain',
+        iconColor: 'text-blue-500'
+      })),
+      ...interactions.map(interaction => ({
+        id: `query_${interaction.id}`,
+        type: 'query_processed' as const,
+        title: 'Query Processed',
+        description: `Confidence: ${interaction.confidence.toFixed(2)}`,
+        timestamp: interaction.timestamp.toISOString(),
+        icon: 'zap',
+        iconColor: 'text-green-500'
+      }))
+    ];
+    
+    return activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 10);
+  }
+
+  async getLearningProgress(): Promise<LearningProgress> {
+    const nodes = await db.select().from(quantumKnowledgeNodes);
+    const learning = await db.select().from(quantumLearning);
+    
+    const avgConfidence = nodes.reduce((sum, node) => sum + node.confidence, 0) / nodes.length || 0;
+    const avgAsiLevel = nodes.reduce((sum, node) => sum + node.asiEnhancementLevel, 0) / nodes.length || 0;
+    
+    return {
+      knowledgeAbsorption: avgConfidence * 100,
+      patternRecognition: avgAsiLevel * 50,
+      quantumCoherence: learning.length > 0 ? 85 : 75,
+      nextCycle: new Date(Date.now() + 30 * 60 * 1000).toISOString()
+    };
+  }
+}
+
+export const storage = new DatabaseStorage();
