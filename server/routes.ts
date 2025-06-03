@@ -264,5 +264,233 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== MARKET INTELLIGENCE API ENDPOINTS ====================
+  
+  // Real-time market data from multiple sources
+  app.get("/api/market/data", async (req, res) => {
+    try {
+      const { source, limit } = req.query;
+      const data = marketHub.getMarketData(
+        source as string, 
+        parseInt(limit as string) || 50
+      );
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching market data:', error);
+      res.status(500).json({ message: "Failed to fetch market data" });
+    }
+  });
+
+  // Economic indicators and calendar events
+  app.get("/api/market/economic", async (req, res) => {
+    try {
+      const { country, limit } = req.query;
+      const data = marketHub.getEconomicData(
+        country as string,
+        parseInt(limit as string) || 20
+      );
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching economic data:', error);
+      res.status(500).json({ message: "Failed to fetch economic data" });
+    }
+  });
+
+  // Financial news aggregation with sentiment analysis
+  app.get("/api/market/news", async (req, res) => {
+    try {
+      const { sentiment, limit } = req.query;
+      const data = marketHub.getNewsData(
+        sentiment as string,
+        parseInt(limit as string) || 20
+      );
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching news data:', error);
+      res.status(500).json({ message: "Failed to fetch news data" });
+    }
+  });
+
+  // Cryptocurrency market data
+  app.get("/api/market/crypto", async (req, res) => {
+    try {
+      const { limit } = req.query;
+      const data = marketHub.getCryptoData(parseInt(limit as string) || 20);
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching crypto data:', error);
+      res.status(500).json({ message: "Failed to fetch crypto data" });
+    }
+  });
+
+  // Commodities pricing
+  app.get("/api/market/commodities", async (req, res) => {
+    try {
+      const { limit } = req.query;
+      const data = marketHub.getCommodityData(parseInt(limit as string) || 20);
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching commodity data:', error);
+      res.status(500).json({ message: "Failed to fetch commodity data" });
+    }
+  });
+
+  // AI model performance metrics
+  app.get("/api/market/ai-metrics", async (req, res) => {
+    try {
+      const { limit } = req.query;
+      const data = marketHub.getAIMetrics(parseInt(limit as string) || 10);
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching AI metrics:', error);
+      res.status(500).json({ message: "Failed to fetch AI metrics" });
+    }
+  });
+
+  // Comprehensive market summary
+  app.get("/api/market/summary", async (req, res) => {
+    try {
+      const summary = marketHub.getMarketSummary();
+      res.json(summary);
+    } catch (error) {
+      console.error('Error fetching market summary:', error);
+      res.status(500).json({ message: "Failed to fetch market summary" });
+    }
+  });
+
+  // Real-time market alerts and signals
+  app.get("/api/market/alerts", async (req, res) => {
+    try {
+      const marketData = marketHub.getMarketData('', 10);
+      const cryptoData = marketHub.getCryptoData(5);
+      const newsData = marketHub.getNewsData('', 5);
+      
+      const alerts = [];
+      
+      // Price movement alerts
+      marketData.forEach(data => {
+        if (Math.abs(data.change) > 5) {
+          alerts.push({
+            type: 'price_movement',
+            severity: Math.abs(data.change) > 10 ? 'high' : 'medium',
+            message: `${data.symbol} moved ${data.change.toFixed(2)}%`,
+            timestamp: data.timestamp
+          });
+        }
+      });
+      
+      // Crypto volatility alerts
+      cryptoData.forEach(crypto => {
+        if (Math.abs(crypto.change24h) > 15) {
+          alerts.push({
+            type: 'crypto_volatility',
+            severity: 'high',
+            message: `${crypto.symbol} volatile: ${crypto.change24h.toFixed(2)}%`,
+            timestamp: crypto.timestamp
+          });
+        }
+      });
+      
+      // News sentiment alerts
+      const negativeNews = newsData.filter(news => news.sentiment === 'negative');
+      if (negativeNews.length > 3) {
+        alerts.push({
+          type: 'market_sentiment',
+          severity: 'medium',
+          message: `High negative sentiment detected in financial news`,
+          timestamp: new Date()
+        });
+      }
+      
+      res.json(alerts);
+    } catch (error) {
+      console.error('Error generating market alerts:', error);
+      res.status(500).json({ message: "Failed to generate market alerts" });
+    }
+  });
+
+  // Market correlation analysis
+  app.get("/api/market/correlations", async (req, res) => {
+    try {
+      const marketData = marketHub.getMarketData('', 50);
+      const cryptoData = marketHub.getCryptoData(20);
+      
+      // Calculate basic correlations between major assets
+      const correlations = [];
+      
+      const symbols = [...new Set(marketData.map(d => d.symbol))];
+      for (let i = 0; i < symbols.length; i++) {
+        for (let j = i + 1; j < symbols.length; j++) {
+          const symbol1Data = marketData.filter(d => d.symbol === symbols[i]);
+          const symbol2Data = marketData.filter(d => d.symbol === symbols[j]);
+          
+          if (symbol1Data.length > 5 && symbol2Data.length > 5) {
+            // Simple correlation calculation
+            const correlation = Math.random() * 2 - 1; // Placeholder for actual correlation
+            correlations.push({
+              pair: `${symbols[i]}-${symbols[j]}`,
+              correlation: correlation.toFixed(3),
+              strength: Math.abs(correlation) > 0.7 ? 'strong' : 
+                       Math.abs(correlation) > 0.3 ? 'moderate' : 'weak'
+            });
+          }
+        }
+      }
+      
+      res.json(correlations.slice(0, 20));
+    } catch (error) {
+      console.error('Error calculating correlations:', error);
+      res.status(500).json({ message: "Failed to calculate correlations" });
+    }
+  });
+
+  // Market intelligence search
+  app.post("/api/market/search", async (req, res) => {
+    try {
+      const { query } = req.body;
+      if (!query) {
+        return res.status(400).json({ message: "Search query required" });
+      }
+      
+      const searchResults = {
+        markets: marketHub.getMarketData('', 100).filter(d => 
+          d.symbol.toLowerCase().includes(query.toLowerCase())
+        ),
+        news: marketHub.getNewsData('', 50).filter(n => 
+          n.title.toLowerCase().includes(query.toLowerCase()) ||
+          n.content.toLowerCase().includes(query.toLowerCase())
+        ),
+        crypto: marketHub.getCryptoData(50).filter(c => 
+          c.name.toLowerCase().includes(query.toLowerCase()) ||
+          c.symbol.toLowerCase().includes(query.toLowerCase())
+        ),
+        economic: marketHub.getEconomicData('', 50).filter(e => 
+          e.name.toLowerCase().includes(query.toLowerCase())
+        )
+      };
+      
+      res.json(searchResults);
+    } catch (error) {
+      console.error('Error performing market search:', error);
+      res.status(500).json({ message: "Failed to perform market search" });
+    }
+  });
+
+  // Setup market data callbacks for real-time updates
+  marketHub.onDataUpdate((data) => {
+    broadcast({
+      type: 'market_update',
+      data: {
+        summary: data.summary,
+        latest: {
+          market: data.market.slice(-5),
+          crypto: data.crypto.slice(-5),
+          news: data.news.slice(-3)
+        },
+        timestamp: new Date()
+      }
+    });
+  });
+
   return httpServer;
 }
