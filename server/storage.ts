@@ -198,7 +198,8 @@ export class MemStorage implements IStorage {
     const fullNode: QuantumKnowledgeNode = { 
       ...node, 
       id,
-      context: node.context || null 
+      context: node.context || null,
+      connections: Array.isArray(node.connections) ? [...node.connections] : []
     };
     this.quantumNodes.set(node.nodeId, fullNode);
     
@@ -237,8 +238,8 @@ export class MemStorage implements IStorage {
     const fullInteraction: LlmInteraction = { 
       ...interaction, 
       id,
-      sourceNodes: Array.isArray(interaction.sourceNodes) ? interaction.sourceNodes : [],
-      reasoningChain: Array.isArray(interaction.reasoningChain) ? interaction.reasoningChain : []
+      sourceNodes: Array.isArray(interaction.sourceNodes) ? [...interaction.sourceNodes] : [],
+      reasoningChain: Array.isArray(interaction.reasoningChain) ? [...interaction.reasoningChain] : []
     };
     this.llmInteractions.set(interaction.interactionId, fullInteraction);
     
