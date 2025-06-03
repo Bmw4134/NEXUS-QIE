@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { TRAXOVOQuantumDatabase } from "./quantum-database";
+import { marketHub } from "./market-intelligence-hub";
 import { 
   insertQuantumKnowledgeNodeSchema,
   insertLlmInteractionSchema,
