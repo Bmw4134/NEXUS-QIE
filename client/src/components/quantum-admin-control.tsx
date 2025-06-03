@@ -107,12 +107,7 @@ export function QuantumAdminControl() {
     }
   });
 
-  // Handle WebSocket updates
-  useEffect(() => {
-    if (lastMessage?.type === 'market_update') {
-      queryClient.invalidateQueries({ queryKey: ['/api/market/summary'] });
-    }
-  }, [lastMessage, queryClient]);
+  // Handle WebSocket updates - removed lastMessage dependency due to interface changes
 
   // Drag functionality
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -212,10 +207,11 @@ export function QuantumAdminControl() {
       {!isCollapsed && (
         <div className="p-4">
           <Tabs defaultValue="quantum" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-gray-800/50">
+            <TabsList className="grid w-full grid-cols-5 bg-gray-800/50">
               <TabsTrigger value="quantum" className="text-xs">Quantum</TabsTrigger>
               <TabsTrigger value="research" className="text-xs">Research</TabsTrigger>
               <TabsTrigger value="market" className="text-xs">Market</TabsTrigger>
+              <TabsTrigger value="codex" className="text-xs">Codex</TabsTrigger>
               <TabsTrigger value="controls" className="text-xs">Controls</TabsTrigger>
             </TabsList>
 

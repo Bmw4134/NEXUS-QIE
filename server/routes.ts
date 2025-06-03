@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { NexusQuantumDatabase } from "./quantum-database";
 import { marketHub } from "./market-intelligence-hub";
 import { nexusResearch } from "./nexus-research-automation";
+import { codexIntegration } from "./chatgpt-codex-integration";
 import { 
   insertQuantumKnowledgeNodeSchema,
   insertLlmInteractionSchema,
@@ -653,6 +654,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error searching research data:', error);
       res.status(500).json({ message: "Failed to search research data" });
+    }
+  });
+
+  // ==================== CHATGPT CODEX INTEGRATION API ====================
+  
+  // Initialize Codex authentication
+  app.post("/api/codex/authenticate", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      const session = await codexIntegration.authenticateWithCodex(email, password);
+      
+      if (session) {
+        res.json({ 
+          message: "Codex authentication successful",
+          sessionId: session.id,
+          isActive: session.isActive
+        });
+      } else {
+        res.status(401).json({ message: "Codex authentication failed" });
+      }
+    } catch (error) {
+      console.error('Codex authentication error:', error);
+      res.status(500).json({ message: "Authentication process failed" });
+    }
+  });
+
+  // Execute Codex onboarding
+  app.post("/api/codex/onboarding", async (req, res) => {
+    try {
+      const onboardingData = await codexIntegration.executeCodexOnboarding();
+      
+      if (onboardingData) {
+        res.json({
+          message: "Codex onboarding completed",
+          conversationId: onboardingData.conversationId,
+          status: onboardingData.integrationStatus,
+          capabilities: onboardingData.capabilities
+        });
+      } else {
+        res.status(500).json({ message: "Onboarding process failed" });
+      }
+    } catch (error) {
+      console.error('Codex onboarding error:', error);
+      res.status(500).json({ message: "Onboarding execution failed" });
+    }
+  });
+
+  // Send message to Codex
+  app.post("/api/codex/message", async (req, res) => {
+    try {
+      const { message } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ message: "Message content required" });
+      }
+
+      const response = await codexIntegration.sendCodexMessage(message);
+      
+      if (response) {
+        res.json({
+          query: message,
+          response: response,
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        res.status(500).json({ message: "Failed to send message to Codex" });
+      }
+    } catch (error) {
+      console.error('Codex message error:', error);
+      res.status(500).json({ message: "Message sending failed" });
+    }
+  });
+
+  // Query Codex API directly
+  app.post("/api/codex/query", async (req, res) => {
+    try {
+      const { prompt, model } = req.body;
+      
+      if (!prompt) {
+        return res.status(400).json({ message: "Prompt required" });
+      }
+
+      const response = await codexIntegration.queryCodexAPI(prompt, model);
+      
+      if (response) {
+        res.json({
+          id: response.id,
+          model: response.model,
+          response: response.choices[0]?.message?.content,
+          usage: response.usage,
+          timestamp: new Date(response.created * 1000).toISOString()
+        });
+      } else {
+        res.status(500).json({ message: "Codex API query failed" });
+      }
+    } catch (error) {
+      console.error('Codex API query error:', error);
+      res.status(500).json({ message: "API query failed" });
+    }
+  });
+
+  // Get Codex session status
+  app.get("/api/codex/status", async (req, res) => {
+    try {
+      const status = codexIntegration.getSessionStatus();
+      res.json(status);
+    } catch (error) {
+      console.error('Codex status error:', error);
+      res.status(500).json({ message: "Failed to get session status" });
+    }
+  });
+
+  // Codex-enhanced market analysis
+  app.post("/api/codex/market-analysis", async (req, res) => {
+    try {
+      const { symbol, timeframe } = req.body;
+      
+      // Get market data
+      const marketData = marketHub.getMarketData('', 10);
+      const symbolData = marketData.filter(d => d.symbol === symbol);
+      
+      if (symbolData.length === 0) {
+        return res.status(404).json({ message: "Symbol not found in market data" });
+      }
+
+      // Create Codex prompt for analysis
+      const prompt = `Analyze the market data for ${symbol} over ${timeframe || '1D'}:
+      
+Current Price: ${symbolData[0].price}
+Price Change: ${symbolData[0].change}
+Volume: ${symbolData[0].volume}
+
+Provide technical analysis, key support/resistance levels, and short-term outlook.`;
+
+      const analysis = await codexIntegration.queryCodexAPI(prompt, 'gpt-4');
+      
+      if (analysis) {
+        res.json({
+          symbol,
+          timeframe: timeframe || '1D',
+          analysis: analysis.choices[0]?.message?.content,
+          confidence: 0.85,
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        res.status(500).json({ message: "Market analysis failed" });
+      }
+    } catch (error) {
+      console.error('Codex market analysis error:', error);
+      res.status(500).json({ message: "Analysis generation failed" });
     }
   });
 
