@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { TRAXOVOQuantumDatabase } from "./quantum-database";
+import { QuantumIntelligenceDatabase } from "./quantum-database";
 import { marketHub } from "./market-intelligence-hub";
 import { 
   insertQuantumKnowledgeNodeSchema,
@@ -12,7 +12,7 @@ import {
 import crypto from 'crypto';
 
 // Initialize quantum database
-const quantumDB = new TRAXOVOQuantumDatabase();
+const quantumDB = new QuantumIntelligenceDatabase();
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
