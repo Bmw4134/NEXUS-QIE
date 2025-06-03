@@ -195,7 +195,11 @@ export class MemStorage implements IStorage {
 
   async createQuantumKnowledgeNode(node: InsertQuantumKnowledgeNode): Promise<QuantumKnowledgeNode> {
     const id = this.currentNodeId++;
-    const fullNode: QuantumKnowledgeNode = { ...node, id };
+    const fullNode: QuantumKnowledgeNode = { 
+      ...node, 
+      id,
+      context: node.context || null 
+    };
     this.quantumNodes.set(node.nodeId, fullNode);
     
     // Add activity
@@ -230,7 +234,12 @@ export class MemStorage implements IStorage {
 
   async createLlmInteraction(interaction: InsertLlmInteraction): Promise<LlmInteraction> {
     const id = this.currentInteractionId++;
-    const fullInteraction: LlmInteraction = { ...interaction, id };
+    const fullInteraction: LlmInteraction = { 
+      ...interaction, 
+      id,
+      sourceNodes: Array.isArray(interaction.sourceNodes) ? interaction.sourceNodes : [],
+      reasoningChain: Array.isArray(interaction.reasoningChain) ? interaction.reasoningChain : []
+    };
     this.llmInteractions.set(interaction.interactionId, fullInteraction);
     
     // Add activity
