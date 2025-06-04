@@ -4,6 +4,7 @@ import { marketHub } from "./market-intelligence-hub";
 import { nexusResearch } from "./nexus-research-automation";
 import { codexIntegration } from "./chatgpt-codex-integration";
 import { perplexitySearch } from "./perplexity-search-service";
+import { intelligentDecision } from "./intelligent-decision-engine";
 
 export interface AutomationMode {
   id: string;
@@ -214,19 +215,43 @@ export class AutomationSuite {
     input: any,
     priority: AutomationTask['priority'] = 'medium'
   ): Promise<string> {
+    // Use intelligent decision engine to analyze the task
+    const decisionContext = {
+      userRequest: name,
+      currentSystemState: this.getMetrics(),
+      availableModules: Array.from(this.automationModes.keys()),
+      recentInteractions: this.completedTasks.slice(-5).map(t => t.name),
+      systemCapabilities: this.automationModes.get(this.currentMode)?.capabilities || []
+    };
+
+    const intent = await intelligentDecision.analyzeUserIntent(name, decisionContext);
+    
+    // Ask for clarification if confidence is low
+    if (intent.confidence < 0.6) {
+      const clarification = await intelligentDecision.askClarificationQuestion(intent);
+      if (clarification) {
+        console.log(`AI Decision Engine: ${clarification}`);
+      }
+    }
+
     const task: AutomationTask = {
       id: `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       name,
       type,
-      priority,
+      priority: intent.priority,
       status: 'pending',
       mode: this.currentMode,
-      input,
+      input: {
+        ...input,
+        intelligentAnalysis: intent,
+        suggestedApproach: intent.suggestedApproach
+      },
       startTime: new Date(),
-      confidence: 0,
+      confidence: intent.confidence,
       metadata: {
         createdBy: 'automation_suite',
-        mode: this.currentMode
+        mode: this.currentMode,
+        decisionEngineAnalysis: intelligentDecision.getDecisionSummary(intent)
       }
     };
 
@@ -236,7 +261,9 @@ export class AutomationSuite {
       return priorityOrder[b.priority] - priorityOrder[a.priority];
     });
 
-    console.log(`Task created: ${name} (${type}, ${priority} priority)`);
+    console.log(`AI-Enhanced Task created: ${name} (${type}, ${intent.priority} priority, ${(intent.confidence * 100).toFixed(0)}% confidence)`);
+    console.log(`Decision Summary: ${intent.suggestedApproach}`);
+    
     return task.id;
   }
 
