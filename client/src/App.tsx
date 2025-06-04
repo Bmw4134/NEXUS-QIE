@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import Dashboard from "@/pages/dashboard";
 import { AutomationPage } from "@/pages/automation";
 import { BrowserPage } from "@/pages/browser";
+import { QuantumAIPage } from "@/pages/quantum-ai";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/automation" component={AutomationPage} />
       <Route path="/browser" component={BrowserPage} />
+      <Route path="/quantum-ai" component={QuantumAIPage} />
       <Route component={NotFound} />
     </Switch>
   );

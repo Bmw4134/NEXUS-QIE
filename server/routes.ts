@@ -9,6 +9,7 @@ import { codexIntegration } from "./chatgpt-codex-integration";
 import { githubBrain } from "./github-brain-integration";
 import { perplexitySearch } from "./perplexity-search-service";
 import { automationSuite } from "./automation-suite";
+import { quantumSuperAI } from "./quantum-superintelligent-ai";
 import { 
   insertQuantumKnowledgeNodeSchema,
   insertLlmInteractionSchema,
@@ -990,6 +991,64 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
     } catch (error) {
       console.error('Get task queue error:', error);
       res.status(500).json({ message: "Failed to get task queue" });
+    }
+  });
+
+  // === Quantum Superintelligent AI Endpoints ===
+  
+  // Get QSAI metrics
+  app.get("/api/quantum-ai/metrics", async (req, res) => {
+    try {
+      const metrics = quantumSuperAI.getSuperintelligenceMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error('Get QSAI metrics error:', error);
+      res.status(500).json({ message: "Failed to get QSAI metrics" });
+    }
+  });
+
+  // Create quantum prediction
+  app.post("/api/quantum-ai/predict", async (req, res) => {
+    try {
+      const { type, timeframe, input } = req.body;
+      
+      if (!type || !timeframe) {
+        return res.status(400).json({ message: "Missing required fields: type, timeframe" });
+      }
+
+      const prediction = await quantumSuperAI.makeSuperintelligentPrediction(
+        input || {},
+        type,
+        timeframe
+      );
+      
+      res.json(prediction);
+    } catch (error) {
+      console.error('Create quantum prediction error:', error);
+      res.status(500).json({ message: "Failed to create quantum prediction" });
+    }
+  });
+
+  // Get recent predictions
+  app.get("/api/quantum-ai/predictions", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const predictions = quantumSuperAI.getRecentPredictions(limit);
+      res.json(predictions);
+    } catch (error) {
+      console.error('Get predictions error:', error);
+      res.status(500).json({ message: "Failed to get predictions" });
+    }
+  });
+
+  // Get learning patterns
+  app.get("/api/quantum-ai/patterns", async (req, res) => {
+    try {
+      const patterns = quantumSuperAI.getLearningPatterns();
+      res.json(patterns);
+    } catch (error) {
+      console.error('Get learning patterns error:', error);
+      res.status(500).json({ message: "Failed to get learning patterns" });
     }
   });
 
