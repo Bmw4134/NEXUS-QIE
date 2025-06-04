@@ -6,6 +6,9 @@ import { NexusQuantumDatabase } from "./quantum-database";
 import { marketHub } from "./market-intelligence-hub";
 import { nexusResearch } from "./nexus-research-automation";
 import { codexIntegration } from "./chatgpt-codex-integration";
+import { githubBrain } from "./github-brain-integration";
+import { perplexitySearch } from "./perplexity-search-service";
+import { automationSuite } from "./automation-suite";
 import { 
   insertQuantumKnowledgeNodeSchema,
   insertLlmInteractionSchema,
@@ -805,6 +808,188 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
     } catch (error) {
       console.error('Codex market analysis error:', error);
       res.status(500).json({ message: "Analysis generation failed" });
+    }
+  });
+
+  // ==================== PERPLEXITY SEARCH API ====================
+  
+  // Search with Perplexity
+  app.post("/api/search/perplexity", async (req, res) => {
+    try {
+      const { query, context, searchType } = req.body;
+      
+      if (!query) {
+        return res.status(400).json({ message: "Query is required" });
+      }
+
+      if (!perplexitySearch.isConfigured()) {
+        return res.status(503).json({ 
+          message: "Perplexity API key not configured",
+          status: "needs_api_key"
+        });
+      }
+
+      const result = await perplexitySearch.search({
+        query,
+        context,
+        searchType: searchType || 'general'
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error('Perplexity search error:', error);
+      res.status(500).json({ message: "Search failed" });
+    }
+  });
+
+  // Financial intelligence search
+  app.post("/api/search/financial", async (req, res) => {
+    try {
+      const { query, context } = req.body;
+      
+      if (!query) {
+        return res.status(400).json({ message: "Query is required" });
+      }
+
+      if (!perplexitySearch.isConfigured()) {
+        return res.status(503).json({ 
+          message: "Perplexity API key not configured",
+          status: "needs_api_key"
+        });
+      }
+
+      const result = await perplexitySearch.searchFinancialIntelligence(query, context);
+      res.json(result);
+    } catch (error) {
+      console.error('Financial search error:', error);
+      res.status(500).json({ message: "Financial search failed" });
+    }
+  });
+
+  // Technical analysis search
+  app.post("/api/search/technical", async (req, res) => {
+    try {
+      const { symbol, timeframe } = req.body;
+      
+      if (!symbol) {
+        return res.status(400).json({ message: "Symbol is required" });
+      }
+
+      if (!perplexitySearch.isConfigured()) {
+        return res.status(503).json({ 
+          message: "Perplexity API key not configured",
+          status: "needs_api_key"
+        });
+      }
+
+      const result = await perplexitySearch.searchTechnicalAnalysis(symbol, timeframe);
+      res.json(result);
+    } catch (error) {
+      console.error('Technical analysis search error:', error);
+      res.status(500).json({ message: "Technical analysis failed" });
+    }
+  });
+
+  // ==================== AUTOMATION SUITE API ====================
+  
+  // Get automation modes
+  app.get("/api/automation/modes", async (req, res) => {
+    try {
+      const modes = automationSuite.getAutomationModes();
+      res.json(modes);
+    } catch (error) {
+      console.error('Get automation modes error:', error);
+      res.status(500).json({ message: "Failed to get automation modes" });
+    }
+  });
+
+  // Get current automation mode
+  app.get("/api/automation/current-mode", async (req, res) => {
+    try {
+      const currentMode = automationSuite.getCurrentMode();
+      res.json(currentMode || { message: "No active mode" });
+    } catch (error) {
+      console.error('Get current mode error:', error);
+      res.status(500).json({ message: "Failed to get current mode" });
+    }
+  });
+
+  // Set automation mode
+  app.post("/api/automation/set-mode", async (req, res) => {
+    try {
+      const { modeId } = req.body;
+      
+      if (!modeId) {
+        return res.status(400).json({ message: "Mode ID is required" });
+      }
+
+      const success = await automationSuite.setMode(modeId);
+      res.json({ success, mode: modeId });
+    } catch (error) {
+      console.error('Set automation mode error:', error);
+      res.status(500).json({ message: error.message || "Failed to set automation mode" });
+    }
+  });
+
+  // Create automation task
+  app.post("/api/automation/create-task", async (req, res) => {
+    try {
+      const { name, type, input, priority } = req.body;
+      
+      if (!name || !type || !input) {
+        return res.status(400).json({ message: "Name, type, and input are required" });
+      }
+
+      const taskId = await automationSuite.createTask(name, type, input, priority);
+      res.json({ taskId, message: "Task created successfully" });
+    } catch (error) {
+      console.error('Create automation task error:', error);
+      res.status(500).json({ message: "Failed to create automation task" });
+    }
+  });
+
+  // Get automation metrics
+  app.get("/api/automation/metrics", async (req, res) => {
+    try {
+      const metrics = automationSuite.getMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error('Get automation metrics error:', error);
+      res.status(500).json({ message: "Failed to get automation metrics" });
+    }
+  });
+
+  // Get active tasks
+  app.get("/api/automation/tasks/active", async (req, res) => {
+    try {
+      const tasks = automationSuite.getActiveTasks();
+      res.json(tasks);
+    } catch (error) {
+      console.error('Get active tasks error:', error);
+      res.status(500).json({ message: "Failed to get active tasks" });
+    }
+  });
+
+  // Get completed tasks
+  app.get("/api/automation/tasks/completed", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const tasks = automationSuite.getCompletedTasks(limit);
+      res.json(tasks);
+    } catch (error) {
+      console.error('Get completed tasks error:', error);
+      res.status(500).json({ message: "Failed to get completed tasks" });
+    }
+  });
+
+  // Get task queue
+  app.get("/api/automation/tasks/queue", async (req, res) => {
+    try {
+      const queue = automationSuite.getTaskQueue();
+      res.json(queue);
+    } catch (error) {
+      console.error('Get task queue error:', error);
+      res.status(500).json({ message: "Failed to get task queue" });
     }
   });
 
