@@ -8,8 +8,10 @@ import {
   Network, 
   Settings, 
   Activity,
-  Atom
+  Atom,
+  Zap
 } from "lucide-react";
+import { Link, useLocation } from "wouter";
 import { useQuantumDatabase } from "@/hooks/use-quantum-database";
 
 interface SidebarProps {
@@ -19,9 +21,11 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { stats } = useQuantumDatabase();
+  const [location] = useLocation();
 
   const navigation = [
-    { name: "Dashboard", icon: Activity, href: "#", current: true },
+    { name: "Dashboard", icon: Activity, href: "/dashboard", current: location === "/" || location === "/dashboard" },
+    { name: "AI Automation", icon: Zap, href: "/automation", current: location === "/automation" },
     { name: "Knowledge Nodes", icon: Brain, href: "#", current: false },
     { name: "Quantum Query", icon: Search, href: "#", current: false },
     { name: "Knowledge Graph", icon: Network, href: "#", current: false },
@@ -41,8 +45,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <Atom className="text-white h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-800 dark:text-white">TRAXOVO</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Quantum ASI Database</p>
+            <h1 className="text-xl font-bold text-gray-800 dark:text-white">NEXUS</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">AI Excellence Platform</p>
           </div>
         </div>
       </div>
@@ -52,20 +56,21 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         {navigation.map((item) => {
           const Icon = item.icon;
           return (
-            <Button
-              key={item.name}
-              variant={item.current ? "default" : "ghost"}
-              className={cn(
-                "w-full justify-start space-x-3 h-12",
-                item.current 
-                  ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30" 
-                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-              )}
-              onClick={onClose}
-            >
-              <Icon className="h-5 w-5" />
-              <span className="font-medium">{item.name}</span>
-            </Button>
+            <Link key={item.name} href={item.href}>
+              <Button
+                variant={item.current ? "default" : "ghost"}
+                className={cn(
+                  "w-full justify-start space-x-3 h-12",
+                  item.current 
+                    ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30" 
+                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                )}
+                onClick={onClose}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="font-medium">{item.name}</span>
+              </Button>
+            </Link>
           );
         })}
       </nav>

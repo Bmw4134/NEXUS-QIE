@@ -28,6 +28,7 @@ import {
   CheckCircle,
   Clock
 } from 'lucide-react';
+import { CodexControlPanel } from '@/components/codex-control-panel';
 
 interface QuantumMetrics {
   quantumNodes: number;
@@ -337,6 +338,11 @@ export function QuantumAdminControl() {
                   <div className="text-white font-semibold">{researchMetrics?.totalTargets || 0}</div>
                 </div>
               </div>
+            </TabsContent>
+
+            {/* Codex Tab */}
+            <TabsContent value="codex" className="space-y-3 mt-3">
+              <CodexControlPanel />
             </TabsContent>
 
             {/* Market Tab */}
