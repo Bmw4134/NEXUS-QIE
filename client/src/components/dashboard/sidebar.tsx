@@ -26,6 +26,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const navigation = [
     { name: "Dashboard", icon: Activity, href: "/dashboard", current: location === "/" || location === "/dashboard" },
     { name: "AI Automation", icon: Zap, href: "/automation", current: location === "/automation" },
+    { name: "Browser", icon: Search, href: "/browser", current: location === "/browser" },
     { name: "Knowledge Nodes", icon: Brain, href: "#", current: false },
     { name: "Quantum Query", icon: Search, href: "#", current: false },
     { name: "Knowledge Graph", icon: Network, href: "#", current: false },
