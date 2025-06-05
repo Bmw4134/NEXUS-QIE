@@ -24,6 +24,7 @@ const quantumDB = new NexusQuantumDatabase();
 // Initialize Master Infinity Router for complete integration
 import { masterRouter } from './master-infinity-router';
 import { kaizenAgent } from './kaizen-infinity-agent';
+import { watsonEngine } from './watson-command-engine';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -1296,9 +1297,67 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
     });
   });
 
+  // === Watson Command Engine Endpoints ===
+  
+  // Get Watson system state
+  app.get("/api/watson/state", async (req, res) => {
+    try {
+      const state = watsonEngine.getSystemState();
+      res.json(state);
+    } catch (error) {
+      console.error('Get Watson state error:', error);
+      res.status(500).json({ message: "Failed to get Watson state" });
+    }
+  });
+
+  // Queue Watson command
+  app.post("/api/watson/command", async (req, res) => {
+    try {
+      const { type, command, parameters, priority, fingerprint } = req.body;
+      
+      const commandId = watsonEngine.queueCommand({
+        type: type || 'system',
+        command,
+        parameters: parameters || {},
+        priority: priority || 'medium',
+        fingerprint: fingerprint || 'WATSON_COMMAND_READY'
+      });
+      
+      res.json({ commandId, message: 'Command queued successfully' });
+    } catch (error) {
+      console.error('Queue Watson command error:', error);
+      res.status(500).json({ message: "Failed to queue command" });
+    }
+  });
+
+  // Get command history
+  app.get("/api/watson/history", async (req, res) => {
+    try {
+      const history = watsonEngine.getCommandHistory();
+      res.json(history);
+    } catch (error) {
+      console.error('Get command history error:', error);
+      res.status(500).json({ message: "Failed to get command history" });
+    }
+  });
+
+  // Render visual system state
+  app.get("/api/watson/visual-state", async (req, res) => {
+    try {
+      const visualState = watsonEngine.renderVisualState();
+      res.json(visualState);
+    } catch (error) {
+      console.error('Get visual state error:', error);
+      res.status(500).json({ message: "Failed to get visual state" });
+    }
+  });
+
   // Activate KaizenGPT Infinity Agent in safe mode with dashboard sync
   console.log('🎯 Activating KaizenGPT Infinity Agent with final fingerprinted patch...');
   kaizenAgent.activate();
+  
+  // Initialize Watson Command Engine with memory-aware runtime
+  console.log('🧠 Watson Command Engine activated with full system alignment');
 
   return httpServer;
 }

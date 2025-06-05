@@ -13,6 +13,7 @@ import { BIMInfinityPage } from "@/pages/bim-infinity";
 import { ProofPuddingPage } from "@/pages/proof-pudding";
 import { InfinitySovereignPage } from "@/pages/infinity-sovereign";
 import { KaizenAgentPage } from "@/pages/kaizen-agent";
+import { WatsonCommandPage } from "@/pages/watson-command";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/proof-pudding" component={ProofPuddingPage} />
       <Route path="/infinity-sovereign" component={InfinitySovereignPage} />
       <Route path="/kaizen-agent" component={KaizenAgentPage} />
+      <Route path="/watson-command" component={WatsonCommandPage} />
       <Route component={NotFound} />
     </Switch>
   );
