@@ -12,6 +12,7 @@ import { GitHubBrainPage } from "@/pages/github-brain";
 import { BIMInfinityPage } from "@/pages/bim-infinity";
 import { ProofPuddingPage } from "@/pages/proof-pudding";
 import { InfinitySovereignPage } from "@/pages/infinity-sovereign";
+import { KaizenAgentPage } from "@/pages/kaizen-agent";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/bim-infinity" component={BIMInfinityPage} />
       <Route path="/proof-pudding" component={ProofPuddingPage} />
       <Route path="/infinity-sovereign" component={InfinitySovereignPage} />
+      <Route path="/kaizen-agent" component={KaizenAgentPage} />
       <Route component={NotFound} />
     </Switch>
   );

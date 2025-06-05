@@ -23,6 +23,7 @@ const quantumDB = new NexusQuantumDatabase();
 
 // Initialize Master Infinity Router for complete integration
 import { masterRouter } from './master-infinity-router';
+import { kaizenAgent } from './kaizen-infinity-agent';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -1212,6 +1213,73 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
     }
   });
 
+  // === KaizenGPT Infinity Agent Endpoints ===
+  
+  // Get KaizenGPT metrics and status
+  app.get("/api/kaizen/status", async (req, res) => {
+    try {
+      const status = kaizenAgent.getStatus();
+      res.json(status);
+    } catch (error) {
+      console.error('Get Kaizen status error:', error);
+      res.status(500).json({ message: "Failed to get Kaizen status" });
+    }
+  });
+
+  // Get optimization metrics
+  app.get("/api/kaizen/metrics", async (req, res) => {
+    try {
+      const metrics = kaizenAgent.getMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error('Get Kaizen metrics error:', error);
+      res.status(500).json({ message: "Failed to get Kaizen metrics" });
+    }
+  });
+
+  // Get optimizations list
+  app.get("/api/kaizen/optimizations", async (req, res) => {
+    try {
+      const optimizations = kaizenAgent.getOptimizations();
+      res.json(optimizations);
+    } catch (error) {
+      console.error('Get optimizations error:', error);
+      res.status(500).json({ message: "Failed to get optimizations" });
+    }
+  });
+
+  // Execute specific optimization
+  app.post("/api/kaizen/execute", async (req, res) => {
+    try {
+      const { optimizationId } = req.body;
+      const success = kaizenAgent.executeOptimization(optimizationId);
+      res.json({ success, message: success ? 'Optimization executed' : 'Failed to execute optimization' });
+    } catch (error) {
+      console.error('Execute optimization error:', error);
+      res.status(500).json({ message: "Failed to execute optimization" });
+    }
+  });
+
+  // Update KaizenGPT configuration
+  app.post("/api/kaizen/config", async (req, res) => {
+    try {
+      const { safeMode, adaptationSpeed } = req.body;
+      
+      if (typeof safeMode === 'boolean') {
+        kaizenAgent.setSafeMode(safeMode);
+      }
+      
+      if (adaptationSpeed && ['conservative', 'moderate', 'aggressive'].includes(adaptationSpeed)) {
+        kaizenAgent.setAdaptationSpeed(adaptationSpeed);
+      }
+      
+      res.json({ message: 'Configuration updated successfully' });
+    } catch (error) {
+      console.error('Update Kaizen config error:', error);
+      res.status(500).json({ message: "Failed to update configuration" });
+    }
+  });
+
   // Setup market data callbacks for real-time updates
   marketHub.onDataUpdate((data) => {
     broadcast({
@@ -1227,6 +1295,10 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
       }
     });
   });
+
+  // Activate KaizenGPT Infinity Agent in safe mode with dashboard sync
+  console.log('🎯 Activating KaizenGPT Infinity Agent with final fingerprinted patch...');
+  kaizenAgent.activate();
 
   return httpServer;
 }
