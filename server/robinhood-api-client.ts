@@ -139,7 +139,7 @@ export class RobinhoodAPIClient {
 
       // Add MFA code if provided
       if (credentials.mfaSecret) {
-        authData.mfa_code = credentials.mfaSecret;
+        (authData as any).mfa_code = credentials.mfaSecret;
       }
 
       const response = await this.axiosInstance.post('/api-token-auth/', authData);
