@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Bell, Menu, Search } from "lucide-react";
 import { useWebSocket } from "@/lib/websocket";
+import { SuccessCelebration, useSuccessCelebration } from "@/components/ui/success-celebration";
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);

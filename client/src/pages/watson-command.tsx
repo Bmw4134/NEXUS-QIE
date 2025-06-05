@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { SuccessCelebration, useSuccessCelebration } from '@/components/ui/success-celebration';
 import { 
   Brain, 
   Command, 
@@ -105,6 +106,7 @@ export function WatsonCommandPage() {
   const [useNaturalLanguage, setUseNaturalLanguage] = useState(true);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const queryClient = useQueryClient();
+  const { celebration, celebrate, hideCelebration } = useSuccessCelebration();
 
   const { data: watsonState } = useQuery<WatsonState>({
     queryKey: ['/api/watson/state'],
@@ -157,25 +159,45 @@ export function WatsonCommandPage() {
         return response.json();
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/watson/history'] });
       queryClient.invalidateQueries({ queryKey: ['/api/watson/state'] });
       setCommandText('');
       setCommandParams('{}');
       setNaturalCommand('');
       setUploadedFiles([]);
+      
+      // Trigger success celebration based on command type
+      const celebrationType = useNaturalLanguage ? 'command' : 
+        commandType === 'optimization' ? 'optimization' :
+        commandType === 'analysis' ? 'analysis' :
+        commandType === 'emergency' ? 'emergency' : 'command';
+      
+      const message = data.interpretedFrom ? 
+        `Natural command processed: "${data.interpretedFrom}"` :
+        `Watson command executed successfully`;
+        
+      celebrate(message, celebrationType);
     }
   });
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     setUploadedFiles(prev => [...prev, ...files]);
+    
+    if (files.length > 0) {
+      celebrate(`${files.length} file${files.length > 1 ? 's' : ''} uploaded successfully`, 'default');
+    }
   };
 
   const handleFileDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     const files = Array.from(event.dataTransfer.files);
     setUploadedFiles(prev => [...prev, ...files]);
+    
+    if (files.length > 0) {
+      celebrate(`${files.length} file${files.length > 1 ? 's' : ''} dropped successfully`, 'default');
+    }
   };
 
   const removeFile = (index: number) => {
@@ -658,6 +680,14 @@ export function WatsonCommandPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Success Celebration Component */}
+      <SuccessCelebration
+        isVisible={celebration.isVisible}
+        message={celebration.message}
+        type={celebration.type}
+        onComplete={hideCelebration}
+      />
     </div>
   );
 }
