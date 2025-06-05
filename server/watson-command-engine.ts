@@ -1,7 +1,6 @@
 import { masterRouter } from './master-infinity-router';
 import { kaizenAgent } from './kaizen-infinity-agent';
 import sharp from 'sharp';
-import pdfParse from 'pdf-parse';
 import mammoth from 'mammoth';
 import fs from 'fs/promises';
 
@@ -470,6 +469,205 @@ export class WatsonCommandEngine {
       clearInterval(this.commandInterval);
     }
     console.log('🔄 Watson Command Engine shutdown complete');
+  }
+
+  private async parseFile(file: any): Promise<ParsedFileContent> {
+    const fileName = file.originalname || file.name;
+    const fileType = file.mimetype || file.type;
+    const fileBuffer = file.buffer || await fs.readFile(file.path);
+
+    try {
+      let content = '';
+      let metadata: any = {
+        size: file.size,
+        type: fileType
+      };
+
+      if (fileType.startsWith('image/')) {
+        // Parse image files
+        const imageInfo = await sharp(fileBuffer).metadata();
+        metadata.dimensions = { width: imageInfo.width || 0, height: imageInfo.height || 0 };
+        content = `Image: ${fileName} (${imageInfo.width}x${imageInfo.height}, ${fileType})`;
+      } else if (fileType === 'application/pdf') {
+        // Parse PDF files
+        const pdfData = await pdfParse(fileBuffer);
+        content = pdfData.text;
+        metadata.pageCount = pdfData.numpages;
+      } else if (fileType.includes('word') || fileType.includes('document')) {
+        // Parse Word documents
+        const result = await mammoth.extractRawText({ buffer: fileBuffer });
+        content = result.value;
+      } else if (fileType.startsWith('text/') || fileType === 'application/json') {
+        // Parse text files
+        content = fileBuffer.toString('utf-8');
+      } else if (fileType.startsWith('video/')) {
+        // Video file metadata
+        content = `Video file: ${fileName} (${fileType})`;
+      } else {
+        // Generic file handling
+        content = `File: ${fileName} (${fileType}, ${Math.round(file.size / 1024)} KB)`;
+      }
+
+      return {
+        fileName,
+        fileType,
+        content,
+        metadata
+      };
+    } catch (error) {
+      console.error(`Error parsing file ${fileName}:`, error);
+      return {
+        fileName,
+        fileType,
+        content: `Error parsing file: ${fileName}`,
+        metadata: { size: file.size, type: fileType }
+      };
+    }
+  }
+
+  async processNaturalCommandWithFiles(naturalCommand: string, files: any[], fingerprint: string): Promise<any> {
+    try {
+      console.log(`🎯 Processing natural command with ${files?.length || 0} files: ${naturalCommand}`);
+      
+      let fileContents: ParsedFileContent[] = [];
+      if (files && files.length > 0) {
+        fileContents = await Promise.all(files.map(file => this.parseFile(file)));
+      }
+
+      // Enhanced natural language interpretation with file context
+      const interpretedCommand = this.interpretNaturalLanguageWithFiles(naturalCommand, fileContents);
+      
+      const commandId = `watson_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+      const command: WatsonCommand = {
+        id: commandId,
+        type: interpretedCommand.type,
+        command: interpretedCommand.command,
+        parameters: { 
+          ...interpretedCommand.parameters,
+          originalNaturalCommand: naturalCommand,
+          fileContents: fileContents
+        },
+        priority: interpretedCommand.priority,
+        status: 'queued',
+        timestamp: new Date(),
+        fingerprint
+      };
+
+      // Store in memory with file context
+      this.systemMemory.chatHistory.push({
+        timestamp: new Date(),
+        context: `Natural command: "${naturalCommand}" with ${fileContents.length} files`,
+        decisions: [interpretedCommand.command],
+        outcomes: ['command_queued']
+      });
+
+      // Execute the command using existing method
+      this.queueCommand(command);
+
+      return {
+        commandId,
+        message: `Command interpreted and queued: ${interpretedCommand.command}`,
+        interpretedFrom: naturalCommand,
+        filesProcessed: fileContents.length
+      };
+    } catch (error) {
+      console.error('Error processing natural command with files:', error);
+      throw error;
+    }
+  }
+
+  private interpretNaturalLanguageWithFiles(naturalCommand: string, fileContents: ParsedFileContent[]): any {
+    const lower = naturalCommand.toLowerCase();
+    
+    // File-specific commands
+    if (fileContents.length > 0) {
+      const fileTypes = fileContents.map(f => f.fileType);
+      const hasImages = fileTypes.some(t => t.startsWith('image/'));
+      const hasPDFs = fileTypes.some(t => t === 'application/pdf');
+      const hasDocuments = fileTypes.some(t => t.includes('document') || t.includes('word'));
+      
+      if (lower.includes('analyze') || lower.includes('what') || lower.includes('tell me about')) {
+        if (hasImages) {
+          return {
+            type: 'analysis',
+            command: 'analyze_uploaded_images',
+            parameters: { files: fileContents },
+            priority: 'medium'
+          };
+        }
+        if (hasPDFs || hasDocuments) {
+          return {
+            type: 'analysis',
+            command: 'analyze_uploaded_documents',
+            parameters: { files: fileContents },
+            priority: 'medium'
+          };
+        }
+      }
+      
+      if (lower.includes('extract') || lower.includes('read') || lower.includes('content')) {
+        return {
+          type: 'analysis',
+          command: 'extract_file_content',
+          parameters: { files: fileContents },
+          priority: 'medium'
+        };
+      }
+    }
+
+    // Standard natural language interpretation
+    if (lower.includes('how are you') || lower.includes('status') || lower.includes('health')) {
+      return {
+        type: 'system',
+        command: 'system_status',
+        parameters: {},
+        priority: 'low'
+      };
+    }
+
+    if (lower.includes('optimize') || lower.includes('improve') || lower.includes('kaizen')) {
+      return {
+        type: 'optimization',
+        command: 'run_kaizen_optimization',
+        parameters: {},
+        priority: 'medium'
+      };
+    }
+
+    if (lower.includes('scan') || lower.includes('check everything') || lower.includes('full analysis')) {
+      return {
+        type: 'analysis',
+        command: 'full_system_scan',
+        parameters: {},
+        priority: 'medium'
+      };
+    }
+
+    if (lower.includes('insights') || lower.includes('report') || lower.includes('summary')) {
+      return {
+        type: 'analysis',
+        command: 'generate_insights_report',
+        parameters: {},
+        priority: 'medium'
+      };
+    }
+
+    if (lower.includes('safe mode') || lower.includes('emergency') || lower.includes('protect')) {
+      return {
+        type: 'emergency',
+        command: 'enable_safe_mode',
+        parameters: {},
+        priority: 'high'
+      };
+    }
+
+    // Default interpretation
+    return {
+      type: 'system',
+      command: 'natural_language_query',
+      parameters: { query: naturalCommand },
+      priority: 'low'
+    };
   }
 }
 

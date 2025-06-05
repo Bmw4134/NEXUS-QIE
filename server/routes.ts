@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { NexusQuantumDatabase } from "./quantum-database";
+import multer from 'multer';
 import { marketHub } from "./market-intelligence-hub";
 import { nexusResearch } from "./nexus-research-automation";
 import { codexIntegration } from "./chatgpt-codex-integration";
@@ -25,6 +26,18 @@ const quantumDB = new NexusQuantumDatabase();
 import { masterRouter } from './master-infinity-router';
 import { kaizenAgent } from './kaizen-infinity-agent';
 import { watsonEngine } from './watson-command-engine';
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept all file types
+    cb(null, true);
+  }
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -1310,21 +1323,27 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
     }
   });
 
-  // Queue Watson command with natural language support
-  app.post("/api/watson/command", async (req, res) => {
+  // Queue Watson command with natural language support and file uploads
+  app.post("/api/watson/command", upload.array('files', 10), async (req, res) => {
     try {
       const { type, command, parameters, priority, fingerprint, naturalCommand } = req.body;
+      const files = req.files as Express.Multer.File[];
       
       let commandId;
       
       if (naturalCommand) {
-        // Use natural language interpreter
-        commandId = watsonEngine.interpretNaturalCommand(naturalCommand, fingerprint || 'WATSON_USER');
-        res.json({ 
-          commandId, 
-          message: 'Natural language command processed and queued',
-          interpretedFrom: naturalCommand
-        });
+        // Use natural language interpreter with file support
+        if (files && files.length > 0) {
+          const result = await watsonEngine.processNaturalCommandWithFiles(naturalCommand, files, fingerprint || 'WATSON_USER');
+          res.json(result);
+        } else {
+          commandId = watsonEngine.interpretNaturalCommand(naturalCommand, fingerprint || 'WATSON_USER');
+          res.json({ 
+            commandId, 
+            message: 'Natural language command processed and queued',
+            interpretedFrom: naturalCommand
+          });
+        }
       } else {
         // Use structured command format
         commandId = watsonEngine.queueCommand({

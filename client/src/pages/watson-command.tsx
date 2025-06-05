@@ -123,13 +123,39 @@ export function WatsonCommandPage() {
 
   const executeCommandMutation = useMutation({
     mutationFn: async (commandData: any) => {
-      const response = await fetch('/api/watson/command', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(commandData)
-      });
-      if (!response.ok) throw new Error('Failed to execute command');
-      return response.json();
+      if (commandData.files && commandData.files.length > 0) {
+        // Use FormData for file uploads
+        const formData = new FormData();
+        if (commandData.naturalCommand) {
+          formData.append('naturalCommand', commandData.naturalCommand);
+        } else {
+          formData.append('type', commandData.type);
+          formData.append('command', commandData.command);
+          formData.append('parameters', JSON.stringify(commandData.parameters));
+          formData.append('priority', commandData.priority);
+        }
+        formData.append('fingerprint', commandData.fingerprint);
+        
+        commandData.files.forEach((file: File) => {
+          formData.append('files', file);
+        });
+
+        const response = await fetch('/api/watson/command', {
+          method: 'POST',
+          body: formData
+        });
+        if (!response.ok) throw new Error('Failed to execute command');
+        return response.json();
+      } else {
+        // Use JSON for text-only commands
+        const response = await fetch('/api/watson/command', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(commandData)
+        });
+        if (!response.ok) throw new Error('Failed to execute command');
+        return response.json();
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/watson/history'] });
@@ -137,6 +163,7 @@ export function WatsonCommandPage() {
       setCommandText('');
       setCommandParams('{}');
       setNaturalCommand('');
+      setUploadedFiles([]);
     }
   });
 
