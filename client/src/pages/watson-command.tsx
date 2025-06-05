@@ -23,6 +23,12 @@ import {
   Server,
   Shield,
   Crown,
+  Upload,
+  File,
+  X,
+  Image,
+  Video,
+  FileText,
   Cpu
 } from 'lucide-react';
 
@@ -97,6 +103,7 @@ export function WatsonCommandPage() {
   const [priority, setPriority] = useState<string>('medium');
   const [naturalCommand, setNaturalCommand] = useState('');
   const [useNaturalLanguage, setUseNaturalLanguage] = useState(true);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const queryClient = useQueryClient();
 
   const { data: watsonState } = useQuery<WatsonState>({
@@ -133,13 +140,44 @@ export function WatsonCommandPage() {
     }
   });
 
-  const handleExecuteCommand = () => {
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setUploadedFiles(prev => [...prev, ...files]);
+  };
+
+  const handleFileDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const files = Array.from(event.dataTransfer.files);
+    setUploadedFiles(prev => [...prev, ...files]);
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const getFileIcon = (file: File) => {
+    if (file.type.startsWith('image/')) return <Image className="w-4 h-4" />;
+    if (file.type.startsWith('video/')) return <Video className="w-4 h-4" />;
+    if (file.type.startsWith('text/') || file.type.includes('document')) return <FileText className="w-4 h-4" />;
+    return <File className="w-4 h-4" />;
+  };
+
+  const handleExecuteCommand = async () => {
     if (useNaturalLanguage) {
       if (!naturalCommand.trim()) return;
       
+      const formData = new FormData();
+      formData.append('naturalCommand', naturalCommand);
+      formData.append('fingerprint', 'WATSON_USER');
+      
+      uploadedFiles.forEach((file, index) => {
+        formData.append(`files`, file);
+      });
+
       executeCommandMutation.mutate({
         naturalCommand: naturalCommand,
-        fingerprint: 'WATSON_USER'
+        fingerprint: 'WATSON_USER',
+        files: uploadedFiles.length > 0 ? uploadedFiles : undefined
       });
     } else {
       if (!commandText.trim()) return;
@@ -156,7 +194,8 @@ export function WatsonCommandPage() {
         command: commandText,
         parameters: parsedParams,
         priority: priority,
-        fingerprint: 'WATSON_COMMAND_READY'
+        fingerprint: 'WATSON_COMMAND_READY',
+        files: uploadedFiles.length > 0 ? uploadedFiles : undefined
       });
     }
   };
@@ -299,6 +338,68 @@ export function WatsonCommandPage() {
                     Examples: "How are you?", "Optimize the system", "Run a full scan", "Show insights", "Enable safe mode"
                   </div>
                 </div>
+              </div>
+
+              {/* File Upload Area */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Attach Files (Optional)</label>
+                <div 
+                  className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
+                  onDrop={handleFileDrop}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDragEnter={(e) => e.preventDefault()}
+                >
+                  <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    Drop files here or click to upload
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-500">
+                    Images, videos, documents, PDFs, code files, etc.
+                  </div>
+                  <input
+                    type="file"
+                    multiple
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="file-upload"
+                    accept="*/*"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    onClick={() => document.getElementById('file-upload')?.click()}
+                  >
+                    Choose Files
+                  </Button>
+                </div>
+
+                {/* Uploaded Files List */}
+                {uploadedFiles.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Uploaded Files:</div>
+                    {uploadedFiles.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 rounded-lg p-2">
+                        <div className="flex items-center gap-2">
+                          {getFileIcon(file)}
+                          <span className="text-sm truncate max-w-[200px]">{file.name}</span>
+                          <span className="text-xs text-gray-500">
+                            ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                          </span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile(index)}
+                          className="h-6 w-6 p-0"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ) : (
