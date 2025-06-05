@@ -1,0 +1,80 @@
+{
+  "name": "watson-llm-desktop",
+  "version": "1.0.0",
+  "description": "Watson LLM Desktop Intelligence Suite with Robinhood Trading Integration",
+  "main": "watson-desktop-main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "npm run build:renderer && npm run build:main",
+    "build:renderer": "vite build",
+    "build:main": "tsc -p tsconfig.main.json",
+    "pack:win": "electron-builder --win",
+    "pack:mac": "electron-builder --mac",
+    "pack:all": "electron-builder --win --mac --linux",
+    "dist": "npm run build && npm run pack:all"
+  },
+  "build": {
+    "appId": "com.jdd.watson-llm",
+    "productName": "Watson LLM Desktop",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "dist/**/*",
+      "server/**/*",
+      "node_modules/**/*",
+      "watson-desktop-main.js",
+      "preload.js"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/watson-icon.ico",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/watson-icon.icns",
+      "category": "public.app-category.finance"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/watson-installer.ico",
+      "uninstallerIcon": "assets/watson-uninstaller.ico",
+      "artifactName": "Watson-LLM-Desktop-Setup-${version}.${ext}",
+      "shortcutName": "Watson LLM"
+    },
+    "dmg": {
+      "title": "Watson LLM Desktop ${version}",
+      "icon": "assets/watson-volume.icns",
+      "background": "assets/dmg-background.png",
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^26.0.0",
+    "electron-builder": "^24.6.4",
+    "@types/electron": "^1.6.10",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0",
+    "ws": "^8.14.0",
+    "puppeteer": "^21.0.0",
+    "cheerio": "^1.0.0-rc.12",
+    "drizzle-orm": "^0.28.0",
+    "@neondatabase/serverless": "^0.6.0"
+  }
+}
