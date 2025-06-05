@@ -17,6 +17,7 @@ import { WatsonCommandPage } from "@/pages/watson-command";
 import { UserManagementPage } from "@/pages/user-management";
 import { InfinityUniformPage } from "@/pages/infinity-uniform";
 import ParticlePlayground from "@/pages/particle-playground";
+import TradingBotPage from "@/pages/trading-bot";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -36,6 +37,7 @@ function Router() {
       <Route path="/user-management" component={UserManagementPage} />
       <Route path="/infinity-uniform" component={InfinityUniformPage} />
       <Route path="/particle-playground" component={ParticlePlayground} />
+      <Route path="/trading-bot" component={TradingBotPage} />
       <Route component={NotFound} />
     </Switch>
   );
