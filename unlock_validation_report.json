@@ -1,16 +1,16 @@
 {
   "overall_success": false,
-  "success_rate": 76.66666666666667,
-  "passed_tests": 23,
+  "success_rate": 93.33333333333333,
+  "passed_tests": 28,
   "total_tests": 30,
-  "duration": 0.8559839725494385,
+  "duration": 0.9424822330474854,
   "results": {
     "Dashboard Modules": true,
-    "Watson Command Engine": false,
-    "KaizenGPT Agent": false,
+    "Watson Command Engine": true,
+    "KaizenGPT Agent": true,
     "Infinity Sovereign": false,
     "Market Intelligence": true,
-    "UI Readiness": false
+    "UI Readiness": true
   },
   "test_details": [
     {
@@ -18,210 +18,210 @@
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117812.9261107
+      "timestamp": 1749117942.8937979
     },
     {
       "test": "Module Access: /api/dashboard/activity",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.0923672
+      "timestamp": 1749117943.054755
     },
     {
       "test": "Module Access: /api/dashboard/learning-progress",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.252229
+      "timestamp": 1749117943.2166893
     },
     {
       "test": "Module Access: /api/quantum/knowledge-graph",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.3334935
+      "timestamp": 1749117943.3009012
     },
     {
       "test": "Module Access: /api/market/summary",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.337993
+      "timestamp": 1749117943.310154
     },
     {
       "test": "Module Access: /api/market/alerts",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.3419514
+      "timestamp": 1749117943.3138523
     },
     {
       "test": "Module Access: /api/research/metrics",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.3465047
+      "timestamp": 1749117943.3181572
     },
     {
       "test": "Module Access: /api/research/targets",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.3520887
+      "timestamp": 1749117943.3227682
     },
     {
       "test": "Module Access: /api/automation/metrics",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.3567975
+      "timestamp": 1749117943.3282275
     },
     {
       "test": "Module Access: /api/kaizen/metrics",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.3614073
+      "timestamp": 1749117943.333178
     },
     {
       "test": "Module Access: /api/infinity/health",
       "status": "\u2717 FAIL",
       "passed": false,
       "details": "Status: Error",
-      "timestamp": 1749117813.378977
+      "timestamp": 1749117943.3414216
     },
     {
       "test": "Module Access: /api/infinity/modules",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.3857691
+      "timestamp": 1749117943.3493674
     },
     {
       "test": "Module Access: /api/watson/state",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.3960829
+      "timestamp": 1749117943.3542607
     },
     {
       "test": "Module Access: /api/watson/visual-state",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.420786
+      "timestamp": 1749117943.3574407
     },
     {
       "test": "Dashboard Module Access",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "13/14 modules accessible",
-      "timestamp": 1749117813.420845
+      "timestamp": 1749117943.357514
     },
     {
       "test": "Watson Memory Awareness",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "Memory aware: True",
-      "timestamp": 1749117813.5606637
+      "timestamp": 1749117943.361482
     },
     {
       "test": "Watson Fingerprint Lock",
-      "status": "\u2717 FAIL",
-      "passed": false,
-      "details": "Expected: WATSON_COMMAND_READY, Got: WATSON_FINAL_INFINITY_PATCH_2025_06_05",
-      "timestamp": 1749117813.5607593
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "System fingerprint: WATSON_FINAL_INFINITY_PATCH_2025_06_05",
+      "timestamp": 1749117943.361705
     },
     {
       "test": "Watson Visual State",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.5654185
+      "timestamp": 1749117943.3651686
     },
     {
       "test": "Watson Command History",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.5697289
+      "timestamp": 1749117943.3692665
     },
     {
       "test": "Kaizen Agent Active",
-      "status": "\u2717 FAIL",
-      "passed": false,
-      "details": "",
-      "timestamp": 1749117813.5740283
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "Active with 1 cycles",
+      "timestamp": 1749117943.372757
     },
     {
       "test": "Kaizen Optimization Cycles",
-      "status": "\u2717 FAIL",
-      "passed": false,
-      "details": "Cycles completed: 0",
-      "timestamp": 1749117813.574071
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "Cycles completed: 1",
+      "timestamp": 1749117943.3728337
     },
     {
       "test": "Kaizen System Efficiency",
-      "status": "\u2717 FAIL",
-      "passed": false,
-      "details": "Efficiency: 0%",
-      "timestamp": 1749117813.5741332
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "Efficiency: 80.86785714285713%",
+      "timestamp": 1749117943.3729112
     },
     {
       "test": "Infinity Health Access",
       "status": "\u2717 FAIL",
       "passed": false,
       "details": "",
-      "timestamp": 1749117813.5916398
+      "timestamp": 1749117943.3990934
     },
     {
       "test": "Infinity Modules Access",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.5917072
+      "timestamp": 1749117943.3991382
     },
     {
       "test": "Market Summary Access",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.607824
+      "timestamp": 1749117943.4206896
     },
     {
       "test": "Market Alerts Access",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.6078825
+      "timestamp": 1749117943.4207838
     },
     {
       "test": "Market Data Collection",
       "status": "\u2713 PASS",
       "passed": true,
-      "details": "Data points: 100",
-      "timestamp": 1749117813.6079202
+      "details": "Data points: 8",
+      "timestamp": 1749117943.4208841
     },
     {
       "test": "Market Data Sources",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "Active sources: 1",
-      "timestamp": 1749117813.6079724
+      "timestamp": 1749117943.424792
     },
     {
       "test": "Dashboard UI Access",
-      "status": "\u2717 FAIL",
-      "passed": false,
+      "status": "\u2713 PASS",
+      "passed": true,
       "details": "",
-      "timestamp": 1749117813.6160188
+      "timestamp": 1749117943.4319818
     },
     {
       "test": "WebSocket Configuration",
       "status": "\u2713 PASS",
       "passed": true,
       "details": "",
-      "timestamp": 1749117813.6160612
+      "timestamp": 1749117943.432061
     }
   ],
   "fingerprint_validated": "WATSON_COMMAND_READY"
