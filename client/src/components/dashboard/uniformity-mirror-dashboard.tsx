@@ -159,7 +159,7 @@ export function UniformityMirrorDashboard() {
               Auto Refresh
             </Button>
             <Badge className="bg-[#00ff64]/20 text-[#00ff64]">
-              {uniformityState.overall.syncPercentage}% Sync
+              {uniformityState?.overall?.syncPercentage || 0}% Sync
             </Badge>
           </div>
         </div>

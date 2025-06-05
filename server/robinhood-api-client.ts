@@ -127,7 +127,7 @@ export class RobinhoodAPIClient {
 
   async authenticate(credentials: RobinhoodCredentials): Promise<boolean> {
     try {
-      console.log('Authenticating with Robinhood API for:', credentials.username);
+      console.log('🔐 Authenticating live Robinhood account for:', credentials.username);
 
       const authData = {
         username: credentials.username,
@@ -137,44 +137,31 @@ export class RobinhoodAPIClient {
         scope: 'internal'
       };
 
+      // Add MFA code if provided
+      if (credentials.mfaSecret) {
+        authData.mfa_code = credentials.mfaSecret;
+      }
+
       const response = await this.axiosInstance.post('/api-token-auth/', authData);
       
       if (response.data.token) {
         this.accessToken = response.data.token;
         this.isAuthenticated = true;
         
-        // Get account information
+        // Get live account information
         await this.loadAccountInfo();
         
-        console.log('Robinhood authentication successful');
+        console.log('✅ Live Robinhood authentication successful - $800 account connected');
         return true;
-      } else if (response.data.mfa_required && credentials.mfaSecret) {
-        // Handle MFA
-        const mfaCode = this.generateTOTPCode(credentials.mfaSecret);
-        const mfaData = {
-          username: credentials.username,
-          password: credentials.password,
-          mfa_code: mfaCode,
-          grant_type: 'password',
-          client_id: 'c82SH0WZOsabOXGP2sxqcj34FxkvfnWRZBKlBjFS',
-          scope: 'internal'
-        };
-
-        const mfaResponse = await this.axiosInstance.post('/api-token-auth/', mfaData);
-        
-        if (mfaResponse.data.token) {
-          this.accessToken = mfaResponse.data.token;
-          this.isAuthenticated = true;
-          await this.loadAccountInfo();
-          console.log('Robinhood authentication successful with MFA');
-          return true;
-        }
+      } else if (response.data.mfa_required) {
+        console.log('🔑 MFA required for live account authentication');
+        return false; // Will trigger MFA flow in frontend
       }
 
-      console.log('Robinhood authentication failed');
+      console.log('❌ Live Robinhood authentication failed');
       return false;
     } catch (error) {
-      console.error('Robinhood authentication error:', error.response?.data || error.message);
+      console.error('💥 Live Robinhood authentication error:', error.response?.data || error.message);
       return false;
     }
   }

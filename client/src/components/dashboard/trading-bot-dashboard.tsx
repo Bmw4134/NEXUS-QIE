@@ -78,7 +78,7 @@ export function TradingBotDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [credentials, setCredentials] = useState({
     username: 'bm.watson34@gmail.com',
-    password: '',
+    password: '4134',
     mfaCode: ''
   });
   const [showMfaInput, setShowMfaInput] = useState(false);
