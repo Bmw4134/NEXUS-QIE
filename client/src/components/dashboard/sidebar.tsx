@@ -47,6 +47,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     { name: "GitHub Brain", icon: GitBranch, href: "/github-brain", current: location === "/github-brain" },
     { name: "BIM Infinity Suite", icon: Building, href: "/bim-infinity", current: location === "/bim-infinity" },
     { name: "Proof in the Pudding", icon: Target, href: "/proof-pudding", current: location === "/proof-pudding" },
+    { name: "Infinity Sovereign", icon: Crown, href: "/infinity-sovereign", current: location === "/infinity-sovereign" },
     { name: "Market Intelligence", icon: TrendingUp, href: "/market-intelligence", current: location === "/market-intelligence" },
     { name: "Research Hub", icon: BookOpen, href: "/research-hub", current: location === "/research-hub" },
     { name: "Quantum AI", icon: Cpu, href: "/quantum-ai", current: location === "/quantum-ai" },
