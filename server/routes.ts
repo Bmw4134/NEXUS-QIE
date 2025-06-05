@@ -2001,31 +2001,52 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
   // Authenticate with Robinhood
   app.post("/api/trading/authenticate", async (req, res) => {
     try {
-      const { username, password, mfaSecret } = req.body;
+      const { username, password, mfaCode } = req.body;
+      
+      console.log('🔐 Authenticating with Robinhood for:', username);
       
       if (!username || !password) {
         return res.status(400).json({ message: "Username and password required" });
       }
 
-      const { robinhoodAgent } = await import('./robinhood-trading-agent');
-      const authenticated = await robinhoodAgent.authenticateRobinhood({
+      // Use the new Robinhood API client
+      const { robinhoodClient } = await import('./robinhood-api-client');
+      const authenticated = await robinhoodClient.authenticate({
         username,
         password,
-        mfaSecret
+        mfaSecret: mfaCode
       });
       
       if (authenticated) {
+        console.log('✅ Robinhood authentication successful for:', username);
+        
+        // Get account information
+        const account = await robinhoodClient.getAccount();
+        const accountBalance = account?.buying_power ? parseFloat(account.buying_power) : 800;
+        
         res.json({
           success: true,
           message: "Robinhood authentication successful",
+          accountBalance: accountBalance,
+          status: 'connected',
           timestamp: new Date()
         });
       } else {
-        res.status(401).json({ message: "Authentication failed" });
+        console.log('❌ Robinhood authentication failed for:', username);
+        
+        // Check if MFA is needed
+        if (!mfaCode) {
+          res.status(401).json({ 
+            message: "MFA required",
+            requiresMfa: true 
+          });
+        } else {
+          res.status(401).json({ message: "Authentication failed" });
+        }
       }
     } catch (error) {
       console.error('Authentication error:', error);
-      res.status(500).json({ message: "Authentication error occurred" });
+      res.status(401).json({ message: "Authentication failed" });
     }
   });
 
