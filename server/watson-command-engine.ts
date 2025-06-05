@@ -336,6 +336,71 @@ export class WatsonCommandEngine {
     };
   }
 
+  // Natural Language Command Interpreter
+  public interpretNaturalCommand(naturalInput: string, userFingerprint: string = 'WATSON_USER'): string {
+    const lowercaseInput = naturalInput.toLowerCase();
+    
+    // Analyze the natural language input and convert to structured command
+    let commandType: WatsonCommand['type'] = 'system';
+    let command = 'system_status';
+    let parameters: Record<string, any> = {};
+    let priority: WatsonCommand['priority'] = 'medium';
+
+    // System status and health checks
+    if (lowercaseInput.includes('status') || lowercaseInput.includes('health') || lowercaseInput.includes('how are')) {
+      commandType = 'system';
+      command = 'system_status';
+    }
+    else if (lowercaseInput.includes('scan') || lowercaseInput.includes('check everything') || lowercaseInput.includes('full check')) {
+      commandType = 'system';
+      command = 'full_system_scan';
+    }
+    // Optimization commands
+    else if (lowercaseInput.includes('optimize') || lowercaseInput.includes('improve') || lowercaseInput.includes('kaizen')) {
+      commandType = 'optimization';
+      command = 'run_kaizen_cycle';
+    }
+    else if (lowercaseInput.includes('safe mode on') || lowercaseInput.includes('enable safe')) {
+      commandType = 'optimization';
+      command = 'set_safe_mode';
+      parameters = { enabled: true };
+    }
+    else if (lowercaseInput.includes('safe mode off') || lowercaseInput.includes('disable safe')) {
+      commandType = 'optimization';
+      command = 'set_safe_mode';
+      parameters = { enabled: false };
+    }
+    // Analysis commands
+    else if (lowercaseInput.includes('analyze') || lowercaseInput.includes('insights') || lowercaseInput.includes('report')) {
+      commandType = 'analysis';
+      command = 'generate_analysis';
+    }
+    // Emergency commands
+    else if (lowercaseInput.includes('emergency') || lowercaseInput.includes('shutdown') || lowercaseInput.includes('stop')) {
+      commandType = 'emergency';
+      command = 'emergency_shutdown';
+      priority = 'critical';
+    }
+    // Evolution commands
+    else if (lowercaseInput.includes('update') || lowercaseInput.includes('patch') || lowercaseInput.includes('evolve')) {
+      commandType = 'evolution';
+      command = 'apply_patch';
+    }
+    // Default to system status for unclear inputs
+    else {
+      commandType = 'system';
+      command = 'system_status';
+    }
+
+    return this.queueCommand({
+      type: commandType,
+      command: command,
+      parameters: parameters,
+      priority: priority,
+      fingerprint: userFingerprint
+    });
+  }
+
   // Public API methods
   public queueCommand(command: Omit<WatsonCommand, 'id' | 'status' | 'timestamp'>): string {
     const watsonCommand: WatsonCommand = {

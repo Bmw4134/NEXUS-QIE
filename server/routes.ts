@@ -1310,20 +1310,32 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
     }
   });
 
-  // Queue Watson command
+  // Queue Watson command with natural language support
   app.post("/api/watson/command", async (req, res) => {
     try {
-      const { type, command, parameters, priority, fingerprint } = req.body;
+      const { type, command, parameters, priority, fingerprint, naturalCommand } = req.body;
       
-      const commandId = watsonEngine.queueCommand({
-        type: type || 'system',
-        command,
-        parameters: parameters || {},
-        priority: priority || 'medium',
-        fingerprint: fingerprint || 'WATSON_COMMAND_READY'
-      });
+      let commandId;
       
-      res.json({ commandId, message: 'Command queued successfully' });
+      if (naturalCommand) {
+        // Use natural language interpreter
+        commandId = watsonEngine.interpretNaturalCommand(naturalCommand, fingerprint || 'WATSON_USER');
+        res.json({ 
+          commandId, 
+          message: 'Natural language command processed and queued',
+          interpretedFrom: naturalCommand
+        });
+      } else {
+        // Use structured command format
+        commandId = watsonEngine.queueCommand({
+          type: type || 'system',
+          command,
+          parameters: parameters || {},
+          priority: priority || 'medium',
+          fingerprint: fingerprint || 'WATSON_COMMAND_READY'
+        });
+        res.json({ commandId, message: 'Command queued successfully' });
+      }
     } catch (error) {
       console.error('Queue Watson command error:', error);
       res.status(500).json({ message: "Failed to queue command" });

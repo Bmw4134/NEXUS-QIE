@@ -94,6 +94,8 @@ export function WatsonCommandPage() {
   const [commandText, setCommandText] = useState('');
   const [commandParams, setCommandParams] = useState('{}');
   const [priority, setPriority] = useState<string>('medium');
+  const [naturalCommand, setNaturalCommand] = useState('');
+  const [useNaturalLanguage, setUseNaturalLanguage] = useState(true);
   const queryClient = useQueryClient();
 
   const { data: watsonState } = useQuery<WatsonState>({
@@ -126,26 +128,36 @@ export function WatsonCommandPage() {
       queryClient.invalidateQueries({ queryKey: ['/api/watson/state'] });
       setCommandText('');
       setCommandParams('{}');
+      setNaturalCommand('');
     }
   });
 
   const handleExecuteCommand = () => {
-    if (!commandText.trim()) return;
-    
-    let parsedParams = {};
-    try {
-      parsedParams = JSON.parse(commandParams);
-    } catch (error) {
-      parsedParams = {};
-    }
+    if (useNaturalLanguage) {
+      if (!naturalCommand.trim()) return;
+      
+      executeCommandMutation.mutate({
+        naturalCommand: naturalCommand,
+        fingerprint: 'WATSON_USER'
+      });
+    } else {
+      if (!commandText.trim()) return;
+      
+      let parsedParams = {};
+      try {
+        parsedParams = JSON.parse(commandParams);
+      } catch (error) {
+        parsedParams = {};
+      }
 
-    executeCommandMutation.mutate({
-      type: commandType,
-      command: commandText,
-      parameters: parsedParams,
-      priority: priority,
-      fingerprint: 'WATSON_COMMAND_READY'
-    });
+      executeCommandMutation.mutate({
+        type: commandType,
+        command: commandText,
+        parameters: parsedParams,
+        priority: priority,
+        fingerprint: 'WATSON_COMMAND_READY'
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
