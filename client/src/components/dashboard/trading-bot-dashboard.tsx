@@ -136,9 +136,9 @@ export function TradingBotDashboard() {
       const result = await authenticateMutation.mutateAsync(credentials);
       if (result.success) {
         setIsAuthenticated(true);
-        queryClient.invalidateQueries(['/api/trading/metrics']);
+        queryClient.invalidateQueries({ queryKey: ['/api/trading/metrics'] });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Authentication error:', error);
       // Check if MFA is required
       if (error.message?.includes('MFA required') || error.message?.includes('mfa') || error.message?.includes('code')) {
