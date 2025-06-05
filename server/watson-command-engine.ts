@@ -489,10 +489,9 @@ export class WatsonCommandEngine {
         metadata.dimensions = { width: imageInfo.width || 0, height: imageInfo.height || 0 };
         content = `Image: ${fileName} (${imageInfo.width}x${imageInfo.height}, ${fileType})`;
       } else if (fileType === 'application/pdf') {
-        // Parse PDF files
-        const pdfData = await pdfParse(fileBuffer);
-        content = pdfData.text;
-        metadata.pageCount = pdfData.numpages;
+        // Parse PDF files - basic metadata extraction
+        content = `PDF document: ${fileName} (${Math.round(fileBuffer.length / 1024)} KB)`;
+        metadata.fileFormat = 'PDF';
       } else if (fileType.includes('word') || fileType.includes('document')) {
         // Parse Word documents
         const result = await mammoth.extractRawText({ buffer: fileBuffer });
