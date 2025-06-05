@@ -14,6 +14,7 @@ import { ProofPuddingPage } from "@/pages/proof-pudding";
 import { InfinitySovereignPage } from "@/pages/infinity-sovereign";
 import { KaizenAgentPage } from "@/pages/kaizen-agent";
 import { WatsonCommandPage } from "@/pages/watson-command";
+import { UserManagementPage } from "@/pages/user-management";
 import NotFound from "@/pages/not-found";
 
 function Router() {

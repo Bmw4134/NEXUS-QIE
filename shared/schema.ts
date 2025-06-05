@@ -1,12 +1,99 @@
-import { pgTable, text, serial, integer, boolean, real, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, real, timestamp, jsonb, varchar } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+export const userRoles = pgTable("user_roles", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description").notNull(),
+  level: integer("level").notNull(), // 1=viewer, 2=ops, 3=exec, 4=admin
+  dashboardAccess: jsonb("dashboard_access").$type<string[]>().notNull(),
+  modulePermissions: jsonb("module_permissions").$type<Record<string, boolean>>().notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
   password: text("password").notNull(),
+  roleId: integer("role_id").references(() => userRoles.id).notNull(),
+  fingerprint: text("fingerprint").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  lastLogin: timestamp("last_login"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+export const userSessions = pgTable("user_sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  sessionToken: text("session_token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  lastActivity: timestamp("last_activity").defaultNow(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+});
+
+export const moduleAccessLogs = pgTable("module_access_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  moduleId: text("module_id").notNull(),
+  action: text("action").notNull(),
+  success: boolean("success").notNull(),
+  timestamp: timestamp("timestamp").defaultNow(),
+  metadata: jsonb("metadata").$type<Record<string, any>>(),
+});
+
+// Relations
+export const userRolesRelations = relations(userRoles, ({ many }) => ({
+  users: many(users),
+}));
+
+export const usersRelations = relations(users, ({ one, many }) => ({
+  role: one(userRoles, {
+    fields: [users.roleId],
+    references: [userRoles.id],
+  }),
+  sessions: many(userSessions),
+  accessLogs: many(moduleAccessLogs),
+}));
+
+export const userSessionsRelations = relations(userSessions, ({ one }) => ({
+  user: one(users, {
+    fields: [userSessions.userId],
+    references: [users.id],
+  }),
+}));
+
+export const moduleAccessLogsRelations = relations(moduleAccessLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [moduleAccessLogs.userId],
+    references: [users.id],
+  }),
+}));
+
+// User management schemas
+export const insertUserRoleSchema = createInsertSchema(userRoles).omit({ id: true, createdAt: true });
+export const insertNewUserSchema = createInsertSchema(users).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true, 
+  lastLogin: true 
+});
+export const insertUserSessionSchema = createInsertSchema(userSessions).omit({ id: true, lastActivity: true });
+export const insertModuleAccessLogSchema = createInsertSchema(moduleAccessLogs).omit({ id: true, timestamp: true });
+
+// User management types
+export type UserRole = typeof userRoles.$inferSelect;
+export type InsertUserRole = z.infer<typeof insertUserRoleSchema>;
+export type NewUser = typeof users.$inferSelect;
+export type InsertNewUser = z.infer<typeof insertNewUserSchema>;
+export type UserSession = typeof userSessions.$inferSelect;
+export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;
+export type ModuleAccessLog = typeof moduleAccessLogs.$inferSelect;
+export type InsertModuleAccessLog = z.infer<typeof insertModuleAccessLogSchema>;
 
 export const quantumKnowledgeNodes = pgTable("quantum_knowledge_nodes", {
   id: serial("id").primaryKey(),
