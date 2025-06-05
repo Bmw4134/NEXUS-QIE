@@ -22,7 +22,8 @@ import {
   Users,
   Maximize,
   Minimize,
-  X
+  X,
+  Shield
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useQuantumDatabase } from "@/hooks/use-quantum-database";
@@ -52,6 +53,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     { name: "KaizenGPT Agent", icon: Cpu, href: "/kaizen-agent", current: location === "/kaizen-agent" },
     { name: "Watson Command", icon: Settings, href: "/watson-command", current: location === "/watson-command" },
     { name: "User Management", icon: Users, href: "/user-management", current: location === "/user-management" },
+    { name: "INFINITY UNIFORM", icon: Shield, href: "/infinity-uniform", current: location === "/infinity-uniform" },
     { name: "Market Intelligence", icon: TrendingUp, href: "/market-intelligence", current: location === "/market-intelligence" },
     { name: "Research Hub", icon: BookOpen, href: "/research-hub", current: location === "/research-hub" },
     { name: "Quantum AI", icon: Cpu, href: "/quantum-ai", current: location === "/quantum-ai" },

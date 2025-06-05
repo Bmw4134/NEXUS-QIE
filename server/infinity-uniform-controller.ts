@@ -247,7 +247,7 @@ export class InfinityUniformController {
     return fingerprint === this.sessionFingerprint;
   }
 
-  public generateOperationalPDF(): string {
+  generateOperationalPDF(): string {
     if (!this.status.subsystems.pdf) {
       throw new Error('PDF generation not initialized');
     }
