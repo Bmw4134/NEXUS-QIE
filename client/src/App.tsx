@@ -15,6 +15,7 @@ import { InfinitySovereignPage } from "@/pages/infinity-sovereign";
 import { KaizenAgentPage } from "@/pages/kaizen-agent";
 import { WatsonCommandPage } from "@/pages/watson-command";
 import { UserManagementPage } from "@/pages/user-management";
+import { InfinityUniformPage } from "@/pages/infinity-uniform";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -32,6 +33,7 @@ function Router() {
       <Route path="/kaizen-agent" component={KaizenAgentPage} />
       <Route path="/watson-command" component={WatsonCommandPage} />
       <Route path="/user-management" component={UserManagementPage} />
+      <Route path="/infinity-uniform" component={InfinityUniformPage} />
       <Route component={NotFound} />
     </Switch>
   );

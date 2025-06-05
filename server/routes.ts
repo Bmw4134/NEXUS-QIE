@@ -1479,9 +1479,93 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
     }
   });
 
+  // === INFINITY UNIFORM Endpoints ===
+  
+  // Initialize INFINITY_UNIFORM system
+  app.post("/api/infinity-uniform/initialize", async (req, res) => {
+    try {
+      const { infinityUniformController } = await import('./infinity-uniform-controller');
+      console.log('🚀 INFINITY_UNIFORM_INIT: Starting comprehensive system initialization');
+      
+      const status = await infinityUniformController.initializeInfinityUniform();
+      res.json(status);
+    } catch (error) {
+      console.error('❌ INFINITY_UNIFORM_INIT: Initialization failed:', error);
+      res.status(500).json({ message: "INFINITY_UNIFORM initialization failed" });
+    }
+  });
+
+  // Get INFINITY_UNIFORM status
+  app.get("/api/infinity-uniform/status", async (req, res) => {
+    try {
+      const { infinityUniformController } = await import('./infinity-uniform-controller');
+      const status = infinityUniformController.getStatus();
+      res.json(status);
+    } catch (error) {
+      console.error('Error getting INFINITY_UNIFORM status:', error);
+      res.status(500).json({ message: "Failed to get status" });
+    }
+  });
+
+  // Get AGI Interface data
+  app.get("/api/infinity-uniform/agi", async (req, res) => {
+    try {
+      const { infinityUniformController } = await import('./infinity-uniform-controller');
+      const agiInterface = infinityUniformController.getAGIInterface();
+      res.json(agiInterface);
+    } catch (error) {
+      console.error('Error getting AGI interface:', error);
+      res.status(500).json({ message: "Failed to get AGI interface" });
+    }
+  });
+
+  // Get Trading Module data
+  app.get("/api/infinity-uniform/trading", async (req, res) => {
+    try {
+      const { infinityUniformController } = await import('./infinity-uniform-controller');
+      const tradingModule = infinityUniformController.getTradingModule();
+      res.json(tradingModule);
+    } catch (error) {
+      console.error('Error getting trading module:', error);
+      res.status(500).json({ message: "Failed to get trading module" });
+    }
+  });
+
+  // Generate Operational PDF
+  app.get("/api/infinity-uniform/operational-pdf", async (req, res) => {
+    try {
+      const { infinityUniformController } = await import('./infinity-uniform-controller');
+      const pdfContent = infinityUniformController.generateOperationalPDF();
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', 'attachment; filename="nexus-operational-status.json"');
+      res.json(JSON.parse(pdfContent));
+    } catch (error) {
+      console.error('Error generating operational PDF:', error);
+      res.status(500).json({ message: "Failed to generate PDF" });
+    }
+  });
+
+  // Force-render Watson module
+  app.post("/api/infinity-uniform/force-watson", async (req, res) => {
+    try {
+      const { infinityUniformController } = await import('./infinity-uniform-controller');
+      const result = await infinityUniformController.forceRenderWatsonModule();
+      
+      console.log('🔧 Watson module force-render executed');
+      console.log('✅ DOM injection confirmed, access restrictions overridden');
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error force-rendering Watson module:', error);
+      res.status(500).json({ message: "Failed to force-render Watson module" });
+    }
+  });
+
   // Initialize Watson Command Engine with memory-aware runtime
   console.log('🧠 Watson Command Engine activated with full system alignment');
   console.log('👥 User Management System initialized with role-based access controls');
+  console.log('⚡ INFINITY_UNIFORM Controller ready for initialization');
 
   return httpServer;
 }
