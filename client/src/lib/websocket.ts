@@ -82,6 +82,34 @@ export function useWebSocket() {
         queryClient.invalidateQueries({ queryKey: ['/api/dashboard/activity'] });
         break;
         
+      case 'market_update':
+        // Handle real-time market data updates
+        queryClient.invalidateQueries({ queryKey: ['/api/market/summary'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/market/alerts'] });
+        if (message.data) {
+          queryClient.setQueryData(['/api/market/summary'], message.data.summary);
+        }
+        break;
+        
+      case 'kaizen_update':
+        // Handle KaizenGPT optimization updates
+        queryClient.invalidateQueries({ queryKey: ['/api/kaizen/metrics'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/kaizen/optimizations'] });
+        break;
+        
+      case 'watson_update':
+        // Handle Watson Command Engine updates
+        queryClient.invalidateQueries({ queryKey: ['/api/watson/state'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/watson/history'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/watson/visual-state'] });
+        break;
+        
+      case 'system_health':
+        // Handle system health updates
+        queryClient.invalidateQueries({ queryKey: ['/api/infinity/health'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/infinity/modules'] });
+        break;
+        
       default:
         console.log('Unknown WebSocket message type:', message.type);
     }

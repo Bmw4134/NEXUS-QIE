@@ -1,0 +1,228 @@
+{
+  "overall_success": false,
+  "success_rate": 76.66666666666667,
+  "passed_tests": 23,
+  "total_tests": 30,
+  "duration": 0.8559839725494385,
+  "results": {
+    "Dashboard Modules": true,
+    "Watson Command Engine": false,
+    "KaizenGPT Agent": false,
+    "Infinity Sovereign": false,
+    "Market Intelligence": true,
+    "UI Readiness": false
+  },
+  "test_details": [
+    {
+      "test": "Module Access: /api/dashboard/stats",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117812.9261107
+    },
+    {
+      "test": "Module Access: /api/dashboard/activity",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.0923672
+    },
+    {
+      "test": "Module Access: /api/dashboard/learning-progress",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.252229
+    },
+    {
+      "test": "Module Access: /api/quantum/knowledge-graph",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.3334935
+    },
+    {
+      "test": "Module Access: /api/market/summary",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.337993
+    },
+    {
+      "test": "Module Access: /api/market/alerts",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.3419514
+    },
+    {
+      "test": "Module Access: /api/research/metrics",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.3465047
+    },
+    {
+      "test": "Module Access: /api/research/targets",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.3520887
+    },
+    {
+      "test": "Module Access: /api/automation/metrics",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.3567975
+    },
+    {
+      "test": "Module Access: /api/kaizen/metrics",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.3614073
+    },
+    {
+      "test": "Module Access: /api/infinity/health",
+      "status": "\u2717 FAIL",
+      "passed": false,
+      "details": "Status: Error",
+      "timestamp": 1749117813.378977
+    },
+    {
+      "test": "Module Access: /api/infinity/modules",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.3857691
+    },
+    {
+      "test": "Module Access: /api/watson/state",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.3960829
+    },
+    {
+      "test": "Module Access: /api/watson/visual-state",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.420786
+    },
+    {
+      "test": "Dashboard Module Access",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "13/14 modules accessible",
+      "timestamp": 1749117813.420845
+    },
+    {
+      "test": "Watson Memory Awareness",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "Memory aware: True",
+      "timestamp": 1749117813.5606637
+    },
+    {
+      "test": "Watson Fingerprint Lock",
+      "status": "\u2717 FAIL",
+      "passed": false,
+      "details": "Expected: WATSON_COMMAND_READY, Got: WATSON_FINAL_INFINITY_PATCH_2025_06_05",
+      "timestamp": 1749117813.5607593
+    },
+    {
+      "test": "Watson Visual State",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.5654185
+    },
+    {
+      "test": "Watson Command History",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.5697289
+    },
+    {
+      "test": "Kaizen Agent Active",
+      "status": "\u2717 FAIL",
+      "passed": false,
+      "details": "",
+      "timestamp": 1749117813.5740283
+    },
+    {
+      "test": "Kaizen Optimization Cycles",
+      "status": "\u2717 FAIL",
+      "passed": false,
+      "details": "Cycles completed: 0",
+      "timestamp": 1749117813.574071
+    },
+    {
+      "test": "Kaizen System Efficiency",
+      "status": "\u2717 FAIL",
+      "passed": false,
+      "details": "Efficiency: 0%",
+      "timestamp": 1749117813.5741332
+    },
+    {
+      "test": "Infinity Health Access",
+      "status": "\u2717 FAIL",
+      "passed": false,
+      "details": "",
+      "timestamp": 1749117813.5916398
+    },
+    {
+      "test": "Infinity Modules Access",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.5917072
+    },
+    {
+      "test": "Market Summary Access",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.607824
+    },
+    {
+      "test": "Market Alerts Access",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.6078825
+    },
+    {
+      "test": "Market Data Collection",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "Data points: 100",
+      "timestamp": 1749117813.6079202
+    },
+    {
+      "test": "Market Data Sources",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "Active sources: 1",
+      "timestamp": 1749117813.6079724
+    },
+    {
+      "test": "Dashboard UI Access",
+      "status": "\u2717 FAIL",
+      "passed": false,
+      "details": "",
+      "timestamp": 1749117813.6160188
+    },
+    {
+      "test": "WebSocket Configuration",
+      "status": "\u2713 PASS",
+      "passed": true,
+      "details": "",
+      "timestamp": 1749117813.6160612
+    }
+  ],
+  "fingerprint_validated": "WATSON_COMMAND_READY"
+}
