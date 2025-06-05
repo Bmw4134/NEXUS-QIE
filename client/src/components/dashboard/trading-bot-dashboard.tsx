@@ -206,13 +206,13 @@ export function TradingBotDashboard() {
           
           {showMfaInput && (
             <div className="space-y-2">
-              <Label htmlFor="mfa">PIN Code from iPhone</Label>
+              <Label htmlFor="mfa">Robinhood PIN Code</Label>
               <Input
                 id="mfa"
                 type="text"
                 value={credentials.mfaCode}
                 onChange={(e) => setCredentials(prev => ({ ...prev, mfaCode: e.target.value }))}
-                placeholder="Enter 6-digit PIN from your iPhone"
+                placeholder="Enter 6-digit Robinhood PIN"
                 maxLength={6}
                 className="text-center text-lg font-mono"
               />
@@ -230,7 +230,7 @@ export function TradingBotDashboard() {
           ) : (
             <div className="space-y-3">
               <div className="text-center text-sm text-yellow-600 bg-yellow-50 p-3 rounded-lg">
-                Check your iPhone for the 6-digit PIN code and enter it below
+                Enter your Robinhood 6-digit PIN code for two-factor authentication
               </div>
               <Button 
                 onClick={handleMfaSubmit} 
