@@ -8,6 +8,7 @@ import { KnowledgeGraph } from "@/components/dashboard/knowledge-graph";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { PerformanceAnalytics } from "@/components/dashboard/performance-analytics";
 import { QuantumAdminControl } from "@/components/quantum-admin-control";
+import { DNSAutomationPanel } from "@/components/dashboard/dns-automation-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Bell, Menu, Search } from "lucide-react";

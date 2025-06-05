@@ -26,6 +26,7 @@ const quantumDB = new NexusQuantumDatabase();
 import { masterRouter } from './master-infinity-router';
 import { kaizenAgent } from './kaizen-infinity-agent';
 import { watsonEngine } from './watson-command-engine';
+import { dnsAutomationService } from './dns-automation-service';
 
 // Configure multer for file uploads
 const upload = multer({
@@ -1593,10 +1594,125 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
     }
   });
 
+  // === DNS Automation Service Endpoints ===
+  
+  // Get DNS metrics and status
+  app.get("/api/dns/metrics", async (req, res) => {
+    try {
+      const metrics = dnsAutomationService.getDNSMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error('DNS metrics error:', error);
+      res.status(500).json({ message: "Failed to get DNS metrics" });
+    }
+  });
+
+  // Get DNS records
+  app.get("/api/dns/records", async (req, res) => {
+    try {
+      const records = dnsAutomationService.getDNSRecords();
+      res.json(records);
+    } catch (error) {
+      console.error('DNS records error:', error);
+      res.status(500).json({ message: "Failed to get DNS records" });
+    }
+  });
+
+  // Create DNS record
+  app.post("/api/dns/records", async (req, res) => {
+    try {
+      const { domain, type, name, value, ttl, priority, provider } = req.body;
+      const recordId = await dnsAutomationService.createDNSRecord({
+        domain, type, name, value, ttl: ttl || 3600, priority, provider
+      });
+      res.json({ recordId, message: 'DNS record created successfully' });
+    } catch (error) {
+      console.error('DNS record creation error:', error);
+      res.status(500).json({ message: "Failed to create DNS record" });
+    }
+  });
+
+  // Add DNS provider
+  app.post("/api/dns/providers", async (req, res) => {
+    try {
+      const { providerId, apiKey, additionalConfig } = req.body;
+      const success = await dnsAutomationService.addDNSProvider(providerId, apiKey, additionalConfig);
+      res.json({ success, message: success ? 'DNS provider added successfully' : 'Failed to connect DNS provider' });
+    } catch (error) {
+      console.error('DNS provider addition error:', error);
+      res.status(500).json({ message: "Failed to add DNS provider" });
+    }
+  });
+
+  // Get DNS providers
+  app.get("/api/dns/providers", async (req, res) => {
+    try {
+      const providers = dnsAutomationService.getDNSProviders();
+      res.json(providers);
+    } catch (error) {
+      console.error('DNS providers error:', error);
+      res.status(500).json({ message: "Failed to get DNS providers" });
+    }
+  });
+
+  // Create automation rule
+  app.post("/api/dns/automation-rules", async (req, res) => {
+    try {
+      const { name, trigger, condition, action, targetDomain, recordType, newValue, isActive } = req.body;
+      const ruleId = await dnsAutomationService.createAutomationRule({
+        name, trigger, condition, action, targetDomain, recordType, newValue, isActive: isActive !== false
+      });
+      res.json({ ruleId, message: 'DNS automation rule created successfully' });
+    } catch (error) {
+      console.error('DNS automation rule creation error:', error);
+      res.status(500).json({ message: "Failed to create automation rule" });
+    }
+  });
+
+  // Get automation rules
+  app.get("/api/dns/automation-rules", async (req, res) => {
+    try {
+      const rules = dnsAutomationService.getAutomationRules();
+      res.json(rules);
+    } catch (error) {
+      console.error('DNS automation rules error:', error);
+      res.status(500).json({ message: "Failed to get automation rules" });
+    }
+  });
+
+  // Create health check
+  app.post("/api/dns/health-checks", async (req, res) => {
+    try {
+      const { domain, recordName, expectedValue, checkInterval, timeout, retryCount } = req.body;
+      const checkId = await dnsAutomationService.createHealthCheck({
+        domain, recordName, expectedValue, 
+        checkInterval: checkInterval || 300, 
+        timeout: timeout || 5000, 
+        retryCount: retryCount || 3
+      });
+      res.json({ checkId, message: 'DNS health check created successfully' });
+    } catch (error) {
+      console.error('DNS health check creation error:', error);
+      res.status(500).json({ message: "Failed to create health check" });
+    }
+  });
+
+  // Get health checks
+  app.get("/api/dns/health-checks", async (req, res) => {
+    try {
+      const healthChecks = dnsAutomationService.getHealthChecks();
+      res.json(healthChecks);
+    } catch (error) {
+      console.error('DNS health checks error:', error);
+      res.status(500).json({ message: "Failed to get health checks" });
+    }
+  });
+
   // Initialize Watson Command Engine with memory-aware runtime
   console.log('🧠 Watson Command Engine activated with full system alignment');
   console.log('👥 User Management System initialized with role-based access controls');
   console.log('⚡ INFINITY_UNIFORM Controller ready for initialization');
+  console.log('🌐 DNS Automation Service integrated with comprehensive provider support');
 
   return httpServer;
 }
