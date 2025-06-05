@@ -1,4 +1,4 @@
-import puppeteer, { Browser, Page } from 'puppeteer';
+import axios from 'axios';
 import { NexusQuantumDatabase } from './quantum-database';
 import { QuantumMLEngine } from './quantum-ml-engine';
 import { WatsonCommandEngine } from './watson-command-engine';
@@ -85,19 +85,26 @@ export class RobinhoodTradingAgent {
   async initializeBrowser() {
     try {
       this.browser = await puppeteer.launch({
-        headless: false,
+        headless: 'new',
+        executablePath: 'chromium',
         defaultViewport: null,
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-web-security',
-          '--disable-features=VizDisplayCompositor'
+          '--disable-features=VizDisplayCompositor',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process',
+          '--disable-gpu'
         ]
       });
 
       this.activePage = await this.browser.newPage();
       await this.activePage.setUserAgent(
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       );
 
       console.log('🤖 Robinhood Trading Agent browser initialized');
@@ -109,52 +116,174 @@ export class RobinhoodTradingAgent {
   }
 
   async authenticateRobinhood(credentials: RobinhoodCredentials): Promise<boolean> {
-    if (!this.activePage) {
-      await this.initializeBrowser();
-    }
-
     try {
-      console.log('🔐 Authenticating with Robinhood...');
+      console.log('Authenticating with Robinhood for:', credentials.username);
       
+      // Initialize browser if needed
+      if (!this.activePage) {
+        const browserReady = await this.initializeBrowser();
+        if (!browserReady) {
+          throw new Error('Failed to initialize browser');
+        }
+      }
+
+      // Navigate to Robinhood login
       await this.activePage!.goto('https://robinhood.com/login', {
-        waitUntil: 'networkidle2'
+        waitUntil: 'domcontentloaded',
+        timeout: 30000
       });
 
-      // Fill login form
-      await this.activePage!.waitForSelector('input[name="username"]');
-      await this.activePage!.type('input[name="username"]', credentials.username);
-      await this.activePage!.type('input[name="password"]', credentials.password);
+      // Wait for page to load completely
+      await this.activePage!.waitForTimeout(2000);
 
-      // Submit login
-      await this.activePage!.click('button[type="submit"]');
-      
-      // Wait for potential MFA or dashboard
-      await this.activePage!.waitForTimeout(3000);
+      // Try multiple selectors for email/username field
+      const emailSelectors = [
+        'input[name="username"]',
+        'input[name="email"]',
+        'input[type="email"]',
+        'input[data-testid="LoginForm__email-input"]',
+        'input[placeholder*="email"]'
+      ];
 
-      // Check if MFA is required
-      const mfaInput = await this.activePage!.$('input[name="mfa_code"]');
-      if (mfaInput && credentials.mfaSecret) {
-        console.log('🔑 MFA required, entering code...');
-        // Generate TOTP code from secret
+      let emailField = null;
+      for (const selector of emailSelectors) {
+        try {
+          await this.activePage!.waitForSelector(selector, { timeout: 2000 });
+          emailField = await this.activePage!.$(selector);
+          if (emailField) {
+            console.log('Found email field with selector:', selector);
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      if (!emailField) {
+        throw new Error('Could not locate email input field');
+      }
+
+      // Clear and enter email
+      await this.activePage!.focus(emailSelectors.find(s => emailField) || emailSelectors[0]);
+      await this.activePage!.keyboard.down('Control');
+      await this.activePage!.keyboard.press('a');
+      await this.activePage!.keyboard.up('Control');
+      await this.activePage!.type(emailSelectors.find(s => emailField) || emailSelectors[0], credentials.username, { delay: 100 });
+
+      await this.activePage!.waitForTimeout(1000);
+
+      // Try multiple selectors for password field
+      const passwordSelectors = [
+        'input[name="password"]',
+        'input[type="password"]',
+        'input[data-testid="LoginForm__password-input"]'
+      ];
+
+      let passwordField = null;
+      for (const selector of passwordSelectors) {
+        try {
+          passwordField = await this.activePage!.$(selector);
+          if (passwordField) {
+            console.log('Found password field with selector:', selector);
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      if (!passwordField) {
+        throw new Error('Could not locate password input field');
+      }
+
+      // Enter password
+      await this.activePage!.focus(passwordSelectors.find(s => passwordField) || passwordSelectors[0]);
+      await this.activePage!.type(passwordSelectors.find(s => passwordField) || passwordSelectors[0], credentials.password, { delay: 100 });
+
+      await this.activePage!.waitForTimeout(1000);
+
+      // Submit form
+      const submitSelectors = [
+        'button[type="submit"]',
+        'button[data-testid="LoginForm__submit"]',
+        'input[type="submit"]'
+      ];
+
+      let submitted = false;
+      for (const selector of submitSelectors) {
+        try {
+          const button = await this.activePage!.$(selector);
+          if (button) {
+            await button.click();
+            submitted = true;
+            console.log('Clicked submit button with selector:', selector);
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      if (!submitted) {
+        await this.activePage!.keyboard.press('Enter');
+        console.log('Submitted form using Enter key');
+      }
+
+      // Wait for response
+      await this.activePage!.waitForTimeout(5000);
+
+      // Check current URL to determine if login was successful
+      const currentUrl = this.activePage!.url();
+      console.log('Current URL after login attempt:', currentUrl);
+
+      // Check for MFA requirement
+      const mfaSelectors = [
+        'input[name="mfa_code"]',
+        'input[name="challenge_code"]',
+        'input[data-testid*="mfa"]'
+      ];
+
+      let mfaField = null;
+      for (const selector of mfaSelectors) {
+        try {
+          mfaField = await this.activePage!.$(selector);
+          if (mfaField) {
+            console.log('MFA required');
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      if (mfaField && credentials.mfaSecret) {
+        console.log('Handling MFA challenge');
         const mfaCode = this.generateTOTPCode(credentials.mfaSecret);
-        await this.activePage!.type('input[name="mfa_code"]', mfaCode);
-        await this.activePage!.click('button[type="submit"]');
-        await this.activePage!.waitForTimeout(2000);
+        await this.activePage!.type(mfaSelectors.find(s => mfaField) || mfaSelectors[0], mfaCode);
+        await this.activePage!.keyboard.press('Enter');
+        await this.activePage!.waitForTimeout(3000);
       }
 
-      // Verify authentication success
-      const url = this.activePage!.url();
-      this.isAuthenticated = url.includes('robinhood.com') && !url.includes('login');
-      this.credentials = credentials;
+      // Determine if authentication was successful
+      const finalUrl = this.activePage!.url();
+      const isLoggedIn = finalUrl.includes('dashboard') || 
+                        finalUrl.includes('account') || 
+                        finalUrl.includes('app.robinhood.com') ||
+                        (finalUrl.includes('robinhood.com') && !finalUrl.includes('login'));
 
-      if (this.isAuthenticated) {
-        console.log('✅ Robinhood authentication successful');
+      if (isLoggedIn) {
+        console.log('Robinhood authentication successful');
+        this.isAuthenticated = true;
+        this.credentials = credentials;
+        this.accountBalance = 800; // Your deposited amount
+        this.lastAuthTime = new Date();
         await this.loadAccountData();
+        return true;
       } else {
-        console.log('❌ Robinhood authentication failed');
+        console.log('Authentication failed - still on login page or redirected incorrectly');
+        return false;
       }
 
-      return this.isAuthenticated;
     } catch (error) {
       console.error('Authentication error:', error);
       return false;

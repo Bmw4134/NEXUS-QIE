@@ -77,10 +77,11 @@ interface PionexSnapshot {
 export function TradingBotDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [credentials, setCredentials] = useState({
-    username: '',
+    username: 'bm.watson34@gmail.com',
     password: '',
-    mfaSecret: ''
+    mfaCode: ''
   });
+  const [showMfaInput, setShowMfaInput] = useState(false);
   const [tradingActive, setTradingActive] = useState(true);
   const queryClient = useQueryClient();
 
@@ -190,16 +191,20 @@ export function TradingBotDashboard() {
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="mfa">MFA Secret (Optional)</Label>
-            <Input
-              id="mfa"
-              type="password"
-              value={credentials.mfaSecret}
-              onChange={(e) => setCredentials(prev => ({ ...prev, mfaSecret: e.target.value }))}
-              placeholder="Enter MFA secret if enabled"
-            />
-          </div>
+          {showMfaInput && (
+            <div className="space-y-2">
+              <Label htmlFor="mfa">PIN Code from iPhone</Label>
+              <Input
+                id="mfa"
+                type="text"
+                value={credentials.mfaCode}
+                onChange={(e) => setCredentials(prev => ({ ...prev, mfaCode: e.target.value }))}
+                placeholder="Enter 6-digit PIN from your iPhone"
+                maxLength={6}
+                className="text-center text-lg font-mono"
+              />
+            </div>
+          )}
           
           <Button 
             onClick={handleAuthenticate} 
