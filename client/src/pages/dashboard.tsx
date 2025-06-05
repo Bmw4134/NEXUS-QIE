@@ -11,6 +11,7 @@ import { QuantumAdminControl } from "@/components/quantum-admin-control";
 import { DNSAutomationPanel } from "@/components/dashboard/dns-automation-panel";
 import { CompetitiveIntelligencePanel } from "@/components/dashboard/competitive-intelligence-panel";
 import { NexusEvolutionSummary } from "@/components/dashboard/nexus-evolution-summary";
+import { UniformityMirrorDashboard } from "@/components/dashboard/uniformity-mirror-dashboard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Bell, Menu, Search } from "lucide-react";
@@ -122,6 +123,9 @@ export default function Dashboard() {
 
           {/* Competitive Intelligence Panel */}
           <CompetitiveIntelligencePanel />
+
+          {/* Uniformity Stack Bridge */}
+          <UniformityMirrorDashboard />
         </main>
       </div>
 
