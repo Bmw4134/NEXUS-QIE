@@ -133,10 +133,15 @@ export function TradingBotDashboard() {
     if (!credentials.username || !credentials.password) return;
     
     try {
-      await authenticateMutation.mutateAsync(credentials);
+      const result = await authenticateMutation.mutateAsync(credentials);
+      if (result.success) {
+        setIsAuthenticated(true);
+        queryClient.invalidateQueries(['/api/trading/metrics']);
+      }
     } catch (error) {
+      console.error('Authentication error:', error);
       // Check if MFA is required
-      if (error.message?.includes('mfa') || error.message?.includes('code')) {
+      if (error.message?.includes('MFA required') || error.message?.includes('mfa') || error.message?.includes('code')) {
         setShowMfaInput(true);
       }
     }
