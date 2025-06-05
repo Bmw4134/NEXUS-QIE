@@ -21,8 +21,8 @@ import crypto from 'crypto';
 // Initialize quantum database
 const quantumDB = new NexusQuantumDatabase();
 
-// Initialize Infinity Master Controller with simplified integration
-let infinityController: any = null;
+// Initialize Master Infinity Router for complete integration
+import { masterRouter } from './master-infinity-router';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -1138,16 +1138,16 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
   // Get system health and sovereign control status
   app.get("/api/infinity/system-health", async (req, res) => {
     try {
-      const health = {
-        overallHealth: 94.7,
+      const health = masterRouter.getSystemHealth();
+      res.json({
+        overallHealth: health.overallHealth,
         securityStatus: 'excellent',
-        performanceScore: 91.3,
+        performanceScore: health.overallHealth * 0.95,
         moduleIntegrity: 100,
-        sovereignControlActive: true,
+        sovereignControlActive: health.sovereignControlActive,
         infinityPatchVersion: '1.0.0-sovereign',
-        lastSyncTimestamp: new Date().toISOString()
-      };
-      res.json(health);
+        lastSyncTimestamp: health.lastSync.toISOString()
+      });
     } catch (error) {
       console.error('Get system health error:', error);
       res.status(500).json({ message: "Failed to get system health" });
@@ -1157,62 +1157,7 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
   // Get module registry
   app.get("/api/infinity/modules", async (req, res) => {
     try {
-      const modules = [
-        {
-          id: 'quantum-database',
-          name: 'Nexus Quantum Database',
-          version: '1.0.0',
-          status: 'active',
-          dependencies: [],
-          capabilities: ['data_storage', 'quantum_queries', 'knowledge_management', 'infinity_enhanced', 'sovereign_control'],
-          telemetryEndpoint: '/api/quantum/telemetry'
-        },
-        {
-          id: 'automation-suite',
-          name: 'AI Automation Suite',
-          version: '1.0.0',
-          status: 'active',
-          dependencies: ['quantum-database'],
-          capabilities: ['task_automation', 'intelligent_workflows', 'asi_optimization', 'infinity_enhanced', 'sovereign_control'],
-          telemetryEndpoint: '/api/automation/telemetry'
-        },
-        {
-          id: 'github-brain',
-          name: 'GitHub Brain Integration',
-          version: '1.0.0',
-          status: 'active',
-          dependencies: ['quantum-database'],
-          capabilities: ['code_analysis', 'repository_intelligence', 'cross_project_insights', 'infinity_enhanced', 'sovereign_control'],
-          telemetryEndpoint: '/api/github-brain/telemetry'
-        },
-        {
-          id: 'quantum-ai',
-          name: 'Quantum Superintelligent AI',
-          version: '1.0.0',
-          status: 'active',
-          dependencies: ['quantum-database'],
-          capabilities: ['superintelligence', 'quantum_cognition', 'advanced_reasoning', 'infinity_enhanced', 'sovereign_control'],
-          telemetryEndpoint: '/api/quantum-ai/telemetry'
-        },
-        {
-          id: 'bim-infinity',
-          name: 'BIM Infinity Full Suite',
-          version: '1.0.0',
-          status: 'active',
-          dependencies: [],
-          capabilities: ['bim_modeling', 'enterprise_collaboration', 'construction_management', 'infinity_enhanced', 'sovereign_control'],
-          telemetryEndpoint: '/api/bim-infinity/telemetry'
-        },
-        {
-          id: 'proof-pudding',
-          name: 'Proof in the Pudding Metrics',
-          version: '1.0.0',
-          status: 'active',
-          dependencies: [],
-          capabilities: ['comprehensive_metrics', 'drill_down_analysis', 'system_monitoring', 'infinity_enhanced', 'sovereign_control'],
-          telemetryEndpoint: '/api/proof-pudding/telemetry'
-        }
-      ];
+      const modules = masterRouter.getModules();
       res.json(modules);
     } catch (error) {
       console.error('Get module registry error:', error);
@@ -1247,24 +1192,7 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
         return res.status(400).json({ message: "Command is required" });
       }
 
-      let result = 'Command executed successfully';
-      
-      switch (command) {
-        case 'system_status':
-          result = {
-            status: 'operational',
-            health: 94.7,
-            modules: 6,
-            sovereignControl: 'active'
-          };
-          break;
-        case 'emergency_shutdown':
-          result = 'Emergency shutdown initiated';
-          break;
-        default:
-          result = `Unknown command: ${command}`;
-      }
-
+      const result = masterRouter.executeGlobalCommand(command, params);
       res.json({ result });
     } catch (error) {
       console.error('Execute global command error:', error);
@@ -1276,8 +1204,8 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
   app.post("/api/infinity/rollback", async (req, res) => {
     try {
       const { label } = req.body;
-      console.log(`Creating rollback point: ${label || 'manual_rollback'}`);
-      res.json({ message: "Rollback point created successfully" });
+      const result = masterRouter.executeGlobalCommand('create_rollback', { label: label || 'manual_rollback' });
+      res.json({ message: result });
     } catch (error) {
       console.error('Create rollback point error:', error);
       res.status(500).json({ message: "Failed to create rollback point" });
