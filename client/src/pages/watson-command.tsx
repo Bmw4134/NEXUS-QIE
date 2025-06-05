@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Brain, 
@@ -271,74 +272,111 @@ export function WatsonCommandPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Command Type</label>
-              <Select value={commandType} onValueChange={setCommandType}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="system">System</SelectItem>
-                  <SelectItem value="optimization">Optimization</SelectItem>
-                  <SelectItem value="analysis">Analysis</SelectItem>
-                  <SelectItem value="emergency">Emergency</SelectItem>
-                  <SelectItem value="evolution">Evolution</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Priority</label>
-              <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="critical">Critical</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Toggle between Natural Language and Technical Mode */}
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={useNaturalLanguage}
+              onCheckedChange={setUseNaturalLanguage}
+            />
+            <label className="text-sm font-medium">
+              {useNaturalLanguage ? 'Natural Language Mode' : 'Technical Mode'}
+            </label>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Command</label>
-            <Input
-              value={commandText}
-              onChange={(e) => setCommandText(e.target.value)}
-              placeholder="system_status, full_system_scan, emergency_shutdown..."
-            />
-          </div>
+          {useNaturalLanguage ? (
+            /* Natural Language Interface */
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Tell Watson what you need:</label>
+                <div className="space-y-2">
+                  <Input
+                    placeholder="e.g., 'Check system health', 'Run optimization', 'Show me the current status'"
+                    value={naturalCommand}
+                    onChange={(e) => setNaturalCommand(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleExecuteCommand()}
+                  />
+                  <div className="text-xs text-muted-foreground">
+                    Examples: "How are you?", "Optimize the system", "Run a full scan", "Show insights", "Enable safe mode"
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Technical Interface */
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Command Type</label>
+                  <Select value={commandType} onValueChange={setCommandType}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="system">System</SelectItem>
+                      <SelectItem value="optimization">Optimization</SelectItem>
+                      <SelectItem value="analysis">Analysis</SelectItem>
+                      <SelectItem value="emergency">Emergency</SelectItem>
+                      <SelectItem value="evolution">Evolution</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Priority</label>
+                  <Select value={priority} onValueChange={setPriority}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="critical">Critical</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Parameters (JSON)</label>
-            <Textarea
-              value={commandParams}
-              onChange={(e) => setCommandParams(e.target.value)}
-              placeholder='{"key": "value"}'
-              rows={3}
-            />
-          </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Command</label>
+                <Input
+                  value={commandText}
+                  onChange={(e) => setCommandText(e.target.value)}
+                  placeholder="system_status, full_system_scan, emergency_shutdown..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Parameters (JSON)</label>
+                <Textarea
+                  value={commandParams}
+                  onChange={(e) => setCommandParams(e.target.value)}
+                  placeholder='{"key": "value"}'
+                  rows={3}
+                />
+              </div>
+            </div>
+          )}
 
           <Button 
             onClick={handleExecuteCommand}
-            disabled={!commandText.trim() || executeCommandMutation.isPending}
+            disabled={useNaturalLanguage ? !naturalCommand.trim() : !commandText.trim() || executeCommandMutation.isPending}
             className="w-full"
           >
             <Command className="w-4 h-4 mr-2" />
-            Execute Command
+            {useNaturalLanguage ? 'Send Message to Watson' : 'Execute Command'}
           </Button>
 
           {executeCommandMutation.data && (
             <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
               <div className="text-sm font-medium text-green-800 dark:text-green-300">
-                Command Queued Successfully
+                {executeCommandMutation.data.message || 'Command Queued Successfully'}
               </div>
               <div className="text-xs text-green-700 dark:text-green-400">
                 ID: {executeCommandMutation.data.commandId}
+                {executeCommandMutation.data.interpretedFrom && (
+                  <div>Interpreted from: "{executeCommandMutation.data.interpretedFrom}"</div>
+                )}
               </div>
             </div>
           )}
