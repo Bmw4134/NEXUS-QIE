@@ -1052,6 +1052,83 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
     }
   });
 
+  // === GitHub Brain Integration Endpoints ===
+  
+  // Initialize GitHub integration
+  app.post("/api/github-brain/initialize", async (req, res) => {
+    try {
+      const { githubToken, username } = req.body;
+      
+      if (!githubToken || !username) {
+        return res.status(400).json({ message: "Missing GitHub token or username" });
+      }
+
+      await githubBrain.initializeGitHubIntegration(githubToken, username);
+      res.json({ message: "GitHub Brain integration initialized successfully" });
+    } catch (error) {
+      console.error('GitHub Brain initialization error:', error);
+      res.status(500).json({ message: "Failed to initialize GitHub Brain" });
+    }
+  });
+
+  // Query GitHub Brain
+  app.post("/api/github-brain/query", async (req, res) => {
+    try {
+      const { query, targetRepos, queryType, context, urgency } = req.body;
+      
+      if (!query) {
+        return res.status(400).json({ message: "Query is required" });
+      }
+
+      const brainQuery = {
+        query,
+        targetRepos: targetRepos || [],
+        queryType: queryType || 'architecture',
+        context: context || '',
+        urgency: urgency || 'medium'
+      };
+
+      const response = await githubBrain.queryBrain(brainQuery);
+      res.json(response);
+    } catch (error) {
+      console.error('GitHub Brain query error:', error);
+      res.status(500).json({ message: "Failed to query GitHub Brain" });
+    }
+  });
+
+  // Get brain statistics
+  app.get("/api/github-brain/stats", async (req, res) => {
+    try {
+      const stats = githubBrain.getBrainStatistics();
+      res.json(stats);
+    } catch (error) {
+      console.error('Get brain stats error:', error);
+      res.status(500).json({ message: "Failed to get brain statistics" });
+    }
+  });
+
+  // Get project brains
+  app.get("/api/github-brain/projects", async (req, res) => {
+    try {
+      const projects = githubBrain.getProjectBrains();
+      res.json(projects);
+    } catch (error) {
+      console.error('Get project brains error:', error);
+      res.status(500).json({ message: "Failed to get project brains" });
+    }
+  });
+
+  // Get cross-connections
+  app.get("/api/github-brain/connections", async (req, res) => {
+    try {
+      const connections = githubBrain.getCrossConnections();
+      res.json(connections);
+    } catch (error) {
+      console.error('Get cross-connections error:', error);
+      res.status(500).json({ message: "Failed to get cross-connections" });
+    }
+  });
+
   // Setup market data callbacks for real-time updates
   marketHub.onDataUpdate((data) => {
     broadcast({

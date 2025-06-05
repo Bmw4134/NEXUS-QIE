@@ -8,6 +8,7 @@ import Dashboard from "@/pages/dashboard";
 import { AutomationPage } from "@/pages/automation";
 import { BrowserPage } from "@/pages/browser";
 import { QuantumAIPage } from "@/pages/quantum-ai";
+import { GitHubBrainPage } from "@/pages/github-brain";
 import NotFound from "@/pages/not-found";
 
 function Router() {
