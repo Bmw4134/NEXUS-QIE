@@ -1998,55 +1998,50 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
     }
   });
 
-  // Authenticate with Robinhood
+  // Authenticate with Robinhood using browser automation
   app.post("/api/trading/authenticate", async (req, res) => {
     try {
       const { username, password, mfaCode } = req.body;
       
       console.log('🔐 Authenticating with Robinhood for:', username);
+      console.log('🔐 Authenticating live Robinhood account for:', username);
       
       if (!username || !password) {
         return res.status(400).json({ message: "Username and password required" });
       }
 
-      // Use consolidated Robinhood API client (Watson LOM verified - no duplication)
-      const { robinhoodClient } = await import('./robinhood-api-client');
-      const authenticated = await robinhoodClient.authenticate({
-        username,
-        password,
-        mfaSecret: mfaCode
-      });
+      // Use direct browser automation for live account access
+      const { robinhoodWebClient } = await import('./robinhood-web-client');
+      const result = await robinhoodWebClient.authenticateWithCredentials(username, password, mfaCode);
       
-      if (authenticated) {
-        console.log('✅ Robinhood authentication successful for:', username);
-        
-        // Get account information
-        const account = await robinhoodClient.getAccount();
-        const accountBalance = account?.buying_power ? parseFloat(account.buying_power) : 800;
+      if (result.success && result.accountInfo) {
+        console.log('✅ Live Robinhood authentication successful');
         
         res.json({
           success: true,
-          message: "Robinhood authentication successful",
-          accountBalance: accountBalance,
+          message: "Connected to live Robinhood account",
+          accountInfo: result.accountInfo,
+          accountBalance: result.accountInfo.buyingPower,
           status: 'connected',
+          isLive: true,
           timestamp: new Date()
         });
       } else {
         console.log('❌ Robinhood authentication failed for:', username);
         
-        // Check if MFA is needed
-        if (!mfaCode) {
-          res.status(401).json({ 
-            message: "MFA required",
-            requiresMfa: true 
-          });
-        } else {
-          res.status(401).json({ message: "Authentication failed" });
-        }
+        res.status(401).json({
+          success: false,
+          message: result.error || "Authentication failed",
+          requiresMfa: result.requiresMfa
+        });
       }
     } catch (error) {
-      console.error('Authentication error:', error);
-      res.status(401).json({ message: "Authentication failed" });
+      console.error('💥 Live Robinhood authentication error:', (error as Error).message);
+      console.error('❌ Robinhood authentication failed for:', req.body.username);
+      res.status(401).json({ 
+        success: false,
+        message: "Authentication failed" 
+      });
     }
   });
 
