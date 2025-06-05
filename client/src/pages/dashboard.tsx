@@ -9,6 +9,7 @@ import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { PerformanceAnalytics } from "@/components/dashboard/performance-analytics";
 import { QuantumAdminControl } from "@/components/quantum-admin-control";
 import { DNSAutomationPanel } from "@/components/dashboard/dns-automation-panel";
+import { CompetitiveIntelligencePanel } from "@/components/dashboard/competitive-intelligence-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Bell, Menu, Search } from "lucide-react";
@@ -111,6 +112,12 @@ export default function Dashboard() {
 
           {/* Performance Analytics */}
           <PerformanceAnalytics />
+
+          {/* DNS Automation Panel */}
+          <DNSAutomationPanel />
+
+          {/* Competitive Intelligence Panel */}
+          <CompetitiveIntelligencePanel />
         </main>
       </div>
 
