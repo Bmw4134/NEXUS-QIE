@@ -35,6 +35,7 @@ function Router() {
       <Route path="/watson-command" component={WatsonCommandPage} />
       <Route path="/user-management" component={UserManagementPage} />
       <Route path="/infinity-uniform" component={InfinityUniformPage} />
+      <Route path="/particle-playground" component={ParticlePlayground} />
       <Route component={NotFound} />
     </Switch>
   );

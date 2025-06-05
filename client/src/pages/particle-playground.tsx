@@ -10,10 +10,10 @@ export default function ParticlePlayground() {
   const [showControls, setShowControls] = useState(true);
   const [particleConfig, setParticleConfig] = useState({
     count: 150,
-    effect: 'quantum',
+    effect: 'quantum' as const,
     showConnections: true,
     showTrails: true,
-    interactionMode: 'attract'
+    interactionMode: 'attract' as const
   });
 
   return (
