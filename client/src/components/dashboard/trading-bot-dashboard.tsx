@@ -131,6 +131,19 @@ export function TradingBotDashboard() {
 
   const handleAuthenticate = async () => {
     if (!credentials.username || !credentials.password) return;
+    
+    try {
+      await authenticateMutation.mutateAsync(credentials);
+    } catch (error) {
+      // Check if MFA is required
+      if (error.message?.includes('mfa') || error.message?.includes('code')) {
+        setShowMfaInput(true);
+      }
+    }
+  };
+
+  const handleMfaSubmit = async () => {
+    if (!credentials.mfaCode || credentials.mfaCode.length !== 6) return;
     await authenticateMutation.mutateAsync(credentials);
   };
 
@@ -206,13 +219,28 @@ export function TradingBotDashboard() {
             </div>
           )}
           
-          <Button 
-            onClick={handleAuthenticate} 
-            disabled={authenticateMutation.isPending}
-            className="w-full bg-[#00ff64] hover:bg-[#00cc50] text-black"
-          >
-            {authenticateMutation.isPending ? 'Authenticating...' : 'Connect to Robinhood'}
-          </Button>
+          {!showMfaInput ? (
+            <Button 
+              onClick={handleAuthenticate} 
+              disabled={authenticateMutation.isPending}
+              className="w-full bg-[#00ff64] hover:bg-[#00cc50] text-black"
+            >
+              {authenticateMutation.isPending ? 'Authenticating...' : 'Connect to Robinhood'}
+            </Button>
+          ) : (
+            <div className="space-y-3">
+              <div className="text-center text-sm text-yellow-600 bg-yellow-50 p-3 rounded-lg">
+                Check your iPhone for the 6-digit PIN code and enter it below
+              </div>
+              <Button 
+                onClick={handleMfaSubmit} 
+                disabled={authenticateMutation.isPending || !credentials.mfaCode || credentials.mfaCode.length !== 6}
+                className="w-full bg-[#00ff64] hover:bg-[#00cc50] text-black"
+              >
+                {authenticateMutation.isPending ? 'Verifying PIN...' : 'Submit PIN Code'}
+              </Button>
+            </div>
+          )}
           
           {authenticateMutation.isError && (
             <div className="text-red-500 text-sm text-center">
