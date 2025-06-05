@@ -2009,7 +2009,7 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
         return res.status(400).json({ message: "Username and password required" });
       }
 
-      // Use the new Robinhood API client
+      // Use consolidated Robinhood API client (Watson LOM verified - no duplication)
       const { robinhoodClient } = await import('./robinhood-api-client');
       const authenticated = await robinhoodClient.authenticate({
         username,
