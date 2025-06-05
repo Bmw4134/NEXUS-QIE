@@ -31,6 +31,7 @@ function Router() {
       <Route path="/infinity-sovereign" component={InfinitySovereignPage} />
       <Route path="/kaizen-agent" component={KaizenAgentPage} />
       <Route path="/watson-command" component={WatsonCommandPage} />
+      <Route path="/user-management" component={UserManagementPage} />
       <Route component={NotFound} />
     </Switch>
   );

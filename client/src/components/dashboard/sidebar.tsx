@@ -19,6 +19,7 @@ import {
   Building,
   Target,
   Crown,
+  Users,
   Maximize,
   Minimize,
   X
@@ -50,6 +51,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     { name: "Infinity Sovereign", icon: Crown, href: "/infinity-sovereign", current: location === "/infinity-sovereign" },
     { name: "KaizenGPT Agent", icon: Cpu, href: "/kaizen-agent", current: location === "/kaizen-agent" },
     { name: "Watson Command", icon: Settings, href: "/watson-command", current: location === "/watson-command" },
+    { name: "User Management", icon: Users, href: "/user-management", current: location === "/user-management" },
     { name: "Market Intelligence", icon: TrendingUp, href: "/market-intelligence", current: location === "/market-intelligence" },
     { name: "Research Hub", icon: BookOpen, href: "/research-hub", current: location === "/research-hub" },
     { name: "Quantum AI", icon: Cpu, href: "/quantum-ai", current: location === "/quantum-ai" },
