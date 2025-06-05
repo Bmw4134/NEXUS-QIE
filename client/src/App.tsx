@@ -19,6 +19,7 @@ function Router() {
       <Route path="/automation" component={AutomationPage} />
       <Route path="/browser" component={BrowserPage} />
       <Route path="/quantum-ai" component={QuantumAIPage} />
+      <Route path="/github-brain" component={GitHubBrainPage} />
       <Route component={NotFound} />
     </Switch>
   );
