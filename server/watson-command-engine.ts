@@ -1,5 +1,9 @@
 import { masterRouter } from './master-infinity-router';
 import { kaizenAgent } from './kaizen-infinity-agent';
+import sharp from 'sharp';
+import pdfParse from 'pdf-parse';
+import mammoth from 'mammoth';
+import fs from 'fs/promises';
 
 export interface WatsonCommand {
   id: string;
@@ -11,6 +15,19 @@ export interface WatsonCommand {
   result?: any;
   timestamp: Date;
   fingerprint: string;
+  files?: File[];
+}
+
+export interface ParsedFileContent {
+  fileName: string;
+  fileType: string;
+  content: string;
+  metadata: {
+    size: number;
+    type: string;
+    dimensions?: { width: number; height: number };
+    pageCount?: number;
+  };
 }
 
 export interface SystemMemory {
