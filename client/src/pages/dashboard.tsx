@@ -17,6 +17,7 @@ import { SuccessCelebration, useSuccessCelebration } from "@/components/ui/succe
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { celebration, celebrate, hideCelebration } = useSuccessCelebration();
 
   // WebSocket connection for real-time updates
   useWebSocket();
@@ -114,6 +115,14 @@ export default function Dashboard() {
 
       {/* Floating Quantum Admin Control */}
       <QuantumAdminControl />
+
+      {/* Success Celebration Component */}
+      <SuccessCelebration
+        isVisible={celebration.isVisible}
+        message={celebration.message}
+        type={celebration.type}
+        onComplete={hideCelebration}
+      />
     </div>
   );
 }
