@@ -10,6 +10,7 @@ import { PerformanceAnalytics } from "@/components/dashboard/performance-analyti
 import { QuantumAdminControl } from "@/components/quantum-admin-control";
 import { DNSAutomationPanel } from "@/components/dashboard/dns-automation-panel";
 import { CompetitiveIntelligencePanel } from "@/components/dashboard/competitive-intelligence-panel";
+import { NexusEvolutionSummary } from "@/components/dashboard/nexus-evolution-summary";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Bell, Menu, Search } from "lucide-react";
@@ -87,6 +88,9 @@ export default function Dashboard() {
         <main className="p-4 lg:p-6 space-y-6">
           {/* Stats Overview */}
           <StatsOverview />
+
+          {/* NEXUS Evolution Summary */}
+          <NexusEvolutionSummary />
 
           {/* Main Dashboard Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
