@@ -18,6 +18,7 @@ import {
   Cpu,
   Building,
   Target,
+  Crown,
   Maximize,
   Minimize,
   X

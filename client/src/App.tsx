@@ -11,6 +11,7 @@ import { QuantumAIPage } from "@/pages/quantum-ai";
 import { GitHubBrainPage } from "@/pages/github-brain";
 import { BIMInfinityPage } from "@/pages/bim-infinity";
 import { ProofPuddingPage } from "@/pages/proof-pudding";
+import { InfinitySovereignPage } from "@/pages/infinity-sovereign";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/github-brain" component={GitHubBrainPage} />
       <Route path="/bim-infinity" component={BIMInfinityPage} />
       <Route path="/proof-pudding" component={ProofPuddingPage} />
+      <Route path="/infinity-sovereign" component={InfinitySovereignPage} />
       <Route component={NotFound} />
     </Switch>
   );
