@@ -83,6 +83,7 @@ export function TradingBotDashboard() {
   });
   const [showMfaInput, setShowMfaInput] = useState(false);
   const [tradingActive, setTradingActive] = useState(true);
+  const [authStatus, setAuthStatus] = useState('disconnected');
   const queryClient = useQueryClient();
 
   // Fetch trading data

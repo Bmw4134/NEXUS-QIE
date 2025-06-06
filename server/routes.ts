@@ -290,6 +290,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== ROBINHOOD TRADING ENDPOINTS ====================
+  
+  // Authenticate with Robinhood
+  app.post("/api/trading/authenticate", async (req, res) => {
+    try {
+      const { username, password, mfaCode } = req.body;
+      
+      // Direct API authentication approach
+      const authResponse = await fetch('https://robinhood.com/api-token-auth/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,
+          mfa_code: mfaCode,
+          scope: 'internal'
+        })
+      });
+
+      const authData = await authResponse.json();
+
+      if (authData.token) {
+        // Get account information
+        const accountResponse = await fetch('https://robinhood.com/accounts/', {
+          headers: {
+            'Authorization': `Token ${authData.token}`,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
+
+        const accountData = await accountResponse.json();
+        
+        if (accountData.results && accountData.results.length > 0) {
+          const account = accountData.results[0];
+          
+          // Get portfolio data
+          const portfolioResponse = await fetch(`https://robinhood.com/accounts/${account.account_number}/portfolio/`, {
+            headers: {
+              'Authorization': `Token ${authData.token}`,
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+          });
+
+          const portfolioData = await portfolioResponse.json();
+
+          res.json({
+            success: true,
+            message: 'Successfully connected to Robinhood account',
+            token: authData.token,
+            accountInfo: {
+              accountNumber: account.account_number,
+              buyingPower: account.buying_power,
+              totalEquity: portfolioData.total_return_today,
+              dayTradeCount: account.day_trade_buying_power_held,
+              portfolioValue: portfolioData.market_value
+            }
+          });
+        } else {
+          res.json({
+            success: false,
+            message: 'Could not retrieve account information'
+          });
+        }
+      } else if (authData.mfa_required) {
+        res.json({
+          success: false,
+          requiresMfa: true,
+          message: 'MFA code required. Please enter your PIN.',
+          mfaType: authData.mfa_type
+        });
+      } else {
+        res.json({
+          success: false,
+          message: authData.detail || 'Authentication failed. Please check your credentials.'
+        });
+      }
+    } catch (error) {
+      console.error('Robinhood authentication error:', error);
+      res.json({
+        success: false,
+        message: 'Connection error. Please try again.'
+      });
+    }
+  });
+
   // ==================== MARKET INTELLIGENCE API ENDPOINTS ====================
   
   // Real-time market data from multiple sources
