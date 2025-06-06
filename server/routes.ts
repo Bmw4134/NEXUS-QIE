@@ -2010,26 +2010,31 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
         return res.status(400).json({ message: "Username and password required" });
       }
 
-      // Simulate successful authentication for testing interface
-      console.log('✅ Simulated Robinhood authentication successful');
+      // Use direct API authentication for live account access
+      const { robinhoodDirectClient } = await import('./robinhood-direct-client');
+      const result = await robinhoodDirectClient.authenticateWithCredentials(username, password, mfaCode);
       
-      const simulatedAccountInfo = {
-        accountNumber: 'RH-SIM-800',
-        buyingPower: 800.00,
-        totalEquity: 800.00,
-        dayTradeCount: 0,
-        positions: []
-      };
-
-      res.json({
-        success: true,
-        message: "Connected to simulated trading account",
-        accountInfo: simulatedAccountInfo,
-        accountBalance: simulatedAccountInfo.buyingPower,
-        status: 'connected',
-        isSimulation: true,
-        timestamp: new Date()
-      });
+      if (result.success && result.accountInfo) {
+        console.log('✅ Live Robinhood authentication successful');
+        
+        res.json({
+          success: true,
+          message: "Connected to live Robinhood account",
+          accountInfo: result.accountInfo,
+          accountBalance: result.accountInfo.buyingPower,
+          status: 'connected',
+          isLive: true,
+          timestamp: new Date()
+        });
+      } else {
+        console.log('❌ Robinhood authentication failed for:', username);
+        
+        res.status(401).json({
+          success: false,
+          message: result.error || "Authentication failed",
+          requiresMfa: result.requiresMfa
+        });
+      }
     } catch (error) {
       console.error('💥 Live Robinhood authentication error:', (error as Error).message);
       console.error('❌ Robinhood authentication failed for:', req.body.username);
