@@ -756,23 +756,26 @@ export default function PTNIDashboardCore() {
       left: 0,
       width: '100vw',
       height: '100vh',
-      backgroundColor: '#0a0a0f',
+      background: 'radial-gradient(ellipse at top, #1a1a2e 0%, #0a0a0f 50%, #000005 100%)',
       overflow: 'hidden',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+      fontFamily: 'SF Pro Display, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      cursor: 'default',
+      userSelect: 'none'
     }}>
       {/* PTNI Navigation Sidebar */}
       <div style={{
         position: 'fixed',
         left: 0,
         top: 0,
-        width: navigationCollapsed ? '70px' : '220px',
+        width: navigationCollapsed ? '70px' : '240px',
         height: '100vh',
-        backgroundColor: 'linear-gradient(145deg, #1a1a2e, #0f0f1e)',
-        borderRight: '1px solid rgba(0, 255, 255, 0.2)',
-        backdropFilter: 'blur(10px)',
-        boxShadow: '4px 0 20px rgba(0, 0, 0, 0.5)',
-        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-        zIndex: 1000
+        background: 'linear-gradient(145deg, rgba(26, 26, 46, 0.95) 0%, rgba(15, 15, 30, 0.9) 50%, rgba(10, 10, 20, 0.95) 100%)',
+        borderRight: '1px solid rgba(0, 255, 255, 0.15)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        boxShadow: '4px 0 40px rgba(0, 0, 0, 0.4), inset -1px 0 0 rgba(255, 255, 255, 0.05)',
+        transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)',
+        zIndex: 1000,
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)'
       }}>
         {/* Navigation Header */}
         <div style={{
