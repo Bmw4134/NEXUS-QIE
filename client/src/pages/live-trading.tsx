@@ -236,9 +236,26 @@ export default function LiveTradingPage() {
             marginTop: '20px',
             border: '2px solid #00ffff'
           }}>
-            <h2 style={{ fontSize: '24px', marginBottom: '20px', color: '#00ffff' }}>
-              🌌 NEXUS QUANTUM TRADING - NO PDT RESTRICTIONS
-            </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2 style={{ fontSize: '24px', margin: 0, color: '#00ffff' }}>
+                🌌 NEXUS QUANTUM TRADING - NO PDT RESTRICTIONS
+              </h2>
+              <a 
+                href="/quantum-trading-dashboard" 
+                style={{
+                  backgroundColor: '#005555',
+                  border: '1px solid #00aaaa',
+                  borderRadius: '4px',
+                  color: '#00ffff',
+                  padding: '8px 16px',
+                  textDecoration: 'none',
+                  fontSize: '14px',
+                  fontWeight: 'bold'
+                }}
+              >
+                📊 FULL DASHBOARD
+              </a>
+            </div>
             <div style={{ color: '#aaaaff', marginBottom: '20px', fontSize: '16px' }}>
               After-hours trading enabled • Quantum execution algorithms active • $834.97 available
             </div>

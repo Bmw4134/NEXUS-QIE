@@ -343,7 +343,11 @@ export class QuantumTradingService {
   }
 
   getTradingPositions(): TradingPosition[] {
-    return Array.from(this.tradingPositions.values());
+    const positions: TradingPosition[] = [];
+    for (const position of this.tradingPositions.values()) {
+      positions.push(position);
+    }
+    return positions;
   }
 
   async shutdown() {
