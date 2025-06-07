@@ -17,6 +17,7 @@ import { liveTradingEngine } from "./live-trading-engine";
 import { nexusRegistry } from "./nexus-registry-service";
 import { autonomousRuntimeController } from "./autonomous-runtime-controller";
 import { ptniProxy } from "./ptni-browser-proxy";
+import { registerFamilyPlatformRoutes } from "./family-platform-routes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -1044,6 +1045,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const healthStatus = await autonomousRuntimeController.healthCheck();
     res.json(healthStatus);
   });
+
+  // Register Family Platform Routes
+  registerFamilyPlatformRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;
