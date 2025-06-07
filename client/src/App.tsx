@@ -1,73 +1,78 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { ThemeProvider } from "next-themes";
-import Dashboard from "@/pages/dashboard-simple";
-import { LiveTradingDashboard } from "@/components/LiveTradingDashboard";
-import { AutomationPage } from "@/pages/automation";
-import { BrowserPage } from "@/pages/browser";
-import { QuantumAIPage } from "@/pages/quantum-ai";
-import { GitHubBrainPage } from "@/pages/github-brain";
-import { BIMInfinityPage } from "@/pages/bim-infinity";
-import { ProofPuddingPage } from "@/pages/proof-pudding";
-import { InfinitySovereignPage } from "@/pages/infinity-sovereign";
-import { KaizenAgentPage } from "@/pages/kaizen-agent";
-import { WatsonCommandPage } from "@/pages/watson-command";
-import { UserManagementPage } from "@/pages/user-management";
-import { InfinityUniformPage } from "@/pages/infinity-uniform";
-import ParticlePlayground from "@/pages/particle-playground";
-import TradingBotPage from "@/pages/trading-bot";
-import SimpleTradingPage from "@/pages/simple-trading";
-import PTNIDashboardCore from "@/components/ptni/ptni-dashboard-core";
-import { PTNIDashboard } from "@/components/ptni/PTNIDashboard";
-import { RobinhoodAccountStatus } from "@/components/RobinhoodAccountStatus";
-import { RealModeController } from "@/components/RealModeController";
-import QuantumTradingDashboardPage from "@/pages/quantum-trading-dashboard";
-import PTNIModeControllerPage from "@/pages/ptni-mode-controller";
-import NotFound from "@/pages/not-found";
+import { Route, Switch } from "wouter";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "./components/theme-provider";
+import { Toaster } from "./components/ui/toaster";
+import { Landing } from "./pages/Landing";
+import { Dashboard } from "./pages/Dashboard";
+import { JoinFamily } from "./pages/JoinFamily";
+import { AdminPanel } from "./pages/AdminPanel";
+import { SmartPlanner } from "./pages/SmartPlanner";
+import { WealthPulse } from "./pages/WealthPulse";
+import { QuantumInsights } from "./pages/QuantumInsights";
+import { NexusNotes } from "./pages/NexusNotes";
+import { FamilySync } from "./pages/FamilySync";
+import { useAuth } from "./hooks/useAuth";
+import "./index.css";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function Router() {
+  const { isAuthenticated, isLoading, user } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <Switch>
-      <Route path="/" component={LiveTradingDashboard} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/automation" component={AutomationPage} />
-      <Route path="/browser" component={BrowserPage} />
-      <Route path="/quantum-ai" component={QuantumAIPage} />
-      <Route path="/github-brain" component={GitHubBrainPage} />
-      <Route path="/bim-infinity" component={BIMInfinityPage} />
-      <Route path="/proof-pudding" component={ProofPuddingPage} />
-      <Route path="/infinity-sovereign" component={InfinitySovereignPage} />
-      <Route path="/kaizen-agent" component={KaizenAgentPage} />
-      <Route path="/watson-command" component={WatsonCommandPage} />
-      <Route path="/user-management" component={UserManagementPage} />
-      <Route path="/infinity-uniform" component={InfinityUniformPage} />
-      <Route path="/particle-playground" component={ParticlePlayground} />
-      <Route path="/trading-bot" component={TradingBotPage} />
-      <Route path="/simple-trading" component={SimpleTradingPage} />
-      <Route path="/live-trading" component={LiveTradingDashboard} />
-      <Route path="/ptni-analytics" component={PTNIDashboard} />
-      <Route path="/ptni-mode-controller" component={PTNIModeControllerPage} />
-      <Route path="/robinhood-account" component={RobinhoodAccountStatus} />
-      <Route path="/quantum-trading-dashboard" component={QuantumTradingDashboardPage} />
-      <Route component={NotFound} />
+      {!isAuthenticated ? (
+        <>
+          <Route path="/" component={Landing} />
+          <Route path="/join/:token" component={JoinFamily} />
+        </>
+      ) : (
+        <>
+          <Route path="/" component={Dashboard} />
+          <Route path="/smart-planner" component={SmartPlanner} />
+          <Route path="/wealth-pulse" component={WealthPulse} />
+          <Route path="/quantum-insights" component={QuantumInsights} />
+          <Route path="/nexus-notes" component={NexusNotes} />
+          <Route path="/family-sync" component={FamilySync} />
+          {user?.role === "admin" && (
+            <Route path="/admin" component={AdminPanel} />
+          )}
+        </>
+      )}
+      <Route>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">404</h1>
+            <p className="text-gray-600 dark:text-gray-300">Page not found</p>
+          </div>
+        </div>
+      </Route>
     </Switch>
   );
 }
 
-function App() {
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+      <ThemeProvider defaultTheme="light" storageKey="family-platform-theme">
+        <Router />
+        <Toaster />
       </ThemeProvider>
     </QueryClientProvider>
   );
 }
-
-export default App;
