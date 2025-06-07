@@ -404,6 +404,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PTNI Analytics API Endpoints
+  app.get("/api/ptni/metrics", async (req, res) => {
+    try {
+      const metrics = ptniAnalyticsEngine.getCurrentMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error('PTNI metrics error:', error);
+      res.status(500).json({ error: 'Failed to fetch PTNI metrics' });
+    }
+  });
+
+  app.get("/api/ptni/metrics/history", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      const history = ptniAnalyticsEngine.getMetricsHistory(limit);
+      res.json(history);
+    } catch (error) {
+      console.error('PTNI metrics history error:', error);
+      res.status(500).json({ error: 'Failed to fetch metrics history' });
+    }
+  });
+
+  app.get("/api/ptni/alerts", async (req, res) => {
+    try {
+      const alerts = ptniAnalyticsEngine.getKPIAlerts();
+      res.json(alerts);
+    } catch (error) {
+      console.error('PTNI alerts error:', error);
+      res.status(500).json({ error: 'Failed to fetch KPI alerts' });
+    }
+  });
+
+  app.get("/api/ptni/visualizations", async (req, res) => {
+    try {
+      const visualizations = await ptniAnalyticsEngine.getVisualizationData();
+      res.json(visualizations);
+    } catch (error) {
+      console.error('PTNI visualizations error:', error);
+      res.status(500).json({ error: 'Failed to fetch visualization data' });
+    }
+  });
+
+  app.get("/api/ptni/status", async (req, res) => {
+    try {
+      const status = ptniAnalyticsEngine.getAnalyticsStatus();
+      res.json(status);
+    } catch (error) {
+      console.error('PTNI status error:', error);
+      res.status(500).json({ error: 'Failed to fetch analytics status' });
+    }
+  });
+
+  // Real Robinhood Account API
+  app.get("/api/robinhood/account", async (req, res) => {
+    try {
+      const account = robinhoodRealClient.getAccount();
+      res.json({
+        ...account,
+        isLive: true,
+        credentialsProvided: !!(process.env.ROBINHOOD_USERNAME && process.env.ROBINHOOD_PASSWORD)
+      });
+    } catch (error) {
+      console.error('Robinhood account error:', error);
+      res.status(500).json({ error: 'Failed to fetch account data' });
+    }
+  });
+
+  app.get("/api/robinhood/portfolio", async (req, res) => {
+    try {
+      const portfolioValue = await robinhoodRealClient.getPortfolioValue();
+      res.json({
+        totalValue: portfolioValue,
+        timestamp: new Date().toISOString(),
+        isLive: robinhoodRealClient.isConnected()
+      });
+    } catch (error) {
+      console.error('Robinhood portfolio error:', error);
+      res.status(500).json({ error: 'Failed to fetch portfolio data' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

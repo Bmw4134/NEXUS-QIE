@@ -21,6 +21,8 @@ import ParticlePlayground from "@/pages/particle-playground";
 import TradingBotPage from "@/pages/trading-bot";
 import SimpleTradingPage from "@/pages/simple-trading";
 import PTNIDashboardCore from "@/components/ptni/ptni-dashboard-core";
+import { PTNIDashboard } from "@/components/ptni/PTNIDashboard";
+import { RobinhoodAccountStatus } from "@/components/RobinhoodAccountStatus";
 import QuantumTradingDashboardPage from "@/pages/quantum-trading-dashboard";
 import NotFound from "@/pages/not-found";
 
@@ -44,6 +46,8 @@ function Router() {
       <Route path="/trading-bot" component={TradingBotPage} />
       <Route path="/simple-trading" component={SimpleTradingPage} />
       <Route path="/live-trading" component={PTNIDashboardCore} />
+      <Route path="/ptni-analytics" component={PTNIDashboard} />
+      <Route path="/robinhood-account" component={RobinhoodAccountStatus} />
       <Route path="/quantum-trading-dashboard" component={QuantumTradingDashboardPage} />
       <Route component={NotFound} />
     </Switch>
