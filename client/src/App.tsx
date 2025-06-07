@@ -19,6 +19,7 @@ import { InfinityUniformPage } from "@/pages/infinity-uniform";
 import ParticlePlayground from "@/pages/particle-playground";
 import TradingBotPage from "@/pages/trading-bot";
 import SimpleTradingPage from "@/pages/simple-trading";
+import LiveTradingPage from "@/pages/live-trading";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -40,6 +41,7 @@ function Router() {
       <Route path="/particle-playground" component={ParticlePlayground} />
       <Route path="/trading-bot" component={TradingBotPage} />
       <Route path="/simple-trading" component={SimpleTradingPage} />
+      <Route path="/live-trading" component={LiveTradingPage} />
       <Route component={NotFound} />
     </Switch>
   );
