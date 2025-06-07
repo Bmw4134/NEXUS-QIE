@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
 import Dashboard from "@/pages/dashboard-simple";
+const LiveTradingPage = PTNIDashboardCore;
 import { AutomationPage } from "@/pages/automation";
 import { BrowserPage } from "@/pages/browser";
 import { QuantumAIPage } from "@/pages/quantum-ai";
@@ -19,7 +20,7 @@ import { InfinityUniformPage } from "@/pages/infinity-uniform";
 import ParticlePlayground from "@/pages/particle-playground";
 import TradingBotPage from "@/pages/trading-bot";
 import SimpleTradingPage from "@/pages/simple-trading";
-import LiveTradingPage from "@/pages/ptni-browser-terminal";
+import PTNIDashboardCore from "@/components/ptni/ptni-dashboard-core";
 import QuantumTradingDashboardPage from "@/pages/quantum-trading-dashboard";
 import NotFound from "@/pages/not-found";
 
@@ -42,7 +43,7 @@ function Router() {
       <Route path="/particle-playground" component={ParticlePlayground} />
       <Route path="/trading-bot" component={TradingBotPage} />
       <Route path="/simple-trading" component={SimpleTradingPage} />
-      <Route path="/live-trading" component={LiveTradingPage} />
+      <Route path="/live-trading" component={PTNIDashboardCore} />
       <Route path="/quantum-trading-dashboard" component={QuantumTradingDashboardPage} />
       <Route component={NotFound} />
     </Switch>
