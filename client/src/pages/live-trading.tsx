@@ -227,7 +227,203 @@ export default function LiveTradingPage() {
           </div>
         )}
 
+        {/* Live Trading Panel */}
+        {accountData && (
+          <div style={{ 
+            backgroundColor: '#220022', 
+            padding: '30px', 
+            borderRadius: '8px',
+            marginTop: '20px'
+          }}>
+            <h2 style={{ fontSize: '24px', marginBottom: '20px', color: '#ff6666' }}>
+              ⚠️ LIVE TRADING - REAL MONEY
+            </h2>
+            
+            <LiveTradingPanel />
+          </div>
+        )}
+
       </div>
+    </div>
+  );
+}
+
+function LiveTradingPanel() {
+  const [symbol, setSymbol] = useState('AAPL');
+  const [side, setSide] = useState<'buy' | 'sell'>('buy');
+  const [quantity, setQuantity] = useState('1');
+  const [orderType, setOrderType] = useState<'market' | 'limit'>('market');
+  const [price, setPrice] = useState('');
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [lastTrade, setLastTrade] = useState<any>(null);
+
+  const executeTrade = async () => {
+    setIsExecuting(true);
+    
+    try {
+      const response = await fetch('/api/trading/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          platform: 'robinhood',
+          symbol,
+          side,
+          quantity,
+          orderType,
+          price: orderType === 'limit' ? price : undefined
+        })
+      });
+
+      const result = await response.json();
+      setLastTrade(result);
+    } catch (error) {
+      setLastTrade({ success: false, message: 'Trade execution failed' });
+    } finally {
+      setIsExecuting(false);
+    }
+  };
+
+  return (
+    <div>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+        gap: '15px',
+        marginBottom: '20px'
+      }}>
+        <div>
+          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Symbol</label>
+          <input
+            type="text"
+            value={symbol}
+            onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+            style={{
+              width: '100%',
+              padding: '8px',
+              backgroundColor: '#333',
+              border: '1px solid #666',
+              borderRadius: '4px',
+              color: 'white'
+            }}
+          />
+        </div>
+
+        <div>
+          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Side</label>
+          <select
+            value={side}
+            onChange={(e) => setSide(e.target.value as 'buy' | 'sell')}
+            style={{
+              width: '100%',
+              padding: '8px',
+              backgroundColor: '#333',
+              border: '1px solid #666',
+              borderRadius: '4px',
+              color: 'white'
+            }}
+          >
+            <option value="buy">BUY</option>
+            <option value="sell">SELL</option>
+          </select>
+        </div>
+
+        <div>
+          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Quantity</label>
+          <input
+            type="number"
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '8px',
+              backgroundColor: '#333',
+              border: '1px solid #666',
+              borderRadius: '4px',
+              color: 'white'
+            }}
+          />
+        </div>
+
+        <div>
+          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Order Type</label>
+          <select
+            value={orderType}
+            onChange={(e) => setOrderType(e.target.value as 'market' | 'limit')}
+            style={{
+              width: '100%',
+              padding: '8px',
+              backgroundColor: '#333',
+              border: '1px solid #666',
+              borderRadius: '4px',
+              color: 'white'
+            }}
+          >
+            <option value="market">MARKET</option>
+            <option value="limit">LIMIT</option>
+          </select>
+        </div>
+
+        {orderType === 'limit' && (
+          <div>
+            <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Price</label>
+            <input
+              type="number"
+              step="0.01"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '8px',
+                backgroundColor: '#333',
+                border: '1px solid #666',
+                borderRadius: '4px',
+                color: 'white'
+              }}
+            />
+          </div>
+        )}
+      </div>
+
+      <button
+        onClick={executeTrade}
+        disabled={isExecuting}
+        style={{
+          backgroundColor: isExecuting ? '#666' : (side === 'buy' ? '#00aa00' : '#aa0000'),
+          color: 'white',
+          padding: '12px 24px',
+          fontSize: '16px',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: isExecuting ? 'not-allowed' : 'pointer',
+          fontWeight: 'bold',
+          marginRight: '15px'
+        }}
+      >
+        {isExecuting ? 'EXECUTING...' : `${side.toUpperCase()} ${quantity} ${symbol}`}
+      </button>
+
+      {lastTrade && (
+        <div style={{
+          marginTop: '20px',
+          padding: '15px',
+          backgroundColor: lastTrade.success ? '#003300' : '#330000',
+          borderRadius: '5px',
+          border: `1px solid ${lastTrade.success ? '#00ff00' : '#ff0000'}`
+        }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>
+            {lastTrade.success ? '✓ TRADE EXECUTED' : '✗ TRADE FAILED'}
+          </div>
+          <div style={{ fontSize: '14px' }}>{lastTrade.message}</div>
+          {lastTrade.success && lastTrade.orderId && (
+            <div style={{ fontSize: '14px', marginTop: '5px' }}>
+              Order ID: {lastTrade.orderId}
+              {lastTrade.executedPrice && (
+                <span> | Price: ${lastTrade.executedPrice.toFixed(2)}</span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

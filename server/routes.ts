@@ -27,6 +27,7 @@ import { masterRouter } from './master-infinity-router';
 import { kaizenAgent } from './kaizen-infinity-agent';
 import { watsonEngine } from './watson-command-engine';
 import { dnsAutomationService } from './dns-automation-service';
+import { liveTradingEngine } from './live-trading-engine';
 
 // Configure multer for file uploads
 const upload = multer({
@@ -299,20 +300,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Direct credential authentication for live account
       if (username === 'bm.watson34@gmail.com' && password === 'Panthers3477') {
-        res.json({
-          success: true,
-          message: 'Connected to live Robinhood account',
-          token: 'live_session_' + Date.now(),
-          accountInfo: {
-            accountNumber: '5YD834',
-            buyingPower: '834.97',
-            totalEquity: '834.97',
-            dayTradeCount: 0,
-            portfolioValue: '834.97',
-            isLiveAccount: true
-          }
-        });
-        return;
+        // Authenticate with live trading engine
+        const authenticated = await liveTradingEngine.authenticateRobinhood(username, password, mfaCode);
+        
+        if (authenticated) {
+          // Enable live trading mode
+          await liveTradingEngine.enableLiveTradingMode();
+          
+          res.json({
+            success: true,
+            message: 'Connected to live Robinhood account - LIVE TRADING ENABLED',
+            token: 'live_session_' + Date.now(),
+            accountInfo: {
+              accountNumber: '5YD834',
+              buyingPower: '834.97',
+              totalEquity: '834.97',
+              dayTradeCount: 0,
+              portfolioValue: '834.97',
+              isLiveAccount: true,
+              liveTradingEnabled: true
+            }
+          });
+          return;
+        }
       }
 
       // Try alternative API endpoint
@@ -447,6 +457,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         success: false,
         message: 'Connection error. Please try again.'
+      });
+    }
+  });
+
+  // Execute live trade
+  app.post("/api/trading/execute", async (req, res) => {
+    try {
+      const { platform, symbol, side, quantity, orderType, price } = req.body;
+      
+      if (!liveTradingEngine.isAuthenticated(platform)) {
+        return res.status(401).json({
+          success: false,
+          message: `${platform} not authenticated`
+        });
+      }
+
+      const order = {
+        symbol,
+        side,
+        quantity: parseFloat(quantity),
+        orderType,
+        price: price ? parseFloat(price) : undefined,
+        timeInForce: 'day' as const
+      };
+
+      const result = await liveTradingEngine.executeLiveTrade(platform, order);
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Trade execution error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Trade execution failed'
+      });
+    }
+  });
+
+  // Get live account data
+  app.get("/api/trading/account/:platform", async (req, res) => {
+    try {
+      const platform = req.params.platform as 'robinhood' | 'coinbase';
+      const accountData = await liveTradingEngine.getLiveAccountData(platform);
+      
+      if (accountData) {
+        res.json({ success: true, data: accountData });
+      } else {
+        res.status(401).json({ 
+          success: false, 
+          message: `${platform} not authenticated` 
+        });
+      }
+    } catch (error) {
+      console.error('Account data error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch account data'
       });
     }
   });
