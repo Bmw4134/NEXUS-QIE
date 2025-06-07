@@ -123,55 +123,20 @@ export function PTNIBrowserBypass({ url, onUrlChange }: PTNIBrowserBypassProps) 
               </div>
             </div>
             
-            {bypassActive ? (
+            {bypassActive && proxyUrl ? (
               <div className="relative">
-                {/* PTNI Quantum Interface */}
-                <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg h-96 p-6 flex flex-col items-center justify-center border border-blue-500/30">
-                  <div className="text-center space-y-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto">
-                      <Zap className="w-8 h-8 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-white">PTNI Quantum Trading Interface</h3>
-                    <p className="text-gray-300 text-sm max-w-sm">
-                      Direct access to Robinhood trading platform through quantum tunnel bypass. 
-                      All trades execute with real money and update your actual account balance.
-                    </p>
-                    
-                    {/* Live Market Data Simulation */}
-                    <div className="grid grid-cols-2 gap-4 mt-6 w-full max-w-md">
-                      <div className="bg-gray-700/50 rounded-lg p-3">
-                        <div className="text-xs text-gray-400">BTC/USD</div>
-                        <div className="text-lg font-bold text-green-400">$105,825</div>
-                        <div className="text-xs text-green-400">+1.42%</div>
-                      </div>
-                      <div className="bg-gray-700/50 rounded-lg p-3">
-                        <div className="text-xs text-gray-400">ETH/USD</div>
-                        <div className="text-lg font-bold text-green-400">$2,522</div>
-                        <div className="text-xs text-green-400">+1.24%</div>
-                      </div>
-                      <div className="bg-gray-700/50 rounded-lg p-3">
-                        <div className="text-xs text-gray-400">AVAX/USD</div>
-                        <div className="text-lg font-bold text-green-400">$20.83</div>
-                        <div className="text-xs text-green-400">+7.08%</div>
-                      </div>
-                      <div className="bg-gray-700/50 rounded-lg p-3">
-                        <div className="text-xs text-gray-400">UNI/USD</div>
-                        <div className="text-lg font-bold text-green-400">$6.34</div>
-                        <div className="text-xs text-green-400">+4.89%</div>
-                      </div>
-                    </div>
-
-                    <Badge variant="outline" className="border-green-500 text-green-400 text-xs mt-4">
-                      <Activity className="w-3 h-3 mr-1" />
-                      Live Trading Active
-                    </Badge>
-                  </div>
-                </div>
+                {/* Real Robinhood Content via PTNI Proxy */}
+                <iframe
+                  src={proxyUrl}
+                  className="w-full h-96 bg-white rounded border-0"
+                  title="PTNI Robinhood Interface"
+                  sandbox="allow-scripts allow-same-origin allow-forms"
+                />
 
                 {/* PTNI Status Overlay */}
                 <div className="absolute top-2 right-2">
                   <Badge variant="default" className="bg-green-600 text-xs">
-                    PTNI CONNECTED
+                    PTNI LIVE
                   </Badge>
                 </div>
               </div>
