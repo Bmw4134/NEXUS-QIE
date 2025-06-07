@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
 import Dashboard from "@/pages/dashboard-simple";
-const LiveTradingPage = PTNIDashboardCore;
+import { LiveTradingDashboard } from "@/components/LiveTradingDashboard";
 import { AutomationPage } from "@/pages/automation";
 import { BrowserPage } from "@/pages/browser";
 import { QuantumAIPage } from "@/pages/quantum-ai";
@@ -31,7 +31,7 @@ import NotFound from "@/pages/not-found";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
+      <Route path="/" component={LiveTradingDashboard} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/automation" component={AutomationPage} />
       <Route path="/browser" component={BrowserPage} />
@@ -47,7 +47,7 @@ function Router() {
       <Route path="/particle-playground" component={ParticlePlayground} />
       <Route path="/trading-bot" component={TradingBotPage} />
       <Route path="/simple-trading" component={SimpleTradingPage} />
-      <Route path="/live-trading" component={PTNIDashboardCore} />
+      <Route path="/live-trading" component={LiveTradingDashboard} />
       <Route path="/ptni-analytics" component={PTNIDashboard} />
       <Route path="/ptni-mode-controller" component={PTNIModeControllerPage} />
       <Route path="/robinhood-account" component={RobinhoodAccountStatus} />
