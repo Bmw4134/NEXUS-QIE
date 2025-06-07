@@ -368,9 +368,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           price: overrideExecution.price,
           quantity: overrideExecution.quantity.toFixed(6),
           status: overrideExecution.status,
-          realMoney: false,
-          realAccountUpdate: false,
-          executionMethod: 'enhanced_simulation',
+          realMoney: useRealMoney && liveTradingEngine.isRealModeEnabled(),
+          realAccountUpdate: useRealMoney && liveTradingEngine.isRealModeEnabled(),
+          executionMethod: useRealMoney && liveTradingEngine.isRealModeEnabled() ? 'nexus_quantum_execution' : 'enhanced_simulation',
           balanceChange: overrideExecution.balanceChange,
           updatedBalance: overrideExecution.newBalance,
           timestamp: overrideExecution.timestamp.toISOString()

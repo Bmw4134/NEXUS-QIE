@@ -240,6 +240,10 @@ export class LiveTradingEngine {
   isRealModeActive(): boolean {
     return this.session.isActive && this.session.realMoneyMode;
   }
+
+  isRealModeEnabled(): boolean {
+    return this.session.realMoneyMode;
+  }
 }
 
 export const liveTradingEngine = new LiveTradingEngine();
