@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
-import Dashboard from "@/pages/dashboard";
+import Dashboard from "@/pages/dashboard-simple";
 import { AutomationPage } from "@/pages/automation";
 import { BrowserPage } from "@/pages/browser";
 import { QuantumAIPage } from "@/pages/quantum-ai";
