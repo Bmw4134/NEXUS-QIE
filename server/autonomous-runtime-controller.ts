@@ -72,12 +72,8 @@ export class AutonomousRuntimeController {
   }
 
   private getCurrentBaseUrl(): string {
-    // Detect current Replit environment URL
-    const replitDomain = process.env.REPL_SLUG && process.env.REPL_OWNER 
-      ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`
-      : 'http://localhost:5000';
-    
-    return replitDomain;
+    // Use the current working server URL
+    return 'http://localhost:5000';
   }
 
   registerProjectAnchor(anchor: ProjectAnchor): boolean {
@@ -179,8 +175,11 @@ export class AutonomousRuntimeController {
     const anchor = this.projectAnchors.get(projectId);
     if (!anchor) return false;
 
-    // For current project, apply patch directly
+    // For current project, apply patch directly and mark as successful
     if (projectId === 'nexus-unified-final') {
+      // Mark project as online since we're running locally
+      anchor.status = 'online';
+      anchor.lastSync = new Date();
       return this.applyLocalPatch(request);
     }
 
@@ -196,9 +195,15 @@ export class AutonomousRuntimeController {
         signal: AbortSignal.timeout(10000)
       });
 
-      return response.ok;
+      if (response.ok) {
+        anchor.status = 'online';
+        anchor.lastSync = new Date();
+        return true;
+      }
+      return false;
     } catch (error) {
       console.error(`Remote patch failed for ${projectId}:`, error);
+      anchor.status = 'offline';
       return false;
     }
   }
