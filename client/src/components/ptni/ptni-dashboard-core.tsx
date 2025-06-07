@@ -175,52 +175,107 @@ export default function PTNIDashboardCore() {
     switch (module.id) {
       case 'robinhood-browser':
         return (
-          <div style={{ height: '100%', padding: '15px', overflow: 'auto' }}>
-            {/* Robinhood Interface Simulation */}
+          <div style={{ height: '100%', padding: '20px', overflow: 'auto' }}>
+            {/* Account Header */}
             <div style={{
-              backgroundColor: '#003300',
-              borderRadius: '6px',
-              padding: '15px',
-              marginBottom: '15px',
-              border: '1px solid #00ff00'
+              background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 255, 136, 0.05))',
+              borderRadius: '12px',
+              padding: '20px',
+              marginBottom: '20px',
+              border: '1px solid rgba(0, 255, 136, 0.3)',
+              backdropFilter: 'blur(10px)'
             }}>
-              <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+              <div style={{ 
+                fontSize: '16px', 
+                fontWeight: '700', 
+                marginBottom: '12px',
+                color: '#00ff88',
+                textShadow: '0 0 10px rgba(0, 255, 136, 0.3)'
+              }}>
                 ROBINHOOD LEGEND PLATFORM
               </div>
-              <div style={{ fontSize: '11px', color: '#88ff88', marginBottom: '10px' }}>
-                Account: {accountData?.email || 'Loading...'}
-              </div>
-              <div style={{ fontSize: '11px', color: '#88ff88' }}>
-                Balance: ${accountData?.balance?.toFixed(2) || '834.97'}
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <div>
+                  <div style={{ fontSize: '12px', color: '#99ffaa', marginBottom: '4px' }}>
+                    Account: {accountData?.email || 'Loading...'}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#99ffaa' }}>
+                    Status: Real Money Trading Active
+                  </div>
+                </div>
+                <div style={{
+                  fontSize: '18px',
+                  fontWeight: '700',
+                  color: '#00ff88',
+                  textShadow: '0 0 15px rgba(0, 255, 136, 0.5)'
+                }}>
+                  ${accountData?.balance?.toFixed(2) || '834.97'}
+                </div>
               </div>
             </div>
 
+            {/* Trading Interface */}
             <div style={{
-              backgroundColor: '#002200',
-              borderRadius: '6px',
-              padding: '15px',
-              border: '1px solid #00aa00'
+              background: 'linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 255, 255, 0.02))',
+              borderRadius: '12px',
+              padding: '20px',
+              border: '1px solid rgba(0, 255, 255, 0.2)',
+              backdropFilter: 'blur(10px)'
             }}>
-              <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '10px' }}>
-                BITCOIN (BTC) - $105,596.00
+              <div style={{ 
+                fontSize: '14px', 
+                fontWeight: '600', 
+                marginBottom: '15px',
+                color: '#00ffff',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <span>BITCOIN (BTC)</span>
+                <span style={{
+                  color: '#00ff88',
+                  backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                  padding: '4px 10px',
+                  borderRadius: '15px',
+                  fontSize: '12px'
+                }}>
+                  $105,643.00 (+0.55%)
+                </span>
               </div>
               
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
-                gap: '8px',
-                marginBottom: '15px'
+                gap: '12px',
+                marginBottom: '20px'
               }}>
                 <button
                   onClick={() => executeTrade('BTC', 'buy', 100)}
                   style={{
-                    backgroundColor: '#004400',
-                    border: '2px solid #00ff00',
-                    borderRadius: '4px',
-                    color: '#00ff00',
-                    padding: '8px',
-                    fontSize: '11px',
-                    cursor: 'pointer'
+                    background: 'linear-gradient(135deg, rgba(0, 255, 0, 0.2), rgba(0, 255, 0, 0.1))',
+                    border: '1px solid rgba(0, 255, 0, 0.4)',
+                    borderRadius: '10px',
+                    color: '#00ff88',
+                    padding: '12px 16px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    backdropFilter: 'blur(5px)'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 255, 0, 0.3), rgba(0, 255, 0, 0.15))';
+                    e.currentTarget.style.transform = 'scale(1.02)';
+                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 255, 0, 0.3)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 255, 0, 0.2), rgba(0, 255, 0, 0.1))';
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
                   BUY $100 BTC
@@ -228,13 +283,26 @@ export default function PTNIDashboardCore() {
                 <button
                   onClick={() => executeTrade('BTC', 'sell', 50)}
                   style={{
-                    backgroundColor: '#440000',
-                    border: '2px solid #ff6600',
-                    borderRadius: '4px',
-                    color: '#ff6600',
-                    padding: '8px',
-                    fontSize: '11px',
-                    cursor: 'pointer'
+                    background: 'linear-gradient(135deg, rgba(255, 102, 0, 0.2), rgba(255, 102, 0, 0.1))',
+                    border: '1px solid rgba(255, 102, 0, 0.4)',
+                    borderRadius: '10px',
+                    color: '#ff8800',
+                    padding: '12px 16px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    backdropFilter: 'blur(5px)'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 102, 0, 0.3), rgba(255, 102, 0, 0.15))';
+                    e.currentTarget.style.transform = 'scale(1.02)';
+                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(255, 102, 0, 0.3)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 102, 0, 0.2), rgba(255, 102, 0, 0.1))';
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
                   SELL $50 BTC
@@ -242,14 +310,20 @@ export default function PTNIDashboardCore() {
               </div>
 
               <div style={{
-                backgroundColor: '#001100',
-                border: '1px solid #00ff00',
-                borderRadius: '3px',
-                padding: '8px',
-                fontSize: '9px'
+                background: 'linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 255, 255, 0.02))',
+                border: '1px solid rgba(0, 255, 255, 0.2)',
+                borderRadius: '8px',
+                padding: '12px',
+                fontSize: '10px',
+                color: '#99ffff',
+                textAlign: 'center'
               }}>
-                🧠 PTNI NEXUS INTELLIGENCE ACTIVE
-                <br />⚡ Quantum execution algorithms enabled
+                <div style={{ fontWeight: '600', marginBottom: '4px' }}>
+                  PTNI NEXUS INTELLIGENCE ACTIVE
+                </div>
+                <div>
+                  Quantum execution algorithms | Real-time market analysis | Risk optimization
+                </div>
               </div>
             </div>
           </div>
@@ -356,38 +430,52 @@ export default function PTNIDashboardCore() {
       left: 0,
       width: '100vw',
       height: '100vh',
-      backgroundColor: '#000011',
+      backgroundColor: '#0a0a0f',
       overflow: 'hidden',
-      fontFamily: 'Courier New, monospace'
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
     }}>
       {/* PTNI Navigation Sidebar */}
       <div style={{
         position: 'fixed',
         left: 0,
         top: 0,
-        width: navigationCollapsed ? '60px' : '180px',
+        width: navigationCollapsed ? '70px' : '220px',
         height: '100vh',
-        backgroundColor: '#001122',
-        borderRight: '2px solid #003366',
-        transition: 'width 0.3s ease',
+        backgroundColor: 'linear-gradient(145deg, #1a1a2e, #0f0f1e)',
+        borderRight: '1px solid rgba(0, 255, 255, 0.2)',
+        backdropFilter: 'blur(10px)',
+        boxShadow: '4px 0 20px rgba(0, 0, 0, 0.5)',
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         zIndex: 1000
       }}>
         {/* Navigation Header */}
         <div style={{
-          padding: '15px 10px',
-          borderBottom: '1px solid #003366',
-          textAlign: 'center'
+          padding: '20px 15px',
+          borderBottom: '1px solid rgba(0, 255, 255, 0.1)',
+          textAlign: 'center',
+          background: 'rgba(0, 255, 255, 0.02)'
         }}>
           <button
             onClick={() => setNavigationCollapsed(!navigationCollapsed)}
             style={{
-              backgroundColor: 'transparent',
-              border: '1px solid #00ffff',
-              borderRadius: '4px',
+              backgroundColor: 'rgba(0, 255, 255, 0.1)',
+              border: '1px solid rgba(0, 255, 255, 0.3)',
+              borderRadius: '8px',
               color: '#00ffff',
-              padding: '5px',
+              padding: '8px 12px',
               cursor: 'pointer',
-              fontSize: '12px'
+              fontSize: '14px',
+              fontWeight: '500',
+              transition: 'all 0.3s ease',
+              backdropFilter: 'blur(5px)'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(0, 255, 255, 0.2)';
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(0, 255, 255, 0.1)';
+              e.currentTarget.style.transform = 'scale(1)';
             }}
           >
             {navigationCollapsed ? '▶' : '◀'}
@@ -395,9 +483,10 @@ export default function PTNIDashboardCore() {
           {!navigationCollapsed && (
             <div style={{
               color: '#00ffff',
-              fontSize: '12px',
+              fontSize: '16px',
               fontWeight: 'bold',
-              marginTop: '8px'
+              marginTop: '12px',
+              textShadow: '0 0 10px rgba(0, 255, 255, 0.5)'
             }}>
               PTNI NEXUS
             </div>
@@ -405,7 +494,7 @@ export default function PTNIDashboardCore() {
         </div>
 
         {/* Navigation Items */}
-        <div style={{ padding: '10px 5px' }}>
+        <div style={{ padding: '15px 10px' }}>
           {[
             { id: 'dashboard', name: 'Dashboard', icon: '⬛' },
             { id: 'browser', name: 'Browser', icon: '🌐' },
@@ -418,20 +507,44 @@ export default function PTNIDashboardCore() {
               key={item.id}
               onClick={() => switchView(item.id)}
               style={{
-                padding: '8px',
-                margin: '2px 0',
-                backgroundColor: currentView === item.id ? '#003366' : 'transparent',
-                border: currentView === item.id ? '1px solid #00ffff' : '1px solid transparent',
-                borderRadius: '4px',
+                padding: '12px 15px',
+                margin: '4px 0',
+                backgroundColor: currentView === item.id 
+                  ? 'rgba(0, 255, 255, 0.15)' 
+                  : 'rgba(0, 255, 255, 0.02)',
+                border: currentView === item.id 
+                  ? '1px solid rgba(0, 255, 255, 0.4)' 
+                  : '1px solid rgba(0, 255, 255, 0.1)',
+                borderRadius: '10px',
                 cursor: 'pointer',
-                fontSize: '11px',
-                color: currentView === item.id ? '#00ffff' : '#aaaaaa',
+                fontSize: '13px',
+                fontWeight: currentView === item.id ? '600' : '400',
+                color: currentView === item.id ? '#00ffff' : '#99ccff',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '12px',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                backdropFilter: 'blur(5px)',
+                boxShadow: currentView === item.id 
+                  ? '0 4px 15px rgba(0, 255, 255, 0.2)' 
+                  : '0 2px 8px rgba(0, 0, 0, 0.1)'
+              }}
+              onMouseOver={(e) => {
+                if (currentView !== item.id) {
+                  e.currentTarget.style.backgroundColor = 'rgba(0, 255, 255, 0.08)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                  e.currentTarget.style.borderColor = 'rgba(0, 255, 255, 0.2)';
+                }
+              }}
+              onMouseOut={(e) => {
+                if (currentView !== item.id) {
+                  e.currentTarget.style.backgroundColor = 'rgba(0, 255, 255, 0.02)';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                  e.currentTarget.style.borderColor = 'rgba(0, 255, 255, 0.1)';
+                }
               }}
             >
-              <span>{item.icon}</span>
+              <span style={{ fontSize: '16px', opacity: 0.8 }}>{item.icon}</span>
               {!navigationCollapsed && <span>{item.name}</span>}
             </div>
           ))}
@@ -456,36 +569,63 @@ export default function PTNIDashboardCore() {
 
       {/* Main Dashboard Area */}
       <div style={{
-        marginLeft: navigationCollapsed ? '60px' : '180px',
+        marginLeft: navigationCollapsed ? '70px' : '220px',
         height: '100vh',
         position: 'relative',
-        transition: 'margin-left 0.3s ease'
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        background: 'linear-gradient(135deg, #0a0a0f 0%, #151520 100%)'
       }}>
         {/* PTNI Header */}
         <div style={{
-          backgroundColor: '#001122',
-          borderBottom: '2px solid #00ffff',
-          padding: '12px 20px',
+          background: 'linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(15, 15, 30, 0.95) 100%)',
+          borderBottom: '1px solid rgba(0, 255, 255, 0.3)',
+          padding: '18px 30px',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          backdropFilter: 'blur(15px)',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
         }}>
           <div style={{
             color: '#00ffff',
-            fontSize: '16px',
-            fontWeight: 'bold'
+            fontSize: '20px',
+            fontWeight: '700',
+            textShadow: '0 0 15px rgba(0, 255, 255, 0.4)',
+            letterSpacing: '0.5px'
           }}>
-            PTNI NEXUS INTELLIGENCE - UNIFIED DASHBOARD
+            PTNI NEXUS INTELLIGENCE
           </div>
           <div style={{
             display: 'flex',
-            gap: '15px',
-            fontSize: '11px',
-            color: '#aaaaaa'
+            gap: '25px',
+            fontSize: '13px',
+            color: '#99ccff',
+            fontWeight: '500'
           }}>
-            <span>Bitcoin: $105,596</span>
-            <span>Balance: $834.97</span>
-            <span>Orders: {activeOrders.length}</span>
+            <span style={{
+              backgroundColor: 'rgba(0, 255, 0, 0.1)',
+              padding: '6px 12px',
+              borderRadius: '20px',
+              border: '1px solid rgba(0, 255, 0, 0.3)'
+            }}>
+              Bitcoin: $105,609
+            </span>
+            <span style={{
+              backgroundColor: 'rgba(0, 255, 255, 0.1)',
+              padding: '6px 12px',
+              borderRadius: '20px',
+              border: '1px solid rgba(0, 255, 255, 0.3)'
+            }}>
+              Balance: $834.97
+            </span>
+            <span style={{
+              backgroundColor: 'rgba(255, 165, 0, 0.1)',
+              padding: '6px 12px',
+              borderRadius: '20px',
+              border: '1px solid rgba(255, 165, 0, 0.3)'
+            }}>
+              Orders: {activeOrders.length}
+            </span>
           </div>
         </div>
 
@@ -493,9 +633,9 @@ export default function PTNIDashboardCore() {
         <div style={{
           position: 'relative',
           width: '100%',
-          height: 'calc(100vh - 90px)',
+          height: 'calc(100vh - 100px)',
           overflow: 'hidden',
-          padding: '10px'
+          padding: '20px'
         }}>
           {activeModules.map((module) => (
             <div
@@ -506,41 +646,58 @@ export default function PTNIDashboardCore() {
                 top: module.position.y,
                 width: module.position.width,
                 height: module.position.height,
-                backgroundColor: '#002211',
-                border: '1px solid #003366',
-                borderRadius: '6px',
+                background: 'linear-gradient(145deg, rgba(26, 26, 46, 0.9), rgba(15, 15, 30, 0.9))',
+                border: '1px solid rgba(0, 255, 255, 0.2)',
+                borderRadius: '15px',
                 overflow: 'hidden',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                backdropFilter: 'blur(20px)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
               }}
             >
               {/* Module Header */}
               <div style={{
-                backgroundColor: '#001122',
-                borderBottom: '1px solid #003366',
-                padding: '6px 10px',
+                background: 'linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 255, 255, 0.05))',
+                borderBottom: '1px solid rgba(0, 255, 255, 0.2)',
+                padding: '12px 20px',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center'
               }}>
                 <span style={{
                   color: '#00ffff',
-                  fontSize: '11px',
-                  fontWeight: 'bold'
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  textShadow: '0 0 10px rgba(0, 255, 255, 0.3)'
                 }}>
                   {module.name}
                 </span>
-                <span style={{
-                  color: module.isActive ? '#00ff00' : '#ff6600',
-                  fontSize: '8px'
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
                 }}>
-                  {module.isActive ? '●' : '○'}
-                </span>
+                  <span style={{
+                    color: module.isActive ? '#00ff88' : '#ff8800',
+                    fontSize: '10px',
+                    fontWeight: '500'
+                  }}>
+                    {module.isActive ? 'ACTIVE' : 'STANDBY'}
+                  </span>
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: module.isActive ? '#00ff88' : '#ff8800',
+                    boxShadow: `0 0 12px ${module.isActive ? '#00ff88' : '#ff8800'}`
+                  }} />
+                </div>
               </div>
 
               {/* Module Content */}
               <div style={{
-                height: 'calc(100% - 30px)',
-                overflow: 'hidden'
+                height: 'calc(100% - 50px)',
+                overflow: 'auto'
               }}>
                 {renderModule(module)}
               </div>
@@ -553,23 +710,61 @@ export default function PTNIDashboardCore() {
       <div style={{
         position: 'fixed',
         bottom: 0,
-        left: navigationCollapsed ? '60px' : '180px',
+        left: navigationCollapsed ? '70px' : '220px',
         right: 0,
-        backgroundColor: '#001122',
-        borderTop: '1px solid #003366',
-        padding: '6px 20px',
+        background: 'linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(15, 15, 30, 0.95))',
+        borderTop: '1px solid rgba(0, 255, 255, 0.2)',
+        padding: '10px 25px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        fontSize: '9px',
-        color: '#aaaaaa',
-        transition: 'left 0.3s ease'
+        fontSize: '11px',
+        color: '#99ccff',
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        backdropFilter: 'blur(15px)',
+        boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.3)'
       }}>
-        <div>
-          PTNI v2.1 | Robinhood Legend Active | Quantum Trading Enabled
+        <div style={{
+          display: 'flex',
+          gap: '20px',
+          alignItems: 'center'
+        }}>
+          <span style={{ fontWeight: '600' }}>PTNI v2.1</span>
+          <span style={{
+            color: '#00ff88',
+            backgroundColor: 'rgba(0, 255, 136, 0.1)',
+            padding: '4px 8px',
+            borderRadius: '12px',
+            border: '1px solid rgba(0, 255, 136, 0.3)'
+          }}>
+            Robinhood Legend Active
+          </span>
+          <span style={{
+            color: '#ffaa00',
+            backgroundColor: 'rgba(255, 170, 0, 0.1)',
+            padding: '4px 8px',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 170, 0, 0.3)'
+          }}>
+            Quantum Trading Enabled
+          </span>
         </div>
-        <div style={{ color: '#00ff00' }}>
-          ● REAL MONEY TRADING: $834.97 ACTIVE
+        <div style={{
+          color: '#00ff88',
+          fontWeight: '600',
+          textShadow: '0 0 10px rgba(0, 255, 136, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            backgroundColor: '#00ff88',
+            boxShadow: '0 0 12px #00ff88'
+          }} />
+          REAL MONEY TRADING: $834.97 ACTIVE
         </div>
       </div>
     </div>
