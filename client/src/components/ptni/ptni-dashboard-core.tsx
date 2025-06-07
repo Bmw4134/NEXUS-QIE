@@ -17,6 +17,9 @@ export default function PTNIDashboardCore() {
   const [accountData, setAccountData] = useState<any>(null);
   const [devLogs, setDevLogs] = useState<string[]>([]);
   const [activeOrders, setActiveOrders] = useState<any[]>([]);
+  const [pionexAccount, setPionexAccount] = useState<any>(null);
+  const [quantumBotStatus, setQuantumBotStatus] = useState<any>(null);
+  const [showPionexSetup, setShowPionexSetup] = useState(false);
 
   useEffect(() => {
     initializePTNIModules();
