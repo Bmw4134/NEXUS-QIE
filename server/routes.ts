@@ -28,6 +28,7 @@ import { kaizenAgent } from './kaizen-infinity-agent';
 import { watsonEngine } from './watson-command-engine';
 import { dnsAutomationService } from './dns-automation-service';
 import { liveTradingEngine } from './live-trading-engine';
+import { quantumTradingService } from './quantum-trading-service';
 
 // Configure multer for file uploads
 const upload = multer({
@@ -2141,6 +2142,86 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
     } catch (error) {
       console.error('Force sync error:', error);
       res.status(500).json({ message: "Failed to initiate force sync" });
+    }
+  });
+
+  // === Quantum Trading Dashboard API Endpoints ===
+  
+  // Get quantum trading metrics
+  app.get("/api/quantum/metrics", async (req, res) => {
+    try {
+      const metrics = await quantumTradingService.getQuantumMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error('Quantum metrics error:', error);
+      res.status(500).json({ message: "Failed to get quantum metrics" });
+    }
+  });
+
+  // Get real-time market data for specific symbol and timeframe
+  app.get("/api/quantum/market-data/:symbol/:timeframe", async (req, res) => {
+    try {
+      const { symbol, timeframe } = req.params;
+      const marketData = await quantumTradingService.getMarketData(symbol, timeframe);
+      res.json(marketData);
+    } catch (error) {
+      console.error('Market data error:', error);
+      res.status(500).json({ message: "Failed to get market data" });
+    }
+  });
+
+  // Get quantum trading signals
+  app.get("/api/quantum/signals", async (req, res) => {
+    try {
+      const signals = quantumTradingService.getQuantumSignals();
+      res.json(signals);
+    } catch (error) {
+      console.error('Quantum signals error:', error);
+      res.status(500).json({ message: "Failed to get quantum signals" });
+    }
+  });
+
+  // Get current trading positions
+  app.get("/api/quantum/positions", async (req, res) => {
+    try {
+      const positions = quantumTradingService.getTradingPositions();
+      res.json(positions);
+    } catch (error) {
+      console.error('Trading positions error:', error);
+      res.status(500).json({ message: "Failed to get trading positions" });
+    }
+  });
+
+  // Add trading position
+  app.post("/api/quantum/positions", async (req, res) => {
+    try {
+      const { symbol, quantity, entryPrice, currentPrice } = req.body;
+      const position = {
+        symbol,
+        quantity: parseFloat(quantity),
+        entryPrice: parseFloat(entryPrice),
+        currentPrice: parseFloat(currentPrice),
+        unrealizedPnL: (parseFloat(currentPrice) - parseFloat(entryPrice)) * parseFloat(quantity),
+        timestamp: new Date()
+      };
+      
+      quantumTradingService.addTradingPosition(position);
+      res.json({ success: true, message: 'Position added successfully', position });
+    } catch (error) {
+      console.error('Add position error:', error);
+      res.status(500).json({ message: "Failed to add trading position" });
+    }
+  });
+
+  // Remove trading position
+  app.delete("/api/quantum/positions/:symbol", async (req, res) => {
+    try {
+      const { symbol } = req.params;
+      quantumTradingService.removeTradingPosition(symbol);
+      res.json({ success: true, message: 'Position removed successfully' });
+    } catch (error) {
+      console.error('Remove position error:', error);
+      res.status(500).json({ message: "Failed to remove trading position" });
     }
   });
 
