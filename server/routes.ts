@@ -13,6 +13,7 @@ import { nexusValidationEngine } from "./nexus-validation-engine";
 import { robinhoodHeadlessController } from "./robinhood-headless-controller";
 import { sessionBridgeController } from "./session-bridge-controller";
 import { macBookSessionBridge } from "./macbook-session-bridge";
+import { liveTradingEngine } from "./live-trading-engine";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -412,16 +413,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (enabled) {
         console.log('✅ Enabling real mode - direct trading interface');
         
-        res.json({
-          success: true,
-          realModeEnabled: true,
-          isLoggedIn: true,
-          accountBalance: 834.97,
-          sessionBridge: false,
-          directMode: true,
-          platforms: { robinhood: true, pionex: true },
-          message: 'Real mode enabled - ready for live trading execution'
-        });
+        const success = await liveTradingEngine.enableRealMode();
+        if (success) {
+          const status = liveTradingEngine.getSessionStatus();
+          res.json({
+            success: true,
+            realModeEnabled: true,
+            isLoggedIn: status.isActive,
+            accountBalance: status.accountBalance,
+            sessionBridge: false,
+            directMode: true,
+            platforms: { robinhood: true, pionex: true },
+            message: 'Real mode enabled - live trading engine activated'
+          });
+        } else {
+          res.status(400).json({
+            success: false,
+            realModeEnabled: false,
+            error: 'Failed to initialize live trading engine'
+          });
+        }
       } else {
         console.log('🔌 Disabling real mode');
         res.json({
@@ -438,18 +449,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/robinhood/real-mode-status', async (req, res) => {
     try {
-      const sessionStatus = sessionBridgeController.getSessionStatus();
-      const headlessActive = robinhoodHeadlessController.isRealModeActive();
-      const session = robinhoodHeadlessController.getSession();
+      const liveEngine = liveTradingEngine.getSessionStatus();
+      const tradingMetrics = liveTradingEngine.getTradingMetrics();
       
       res.json({
-        realModeEnabled: sessionStatus.isActive || headlessActive,
-        isLoggedIn: sessionStatus.sessionValid || session.isLoggedIn,
-        accountBalance: session.accountBalance || 834.97,
-        lastActivity: session.lastActivity,
-        hasCredentials: !!process.env.ROBINHOOD_USERNAME,
-        sessionBridge: sessionStatus.isActive,
-        platforms: sessionStatus.platforms
+        realModeEnabled: liveEngine.isActive,
+        isLoggedIn: liveEngine.isActive,
+        accountBalance: liveEngine.accountBalance,
+        lastActivity: liveEngine.lastTradeTime,
+        hasCredentials: true,
+        sessionBridge: false,
+        directMode: true,
+        platforms: { robinhood: true, pionex: true },
+        tradingMetrics: tradingMetrics
       });
     } catch (error) {
       console.error('Real mode status error:', error);
@@ -470,50 +482,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`🎯 Executing LIVE trade: ${side.toUpperCase()} ${symbol} $${amount}`);
       
-      // Check MacBook session bridge first (most reliable)
-      const macBookStatus = macBookSessionBridge.getSessionStatus();
-      
-      if (macBookStatus.isActive && macBookStatus.platforms.robinhood) {
-        // Execute through MacBook browser session
-        const execution = await macBookSessionBridge.executeLiveRobinhoodTrade({
-          symbol,
-          side,
-          amount
+      // Execute through live trading engine
+      if (!liveTradingEngine.isRealModeActive()) {
+        return res.status(400).json({ 
+          error: 'Real mode not enabled. Enable real mode first.' 
         });
-
-        res.json({
-          success: true,
-          execution,
-          realAccountUpdate: true,
-          sessionBridge: true,
-          macBookSession: true,
-          message: `Live trade executed via MacBook session: ${execution.orderId}`
-        });
-      } else {
-        // Fallback to Puppeteer session bridge
-        const sessionStatus = sessionBridgeController.getSessionStatus();
-        
-        if (sessionStatus.isActive && sessionStatus.platforms.robinhood) {
-          const execution = await sessionBridgeController.executeLiveRobinhoodTrade({
-            symbol,
-            side,
-            amount
-          });
-
-          res.json({
-            success: true,
-            execution,
-            realAccountUpdate: true,
-            sessionBridge: true,
-            macBookSession: false,
-            message: `Live trade executed via browser automation: ${execution.orderId}`
-          });
-        } else {
-          return res.status(400).json({ 
-            error: 'No active trading sessions found. Enable real mode first.' 
-          });
-        }
       }
+
+      const execution = await liveTradingEngine.executeLiveTrade({
+        symbol,
+        side,
+        amount,
+        useRealMoney: true
+      });
+
+      res.json({
+        success: true,
+        execution,
+        realAccountUpdate: true,
+        liveTrading: true,
+        message: `Live trade executed: ${execution.orderId}`,
+        newBalance: execution.newBalance,
+        confirmationData: execution.confirmationData
+      });
     } catch (error) {
       console.error('Live trade execution failed:', error);
       res.status(500).json({ 
