@@ -9,17 +9,20 @@ export default function LiveTradingPage() {
     const fetchCryptoData = async () => {
       try {
         const response = await fetch('/api/crypto/assets');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
         const data = await response.json();
         setCryptoData(data || []);
       } catch (error) {
-        console.log('Using fallback crypto data');
+        console.log('Using fallback crypto data:', error);
         // Fallback data with Bitcoin over $100k
         setCryptoData([
-          { symbol: 'BTC', name: 'Bitcoin', price: 105465, change24h: 1.41, volume24h: 28500000000, marketCap: 2100000000000 },
-          { symbol: 'ETH', name: 'Ethereum', price: 2498.85, change24h: 0.74, volume24h: 12500000000, marketCap: 300000000000 },
-          { symbol: 'DOGE', name: 'Dogecoin', price: 0.19, change24h: 4.61, volume24h: 1200000000, marketCap: 27000000000 },
-          { symbol: 'SOL', name: 'Solana', price: 152.14, change24h: 0.52, volume24h: 2800000000, marketCap: 72000000000 },
-          { symbol: 'ADA', name: 'Cardano', price: 0.67, change24h: 1.35, volume24h: 850000000, marketCap: 23000000000 }
+          { symbol: 'BTC', name: 'Bitcoin', price: 105531, change24h: 0.54, volume24h: 28500000000, marketCap: 2100000000000 },
+          { symbol: 'ETH', name: 'Ethereum', price: 2518.27, change24h: 0.38, volume24h: 12500000000, marketCap: 300000000000 },
+          { symbol: 'DOGE', name: 'Dogecoin', price: 0.19, change24h: 2.80, volume24h: 1200000000, marketCap: 27000000000 },
+          { symbol: 'SOL', name: 'Solana', price: 151.19, change24h: -0.02, volume24h: 2800000000, marketCap: 72000000000 },
+          { symbol: 'ADA', name: 'Cardano', price: 0.67, change24h: 0.11, volume24h: 850000000, marketCap: 23000000000 }
         ]);
       } finally {
         setIsLoading(false);
