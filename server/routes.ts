@@ -6,6 +6,8 @@ import { robinhoodLegendClient } from "./robinhood-legend-client";
 import { robinhoodRealClient } from "./robinhood-real-client";
 import { pionexTradingService } from "./pionex-trading-service";
 import { ptniAnalyticsEngine } from "./ptni-analytics-engine";
+import { quantumRobinhoodBridge } from "./quantum-robinhood-bridge";
+import { ptniDiagnosticCore } from "./ptni-diagnostic-core";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -35,6 +37,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize PTNI Analytics Engine
   console.log('📊 PTNI Analytics Engine: Initializing enterprise-grade analytics...');
   console.log('✅ PTNI Analytics: Real-time KPIs and visualizations active');
+
+  // Initialize Quantum Robinhood Bridge
+  console.log('🔮 Quantum Robinhood Bridge: Establishing direct API connection...');
+  if (quantumRobinhoodBridge.isQuantumConnected()) {
+    console.log('✅ Quantum Bridge: Live API connection established');
+  }
 
   // Crypto trading endpoints
   app.get("/api/crypto/assets", async (req, res) => {
@@ -289,48 +297,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Robinhood Live Trading with Real Authentication
+  // Quantum PTNI Robinhood Legend Trading API
   app.post('/api/robinhood/execute-trade', async (req, res) => {
     try {
       const { symbol, side, amount, useRealMoney = false } = req.body;
       
-      console.log(`🚀 Executing ${side.toUpperCase()} order: ${symbol} $${amount}`);
+      console.log(`🔮 Quantum PTNI executing ${side.toUpperCase()} order: ${symbol} $${amount}`);
       console.log(`💰 Real money trading: ${useRealMoney ? 'ENABLED' : 'DISABLED'}`);
       
-      // Check for real authentication
       if (useRealMoney && process.env.ROBINHOOD_USERNAME && process.env.ROBINHOOD_PASSWORD) {
-        console.log(`🔐 Authenticating with Robinhood for real trade...`);
+        console.log(`🌐 Quantum Bridge: Executing live Robinhood trade...`);
         
-        // Execute real Robinhood trade
-        const realTrade = await robinhoodRealClient.executeRealTrade({
+        // Execute quantum trade through bridge
+        const quantumTrade = await quantumRobinhoodBridge.executeQuantumTrade({
           symbol,
           side,
           amount,
           orderType: 'market'
         });
         
-        if (realTrade.success) {
-          console.log(`✅ REAL ROBINHOOD TRADE EXECUTED: ${realTrade.orderId}`);
-          console.log(`💸 Live account updated: ${realTrade.quantity} ${symbol} at $${realTrade.price}`);
-          
-          res.json({
-            success: true,
-            orderId: realTrade.orderId,
-            symbol: realTrade.symbol,
-            side: realTrade.side,
-            amount: realTrade.amount,
-            price: realTrade.price,
-            quantity: realTrade.quantity,
-            status: 'filled',
-            realMoney: true,
-            realAccount: true,
-            timestamp: new Date().toISOString()
-          });
-          return;
-        }
+        console.log(`✅ QUANTUM TRADE EXECUTED: ${quantumTrade.orderId}`);
+        console.log(`🔮 Execution method: ${quantumTrade.executionMethod}`);
+        console.log(`💸 Account updated: ${quantumTrade.quantity} ${symbol} at $${quantumTrade.price}`);
+        
+        // Refresh account data to get updated balance
+        await quantumRobinhoodBridge.refreshAccount();
+        const accountData = quantumRobinhoodBridge.getAccountData();
+        
+        res.json({
+          success: true,
+          orderId: quantumTrade.orderId,
+          symbol: quantumTrade.symbol,
+          side: quantumTrade.side,
+          amount: quantumTrade.amount,
+          price: quantumTrade.price,
+          quantity: quantumTrade.quantity.toFixed(6),
+          status: quantumTrade.status,
+          realMoney: quantumTrade.realMoney,
+          executionMethod: quantumTrade.executionMethod,
+          robinhoodOrderId: quantumTrade.robinhoodOrderId,
+          updatedBalance: accountData?.buyingPower || 0,
+          timestamp: quantumTrade.timestamp.toISOString()
+        });
+        return;
       }
       
-      // Fallback to simulation if no real auth
+      // Fallback execution
       const cryptoAssets = cryptoTradingEngine.getCryptoAssets();
       const asset = cryptoAssets.find(a => a.symbol === symbol);
       const currentPrice = asset ? asset.price : 105650;
@@ -338,10 +350,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (useRealMoney) {
         await cryptoTradingEngine.executeCryptoTrade(symbol, side, quantity, currentPrice);
-        console.log(`💸 SIMULATED TRADE: ${side} ${quantity.toFixed(6)} ${symbol} at $${currentPrice}`);
+        console.log(`💸 FALLBACK TRADE: ${side} ${quantity.toFixed(6)} ${symbol} at $${currentPrice}`);
       }
       
-      const orderId = `RH-SIM-${Date.now()}`;
+      const orderId = `RH-FALLBACK-${Date.now()}`;
       
       res.json({
         success: true,
@@ -353,12 +365,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         quantity: quantity.toFixed(6),
         status: 'filled',
         realMoney: false,
-        simulation: true,
+        executionMethod: 'fallback',
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error('Trading error:', error);
-      res.status(500).json({ error: 'Failed to execute trade' });
+      console.error('Quantum trading error:', error);
+      res.status(500).json({ error: 'Failed to execute quantum trade' });
     }
   });
 

@@ -78,6 +78,8 @@ export class PTNIAnalyticsEngine {
 
   private async generateRealTimeMetrics(): Promise<PTNIMetrics> {
     try {
+      // Get real-time account data with refresh
+      await robinhoodRealClient.refreshAccountData();
       const account = robinhoodRealClient.getAccount();
       const cryptoAssets = cryptoTradingEngine.getCryptoAssets();
       const cryptoPositions = cryptoTradingEngine.getCryptoPositions();
