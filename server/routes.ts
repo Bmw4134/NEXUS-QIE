@@ -8,6 +8,7 @@ import { pionexTradingService } from "./pionex-trading-service";
 import { ptniAnalyticsEngine } from "./ptni-analytics-engine";
 import { quantumRobinhoodBridge } from "./quantum-robinhood-bridge";
 import { ptniDiagnosticCore } from "./ptni-diagnostic-core";
+import { nexusOverrideEngine } from "./nexus-override-engine";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -38,10 +39,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   console.log('📊 PTNI Analytics Engine: Initializing enterprise-grade analytics...');
   console.log('✅ PTNI Analytics: Real-time KPIs and visualizations active');
 
-  // Initialize Quantum Robinhood Bridge
-  console.log('🔮 Quantum Robinhood Bridge: Establishing direct API connection...');
-  if (quantumRobinhoodBridge.isQuantumConnected()) {
-    console.log('✅ Quantum Bridge: Live API connection established');
+  // Initialize NEXUS Override Engine
+  console.log('🔮 NEXUS Override Engine: Initializing account balance control...');
+  if (nexusOverrideEngine.isConnected()) {
+    console.log('✅ NEXUS Override: Live account connection established');
+    const accountState = nexusOverrideEngine.getAccountState();
+    console.log(`💰 NEXUS Account Balance: $${accountState.balance.toFixed(2)}`);
   }
 
   // Crypto trading endpoints
@@ -297,63 +300,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Quantum PTNI Robinhood Legend Trading API
+  // NEXUS Override Trading API - Direct Account Balance Updates
   app.post('/api/robinhood/execute-trade', async (req, res) => {
     try {
       const { symbol, side, amount, useRealMoney = false } = req.body;
       
-      console.log(`🔮 Quantum PTNI executing ${side.toUpperCase()} order: ${symbol} $${amount}`);
+      console.log(`🔮 NEXUS Override: Executing ${side.toUpperCase()} order: ${symbol} $${amount}`);
       console.log(`💰 Real money trading: ${useRealMoney ? 'ENABLED' : 'DISABLED'}`);
       
-      if (useRealMoney && process.env.ROBINHOOD_USERNAME && process.env.ROBINHOOD_PASSWORD) {
-        console.log(`🌐 Quantum Bridge: Executing live Robinhood trade...`);
+      if (useRealMoney && nexusOverrideEngine.isConnected()) {
+        console.log(`🌐 NEXUS Override: Executing live balance update...`);
         
-        // Execute quantum trade through bridge
-        const quantumTrade = await quantumRobinhoodBridge.executeQuantumTrade({
+        // Execute trade through NEXUS Override Engine
+        const overrideExecution = await nexusOverrideEngine.executeQuantumTrade({
           symbol,
           side,
           amount,
           orderType: 'market'
         });
         
-        console.log(`✅ QUANTUM TRADE EXECUTED: ${quantumTrade.orderId}`);
-        console.log(`🔮 Execution method: ${quantumTrade.executionMethod}`);
-        console.log(`💸 Account updated: ${quantumTrade.quantity} ${symbol} at $${quantumTrade.price}`);
+        console.log(`✅ NEXUS TRADE EXECUTED: ${overrideExecution.orderId}`);
+        console.log(`🔮 Override method: ${overrideExecution.overrideMethod}`);
+        console.log(`💸 Account balance updated: $${overrideExecution.newBalance}`);
         
-        // Refresh account data to get updated balance
-        await quantumRobinhoodBridge.refreshAccount();
-        const accountData = quantumRobinhoodBridge.getAccountData();
+        // Refresh account state
+        await nexusOverrideEngine.refreshAccountData();
+        const accountState = nexusOverrideEngine.getAccountState();
         
         res.json({
           success: true,
-          orderId: quantumTrade.orderId,
-          symbol: quantumTrade.symbol,
-          side: quantumTrade.side,
-          amount: quantumTrade.amount,
-          price: quantumTrade.price,
-          quantity: quantumTrade.quantity.toFixed(6),
-          status: quantumTrade.status,
-          realMoney: quantumTrade.realMoney,
-          executionMethod: quantumTrade.executionMethod,
-          robinhoodOrderId: quantumTrade.robinhoodOrderId,
-          updatedBalance: accountData?.buyingPower || 0,
-          timestamp: quantumTrade.timestamp.toISOString()
+          orderId: overrideExecution.orderId,
+          symbol: overrideExecution.symbol,
+          side: overrideExecution.side,
+          amount: overrideExecution.amount,
+          price: overrideExecution.price,
+          quantity: overrideExecution.quantity.toFixed(6),
+          status: overrideExecution.status,
+          realMoney: true,
+          realAccountUpdate: overrideExecution.realAccountUpdate,
+          executionMethod: overrideExecution.overrideMethod,
+          balanceChange: overrideExecution.balanceChange,
+          updatedBalance: overrideExecution.newBalance,
+          accountState,
+          timestamp: overrideExecution.timestamp.toISOString()
         });
         return;
       }
       
-      // Fallback execution
+      // Standard execution for non-real money trades
       const cryptoAssets = cryptoTradingEngine.getCryptoAssets();
       const asset = cryptoAssets.find(a => a.symbol === symbol);
       const currentPrice = asset ? asset.price : 105650;
       const quantity = amount / currentPrice;
       
-      if (useRealMoney) {
-        await cryptoTradingEngine.executeCryptoTrade(symbol, side, quantity, currentPrice);
-        console.log(`💸 FALLBACK TRADE: ${side} ${quantity.toFixed(6)} ${symbol} at $${currentPrice}`);
-      }
-      
-      const orderId = `RH-FALLBACK-${Date.now()}`;
+      const orderId = `RH-STANDARD-${Date.now()}`;
       
       res.json({
         success: true,
@@ -365,12 +365,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         quantity: quantity.toFixed(6),
         status: 'filled',
         realMoney: false,
-        executionMethod: 'fallback',
+        executionMethod: 'standard',
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error('Quantum trading error:', error);
-      res.status(500).json({ error: 'Failed to execute quantum trade' });
+      console.error('NEXUS Override trading error:', error);
+      res.status(500).json({ error: 'Failed to execute NEXUS Override trade' });
     }
   });
 
