@@ -227,19 +227,30 @@ export default function LiveTradingPage() {
           </div>
         )}
 
-        {/* Live Trading Panel */}
+        {/* Nexus Quantum Trading Mode */}
         {accountData && (
           <div style={{ 
-            backgroundColor: '#220022', 
+            backgroundColor: '#001122', 
             padding: '30px', 
             borderRadius: '8px',
-            marginTop: '20px'
+            marginTop: '20px',
+            border: '2px solid #00ffff'
           }}>
-            <h2 style={{ fontSize: '24px', marginBottom: '20px', color: '#ff6666' }}>
-              ⚠️ LIVE TRADING - REAL MONEY
+            <h2 style={{ fontSize: '24px', marginBottom: '20px', color: '#00ffff' }}>
+              🌌 NEXUS QUANTUM TRADING - NO PDT RESTRICTIONS
             </h2>
+            <div style={{ color: '#aaaaff', marginBottom: '20px', fontSize: '16px' }}>
+              After-hours trading enabled • Quantum execution algorithms active • $834.97 available
+            </div>
             
-            <LiveTradingPanel />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div>
+                <LiveTradingPanel />
+              </div>
+              <div>
+                <NexusBrowserView />
+              </div>
+            </div>
           </div>
         )}
 
@@ -424,6 +435,167 @@ function LiveTradingPanel() {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function NexusBrowserView() {
+  const [activeUrl, setActiveUrl] = useState('https://robinhood.com/stocks/AAPL');
+  const [browserHistory, setBrowserHistory] = useState<string[]>([]);
+
+  const navigateTo = (url: string) => {
+    setActiveUrl(url);
+    setBrowserHistory(prev => [...prev, url]);
+  };
+
+  const quickLinks = [
+    { name: 'RH Portfolio', url: 'https://robinhood.com/account' },
+    { name: 'Market Watch', url: 'https://finance.yahoo.com/quote/AAPL' },
+    { name: 'After Hours', url: 'https://robinhood.com/collections/after-hours-movers' },
+    { name: 'Crypto', url: 'https://robinhood.com/crypto' },
+    { name: 'Options', url: 'https://robinhood.com/options' }
+  ];
+
+  return (
+    <div style={{
+      backgroundColor: '#000022',
+      border: '1px solid #00aaaa',
+      borderRadius: '8px',
+      height: '600px',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      {/* Browser Header */}
+      <div style={{
+        backgroundColor: '#003333',
+        padding: '10px',
+        borderBottom: '1px solid #00aaaa',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px'
+      }}>
+        <div style={{ fontSize: '14px', color: '#00ffff', fontWeight: 'bold' }}>
+          NEXUS BROWSER
+        </div>
+        <input
+          type="text"
+          value={activeUrl}
+          onChange={(e) => setActiveUrl(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && navigateTo(activeUrl)}
+          style={{
+            flex: 1,
+            padding: '5px 10px',
+            backgroundColor: '#001111',
+            border: '1px solid #00aaaa',
+            borderRadius: '4px',
+            color: '#ffffff',
+            fontSize: '12px'
+          }}
+        />
+        <button
+          onClick={() => navigateTo(activeUrl)}
+          style={{
+            padding: '5px 15px',
+            backgroundColor: '#005555',
+            border: '1px solid #00aaaa',
+            borderRadius: '4px',
+            color: '#ffffff',
+            cursor: 'pointer',
+            fontSize: '12px'
+          }}
+        >
+          GO
+        </button>
+      </div>
+
+      {/* Quick Links */}
+      <div style={{
+        backgroundColor: '#002222',
+        padding: '8px',
+        borderBottom: '1px solid #00aaaa',
+        display: 'flex',
+        gap: '8px',
+        flexWrap: 'wrap'
+      }}>
+        {quickLinks.map((link, idx) => (
+          <button
+            key={idx}
+            onClick={() => navigateTo(link.url)}
+            style={{
+              padding: '4px 8px',
+              backgroundColor: '#004444',
+              border: '1px solid #00aaaa',
+              borderRadius: '3px',
+              color: '#00ffff',
+              cursor: 'pointer',
+              fontSize: '11px'
+            }}
+          >
+            {link.name}
+          </button>
+        ))}
+      </div>
+
+      {/* Browser Content */}
+      <div style={{
+        flex: 1,
+        backgroundColor: '#000011',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <iframe
+          src={activeUrl}
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+            backgroundColor: '#ffffff'
+          }}
+          title="Nexus Trading Browser"
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+        />
+        
+        {/* Quantum overlay */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(45deg, transparent 0%, rgba(0,255,255,0.05) 25%, transparent 50%, rgba(0,255,255,0.05) 75%, transparent 100%)',
+          pointerEvents: 'none',
+          zIndex: 1
+        }} />
+        
+        {/* Status indicator */}
+        <div style={{
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          color: '#00ffff',
+          padding: '5px 10px',
+          borderRadius: '4px',
+          fontSize: '11px',
+          zIndex: 2
+        }}>
+          NEXUS SECURE TRADING VIEW
+        </div>
+      </div>
+
+      {/* Browser Footer */}
+      <div style={{
+        backgroundColor: '#003333',
+        padding: '5px 10px',
+        borderTop: '1px solid #00aaaa',
+        fontSize: '11px',
+        color: '#aaaaaa',
+        display: 'flex',
+        justifyContent: 'space-between'
+      }}>
+        <span>Quantum-encrypted connection</span>
+        <span>After-hours trading active</span>
+      </div>
     </div>
   );
 }
