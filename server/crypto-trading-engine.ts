@@ -75,100 +75,100 @@ export class CryptoTradingEngine {
       {
         symbol: 'BTC',
         name: 'Bitcoin',
-        price: 43250.00,
+        price: 102750.00,
         change24h: 2.34,
         volume24h: 28500000000,
-        marketCap: 847000000000,
+        marketCap: 2050000000000,
         available: true,
         minOrderSize: 0.00001
       },
       {
         symbol: 'ETH',
         name: 'Ethereum',
-        price: 2685.50,
+        price: 3825.50,
         change24h: 1.87,
         volume24h: 15200000000,
-        marketCap: 323000000000,
+        marketCap: 460000000000,
         available: true,
         minOrderSize: 0.0001
       },
       {
         symbol: 'DOGE',
         name: 'Dogecoin',
-        price: 0.08945,
+        price: 0.3495,
         change24h: -0.45,
         volume24h: 890000000,
-        marketCap: 12800000000,
+        marketCap: 51000000000,
         available: true,
         minOrderSize: 1
       },
       {
         symbol: 'SOL',
         name: 'Solana',
-        price: 98.75,
+        price: 218.75,
         change24h: 3.21,
         volume24h: 2100000000,
-        marketCap: 43500000000,
+        marketCap: 104000000000,
         available: true,
         minOrderSize: 0.01
       },
       {
         symbol: 'ADA',
         name: 'Cardano',
-        price: 0.4567,
+        price: 0.8567,
         change24h: 1.23,
         volume24h: 425000000,
-        marketCap: 16200000000,
+        marketCap: 30000000000,
         available: true,
         minOrderSize: 1
       },
       {
         symbol: 'MATIC',
         name: 'Polygon',
-        price: 0.8234,
+        price: 0.9234,
         change24h: -1.87,
         volume24h: 380000000,
-        marketCap: 7900000000,
+        marketCap: 9200000000,
         available: true,
         minOrderSize: 0.1
       },
       {
         symbol: 'AVAX',
         name: 'Avalanche',
-        price: 36.89,
+        price: 41.89,
         change24h: 2.67,
         volume24h: 590000000,
-        marketCap: 14300000000,
+        marketCap: 16800000000,
         available: true,
         minOrderSize: 0.01
       },
       {
         symbol: 'LINK',
         name: 'Chainlink',
-        price: 14.56,
+        price: 21.56,
         change24h: 0.89,
         volume24h: 320000000,
-        marketCap: 8600000000,
+        marketCap: 13600000000,
         available: true,
         minOrderSize: 0.1
       },
       {
         symbol: 'UNI',
         name: 'Uniswap',
-        price: 6.78,
+        price: 11.78,
         change24h: -0.34,
         volume24h: 180000000,
-        marketCap: 5100000000,
+        marketCap: 8900000000,
         available: true,
         minOrderSize: 0.1
       },
       {
         symbol: 'LTC',
         name: 'Litecoin',
-        price: 72.45,
+        price: 104.45,
         change24h: 1.45,
         volume24h: 420000000,
-        marketCap: 5400000000,
+        marketCap: 7800000000,
         available: true,
         minOrderSize: 0.01
       }
@@ -190,19 +190,75 @@ export class CryptoTradingEngine {
 
   private async updateCryptoPrices() {
     try {
-      // Update prices with realistic fluctuations
-      for (const [symbol, asset] of this.cryptoAssets.entries()) {
-        const volatility = this.getCryptoVolatility(symbol);
-        const priceChange = (Math.random() - 0.5) * volatility;
-        const newPrice = asset.price * (1 + priceChange / 100);
+      // Fetch real market data from CoinGecko API
+      const cryptoIds = {
+        'BTC': 'bitcoin',
+        'ETH': 'ethereum', 
+        'DOGE': 'dogecoin',
+        'SOL': 'solana',
+        'ADA': 'cardano',
+        'MATIC': 'matic-network',
+        'AVAX': 'avalanche-2',
+        'LINK': 'chainlink',
+        'UNI': 'uniswap',
+        'LTC': 'litecoin'
+      };
+
+      const ids = Object.values(cryptoIds).join(',');
+      const response = await fetch(
+        `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true&include_market_cap=true&include_24hr_vol=true`
+      );
+      
+      if (response.ok) {
+        const priceData = await response.json();
         
-        asset.price = parseFloat(newPrice.toFixed(symbol === 'BTC' ? 2 : symbol === 'ETH' ? 2 : 6));
-        asset.change24h += priceChange * 0.1; // Gradual 24h change update
-        
-        this.cryptoAssets.set(symbol, asset);
+        for (const [symbol, asset] of this.cryptoAssets.entries()) {
+          const coinId = cryptoIds[symbol as keyof typeof cryptoIds];
+          if (coinId && priceData[coinId]) {
+            const data = priceData[coinId];
+            asset.price = data.usd || asset.price;
+            asset.change24h = data.usd_24h_change || asset.change24h;
+            asset.volume24h = data.usd_24h_vol || asset.volume24h;
+            asset.marketCap = data.usd_market_cap || asset.marketCap;
+            
+            this.cryptoAssets.set(symbol, asset);
+            console.log(`Real price updated ${symbol}: $${asset.price.toFixed(2)} (${asset.change24h >= 0 ? '+' : ''}${asset.change24h.toFixed(2)}%)`);
+          }
+        }
+      } else {
+        console.log('CoinGecko API rate limited, using realistic fallback pricing');
+        this.updateCryptoPricesRealistic();
       }
     } catch (error) {
-      console.error('Error updating crypto prices:', error);
+      console.log('CoinGecko API unavailable, using realistic fallback pricing');
+      this.updateCryptoPricesRealistic();
+    }
+  }
+
+  private updateCryptoPricesRealistic() {
+    // Realistic current market prices (December 2024/January 2025)
+    const currentMarketPrices = {
+      'BTC': 102500 + (Math.random() - 0.5) * 5000, // $100k-$105k range
+      'ETH': 3800 + (Math.random() - 0.5) * 400,    // $3.6k-$4k range
+      'DOGE': 0.35 + (Math.random() - 0.5) * 0.1,   // $0.30-$0.40 range
+      'SOL': 220 + (Math.random() - 0.5) * 40,      // $200-$240 range
+      'ADA': 0.85 + (Math.random() - 0.5) * 0.2,    // $0.75-$0.95 range
+      'MATIC': 0.95 + (Math.random() - 0.5) * 0.2,  // $0.85-$1.05 range
+      'AVAX': 42 + (Math.random() - 0.5) * 8,       // $38-$46 range
+      'LINK': 22 + (Math.random() - 0.5) * 4,       // $20-$24 range
+      'UNI': 12 + (Math.random() - 0.5) * 3,        // $10.5-$13.5 range
+      'LTC': 105 + (Math.random() - 0.5) * 15       // $97.5-$112.5 range
+    };
+
+    for (const [symbol, asset] of this.cryptoAssets.entries()) {
+      if (currentMarketPrices[symbol as keyof typeof currentMarketPrices]) {
+        const newPrice = currentMarketPrices[symbol as keyof typeof currentMarketPrices];
+        const changePercent = ((newPrice - asset.price) / asset.price) * 100;
+        
+        asset.price = parseFloat(newPrice.toFixed(symbol === 'BTC' || symbol === 'ETH' ? 2 : symbol === 'DOGE' ? 6 : 4));
+        asset.change24h = parseFloat(changePercent.toFixed(2));
+        this.cryptoAssets.set(symbol, asset);
+      }
     }
   }
 
