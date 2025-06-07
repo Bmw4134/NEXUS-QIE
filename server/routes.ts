@@ -645,6 +645,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PTNI Mode Controller API
+  app.get('/api/ptni/mode-status', async (req, res) => {
+    try {
+      const liveEngine = liveTradingEngine.getSessionStatus();
+      const tradingMetrics = liveTradingEngine.getTradingMetrics();
+      const ptniMetrics = ptniAnalyticsEngine.getMetrics();
+      
+      res.json({
+        isRealMode: liveEngine.isActive,
+        isAuthenticated: liveEngine.isActive,
+        accountBalance: liveEngine.accountBalance,
+        lastTradeTime: liveEngine.lastTradeTime,
+        tradingMetrics: {
+          totalTrades: tradingMetrics.totalTrades,
+          successRate: tradingMetrics.successRate,
+          totalPnL: tradingMetrics.totalPnL
+        },
+        ptniStatus: {
+          analyticsActive: true,
+          diagnosticsRunning: true,
+          realTimeKPIs: true
+        }
+      });
+    } catch (error) {
+      console.error('Failed to get PTNI mode status:', error);
+      res.status(500).json({ error: 'Failed to get PTNI mode status' });
+    }
+  });
+
+  app.post('/api/ptni/toggle-mode', async (req, res) => {
+    try {
+      const { enableRealMode, enablePTNI } = req.body;
+      
+      console.log(`🎯 PTNI Mode Toggle: ${enableRealMode ? 'ENABLING' : 'DISABLING'} real mode`);
+      
+      if (enableRealMode) {
+        console.log('✅ Enabling real mode with PTNI analytics');
+        liveTradingEngine.activateRealMode();
+        console.log('🔴 REAL MONEY MODE ENABLED via PTNI');
+        console.log('⚠️  All trades will affect actual account balance');
+      } else {
+        console.log('✅ Enabling simulation mode with PTNI analytics');
+        liveTradingEngine.deactivateRealMode();
+        console.log('🔵 SIMULATION MODE ENABLED via PTNI');
+        console.log('✅ Safe testing environment active');
+      }
+      
+      const sessionStatus = liveTradingEngine.getSessionStatus();
+      
+      res.json({
+        success: true,
+        realModeEnabled: enableRealMode,
+        ptniEnabled: enablePTNI,
+        accountBalance: sessionStatus.accountBalance,
+        message: `PTNI mode ${enableRealMode ? 'real trading' : 'simulation'} activated`
+      });
+    } catch (error) {
+      console.error('PTNI mode toggle failed:', error);
+      res.status(500).json({ error: 'PTNI mode toggle failed' });
+    }
+  });
+
   app.post('/api/robinhood/toggle-live-trading', async (req, res) => {
     try {
       const { enabled } = req.body;

@@ -25,6 +25,7 @@ import { PTNIDashboard } from "@/components/ptni/PTNIDashboard";
 import { RobinhoodAccountStatus } from "@/components/RobinhoodAccountStatus";
 import { RealModeController } from "@/components/RealModeController";
 import QuantumTradingDashboardPage from "@/pages/quantum-trading-dashboard";
+import PTNIModeControllerPage from "@/pages/ptni-mode-controller";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -48,6 +49,7 @@ function Router() {
       <Route path="/simple-trading" component={SimpleTradingPage} />
       <Route path="/live-trading" component={PTNIDashboardCore} />
       <Route path="/ptni-analytics" component={PTNIDashboard} />
+      <Route path="/ptni-mode-controller" component={PTNIModeControllerPage} />
       <Route path="/robinhood-account" component={RobinhoodAccountStatus} />
       <Route path="/quantum-trading-dashboard" component={QuantumTradingDashboardPage} />
       <Route component={NotFound} />

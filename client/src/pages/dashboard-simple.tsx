@@ -52,6 +52,14 @@ export default function Dashboard() {
 
   const platformFeatures = [
     {
+      title: 'PTNI Mode Controller',
+      description: 'Real-time toggle between authentic trading and simulation with PTNI analytics integration',
+      path: '/ptni-mode-controller',
+      icon: Shield,
+      status: 'active',
+      highlights: ['Real/Sim Toggle', 'Live Authentication', 'Balance Tracking', 'PTNI Integration']
+    },
+    {
       title: 'PTNI Analytics Engine',
       description: 'Enterprise-grade real-time trading intelligence with advanced KPIs and visualizations',
       path: '/ptni-analytics',
