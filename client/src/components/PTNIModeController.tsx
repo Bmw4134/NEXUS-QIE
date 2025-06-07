@@ -178,7 +178,7 @@ export function PTNIModeController() {
                 <span className="text-white font-medium">Account Balance</span>
               </div>
               <div className="text-2xl font-bold text-white">
-                ${modeStatus.accountBalance.toLocaleString()}
+                ${modeStatus.accountBalance?.toLocaleString() || '0.00'}
               </div>
               <p className="text-sm text-gray-400">
                 {modeStatus.isRealMode ? 'Real Account' : 'Simulated Funds'}
@@ -208,21 +208,21 @@ export function PTNIModeController() {
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
                 <div className="text-xl font-bold text-white">
-                  {modeStatus.tradingMetrics.totalTrades}
+                  {modeStatus.tradingMetrics?.totalTrades || 0}
                 </div>
                 <div className="text-sm text-gray-400">Total Trades</div>
               </div>
               <div className="text-center">
                 <div className="text-xl font-bold text-white">
-                  {modeStatus.tradingMetrics.successRate}%
+                  {modeStatus.tradingMetrics?.successRate || 0}%
                 </div>
                 <div className="text-sm text-gray-400">Success Rate</div>
               </div>
               <div className="text-center">
                 <div className={`text-xl font-bold ${
-                  modeStatus.tradingMetrics.totalPnL >= 0 ? 'text-green-400' : 'text-red-400'
+                  (modeStatus.tradingMetrics?.totalPnL || 0) >= 0 ? 'text-green-400' : 'text-red-400'
                 }`}>
-                  ${modeStatus.tradingMetrics.totalPnL.toFixed(2)}
+                  ${(modeStatus.tradingMetrics?.totalPnL || 0).toFixed(2)}
                 </div>
                 <div className="text-sm text-gray-400">Total P&L</div>
               </div>
@@ -235,20 +235,20 @@ export function PTNIModeController() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-gray-300">Analytics Active</span>
-                <Badge variant={modeStatus.ptniStatus.analyticsActive ? "default" : "secondary"}>
-                  {modeStatus.ptniStatus.analyticsActive ? 'Online' : 'Offline'}
+                <Badge variant={modeStatus.ptniStatus?.analyticsActive ? "default" : "secondary"}>
+                  {modeStatus.ptniStatus?.analyticsActive ? 'Online' : 'Offline'}
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-300">Diagnostics Running</span>
-                <Badge variant={modeStatus.ptniStatus.diagnosticsRunning ? "default" : "secondary"}>
-                  {modeStatus.ptniStatus.diagnosticsRunning ? 'Active' : 'Inactive'}
+                <Badge variant={modeStatus.ptniStatus?.diagnosticsRunning ? "default" : "secondary"}>
+                  {modeStatus.ptniStatus?.diagnosticsRunning ? 'Active' : 'Inactive'}
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-300">Real-time KPIs</span>
-                <Badge variant={modeStatus.ptniStatus.realTimeKPIs ? "default" : "secondary"}>
-                  {modeStatus.ptniStatus.realTimeKPIs ? 'Enabled' : 'Disabled'}
+                <Badge variant={modeStatus.ptniStatus?.realTimeKPIs ? "default" : "secondary"}>
+                  {modeStatus.ptniStatus?.realTimeKPIs ? 'Enabled' : 'Disabled'}
                 </Badge>
               </div>
             </div>
