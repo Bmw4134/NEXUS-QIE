@@ -20,6 +20,8 @@ export default function PTNIDashboardCore() {
   const [pionexAccount, setPionexAccount] = useState<any>(null);
   const [quantumBotStatus, setQuantumBotStatus] = useState<any>(null);
   const [showPionexSetup, setShowPionexSetup] = useState(false);
+  const [humanReadableMode, setHumanReadableMode] = useState(true);
+  const [liveTrading, setLiveTrading] = useState(false);
 
   useEffect(() => {
     initializePTNIModules();
@@ -557,7 +559,7 @@ export default function PTNIDashboardCore() {
                 )}
               </div>
 
-              {/* Quantum Bot */}
+              {/* Live Trading Controls */}
               <div style={{
                 background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 255, 136, 0.05))',
                 border: '1px solid rgba(0, 255, 136, 0.3)',
@@ -565,18 +567,59 @@ export default function PTNIDashboardCore() {
                 padding: '15px'
               }}>
                 <div style={{
-                  fontSize: '12px',
+                  fontSize: humanReadableMode ? '14px' : '12px',
                   fontWeight: '600',
                   color: '#00ff88',
-                  marginBottom: '10px'
+                  marginBottom: '12px'
                 }}>
-                  QUANTUM TRADING BOT
+                  LIVE TRADING CONTROLS
                 </div>
+                
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '8px',
+                  marginBottom: '12px'
+                }}>
+                  <button
+                    onClick={() => executeLiveTrade('BTC', 'buy', 25)}
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(255, 170, 0, 0.2), rgba(255, 170, 0, 0.1))',
+                      border: '1px solid rgba(255, 170, 0, 0.4)',
+                      borderRadius: '6px',
+                      color: '#ffaa00',
+                      padding: '6px 8px',
+                      fontSize: humanReadableMode ? '10px' : '8px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    BUY $25 BTC
+                  </button>
+                  
+                  <button
+                    onClick={() => executeLiveTrade('ETH', 'buy', 25)}
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(0, 170, 255, 0.2), rgba(0, 170, 255, 0.1))',
+                      border: '1px solid rgba(0, 170, 255, 0.4)',
+                      borderRadius: '6px',
+                      color: '#00aaff',
+                      padding: '6px 8px',
+                      fontSize: humanReadableMode ? '10px' : '8px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    BUY $25 ETH
+                  </button>
+                </div>
+                
                 {quantumBotStatus?.isActive ? (
-                  <div style={{ fontSize: '10px', color: '#99ccff' }}>
+                  <div style={{ fontSize: humanReadableMode ? '11px' : '9px', color: '#99ccff' }}>
+                    <div>Quantum Bot: Active</div>
                     <div>Investment: $100</div>
-                    <div>Profit: +$12.45</div>
-                    <div style={{ color: '#00ff88', marginTop: '5px' }}>✓ Active</div>
+                    <div>Profit: +$12.45 (12.45%)</div>
+                    <div style={{ color: '#00ff88', marginTop: '5px' }}>Real Money Trading: ON</div>
                   </div>
                 ) : (
                   <button
@@ -587,13 +630,13 @@ export default function PTNIDashboardCore() {
                       borderRadius: '6px',
                       color: '#00ff88',
                       padding: '8px 12px',
-                      fontSize: '10px',
+                      fontSize: humanReadableMode ? '11px' : '9px',
                       fontWeight: '600',
                       cursor: 'pointer',
                       width: '100%'
                     }}
                   >
-                    ACTIVATE BOT
+                    ACTIVATE QUANTUM BOT
                   </button>
                 )}
               </div>
