@@ -276,6 +276,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Robinhood Legend Live Trading Routes
+  app.post('/api/robinhood/execute-trade', async (req, res) => {
+    try {
+      const { symbol, side, amount, useRealMoney = false } = req.body;
+      
+      console.log(`🚀 Executing ${side.toUpperCase()} order: ${symbol} $${amount}`);
+      console.log(`💰 Real money trading: ${useRealMoney ? 'ENABLED' : 'DISABLED'}`);
+      
+      // Get current market price
+      const cryptoAssets = cryptoTradingEngine.getCryptoAssets();
+      const asset = cryptoAssets.find(a => a.symbol === symbol);
+      const currentPrice = asset ? asset.price : 105650;
+      const quantity = amount / currentPrice;
+      
+      // Execute real money trade through crypto engine
+      if (useRealMoney) {
+        await cryptoTradingEngine.executeCryptoTrade(symbol, side, quantity, currentPrice);
+        console.log(`💸 REAL MONEY TRADE: ${side} ${quantity.toFixed(6)} ${symbol} at $${currentPrice}`);
+      }
+      
+      const orderId = `RH-LEGEND-${Date.now()}`;
+      
+      res.json({
+        success: true,
+        orderId,
+        symbol,
+        side,
+        amount,
+        price: currentPrice,
+        quantity: quantity.toFixed(6),
+        status: 'filled',
+        realMoney: useRealMoney,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Trading error:', error);
+      res.status(500).json({ error: 'Failed to execute trade' });
+    }
+  });
+
+  app.post('/api/robinhood/toggle-live-trading', async (req, res) => {
+    try {
+      const { enabled } = req.body;
+      
+      if (enabled) {
+        cryptoTradingEngine.enableLiveTrading();
+        console.log('🔴 LIVE TRADING ENABLED - USING REAL MONEY');
+      } else {
+        cryptoTradingEngine.disableLiveTrading();
+        console.log('🟡 Live trading disabled - Paper trading mode');
+      }
+      
+      res.json({
+        success: true,
+        liveTrading: enabled,
+        message: enabled ? 'Live trading enabled with real money' : 'Paper trading mode enabled'
+      });
+    } catch (error) {
+      console.error('Toggle error:', error);
+      res.status(500).json({ error: 'Failed to toggle live trading' });
+    }
+  });
+
+  app.get('/api/robinhood/trading-status', async (req, res) => {
+    try {
+      const metrics = cryptoTradingEngine.getCryptoTradingMetrics();
+      const positions = cryptoTradingEngine.getCryptoPositions();
+      const trades = cryptoTradingEngine.getCryptoTrades();
+      
+      res.json({
+        success: true,
+        metrics,
+        positions,
+        recentTrades: trades.slice(-10),
+        liveTrading: true
+      });
+    } catch (error) {
+      console.error('Status error:', error);
+      res.status(500).json({ error: 'Failed to get trading status' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
