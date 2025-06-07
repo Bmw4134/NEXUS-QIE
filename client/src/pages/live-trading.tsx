@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { Sidebar } from '@/components/sidebar';
 
 export default function LiveTradingPage() {
   const [status, setStatus] = useState('Ready to connect');
@@ -63,13 +66,17 @@ export default function LiveTradingPage() {
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: '#111', 
-      color: 'white', 
-      padding: '40px',
-      fontFamily: 'Arial, sans-serif'
-    }}>
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
+      <Sidebar />
+      <div style={{ 
+        marginLeft: '280px',
+        flex: 1,
+        minHeight: '100vh', 
+        backgroundColor: '#111', 
+        color: 'white', 
+        padding: '40px',
+        fontFamily: 'Arial, sans-serif'
+      }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         
         <h1 style={{ fontSize: '36px', marginBottom: '40px', textAlign: 'center' }}>
@@ -238,7 +245,7 @@ export default function LiveTradingPage() {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h2 style={{ fontSize: '24px', margin: 0, color: '#00ffff' }}>
-                🌌 NEXUS QUANTUM TRADING - NO PDT RESTRICTIONS
+                NEXUS QUANTUM TRADING - NO PDT RESTRICTIONS
               </h2>
               <a 
                 href="/quantum-trading-dashboard" 
@@ -253,7 +260,7 @@ export default function LiveTradingPage() {
                   fontWeight: 'bold'
                 }}
               >
-                📊 FULL DASHBOARD
+                FULL DASHBOARD
               </a>
             </div>
             <div style={{ color: '#aaaaff', marginBottom: '20px', fontSize: '16px' }}>
