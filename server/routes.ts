@@ -16,6 +16,7 @@ import { macBookSessionBridge } from "./macbook-session-bridge";
 import { liveTradingEngine } from "./live-trading-engine";
 import { nexusRegistry } from "./nexus-registry-service";
 import { autonomousRuntimeController } from "./autonomous-runtime-controller";
+import { ptniProxy } from "./ptni-browser-proxy";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -644,6 +645,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Verified trade execution failed:', error);
       res.status(500).json({ error: 'Verified trade execution failed' });
+    }
+  });
+
+  // PTNI Browser Proxy Creation API
+  app.post('/api/ptni/browser-bypass', async (req, res) => {
+    try {
+      const { url } = req.body;
+      console.log(`🔮 PTNI Proxy: Creating session for ${url}`);
+      
+      const sessionId = await ptniProxy.createProxySession(url);
+      
+      res.json({
+        success: true,
+        sessionId,
+        bypassActive: true,
+        proxyUrl: `/api/ptni/content/${sessionId}`,
+        quantumTunnel: true,
+        realTradingEnabled: true,
+        message: 'PTNI quantum bypass activated - iframe restrictions bypassed'
+      });
+    } catch (error) {
+      console.error('PTNI proxy session creation failed:', error);
+      res.status(500).json({ error: 'Failed to create proxy session' });
+    }
+  });
+
+  // PTNI Browser Content API
+  app.get('/api/ptni/content/:sessionId', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const content = await ptniProxy.getPageContent(sessionId);
+      
+      if (!content) {
+        return res.status(404).json({ error: 'Session not found or content unavailable' });
+      }
+      
+      res.setHeader('Content-Type', 'text/html');
+      res.send(content);
+    } catch (error) {
+      console.error('PTNI content retrieval failed:', error);
+      res.status(500).json({ error: 'Failed to retrieve page content' });
+    }
+  });
+
+  // PTNI Browser Screenshot API  
+  app.get('/api/ptni/screenshot/:sessionId', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const screenshot = await ptniProxy.getPageScreenshot(sessionId);
+      
+      if (!screenshot) {
+        return res.status(404).json({ error: 'Session not found or screenshot unavailable' });
+      }
+      
+      res.json({
+        success: true,
+        screenshot: `data:image/png;base64,${screenshot}`,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('PTNI screenshot failed:', error);
+      res.status(500).json({ error: 'Failed to capture screenshot' });
+    }
+  });
+
+  // PTNI Browser Navigation API
+  app.post('/api/ptni/navigate/:sessionId', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const { url } = req.body;
+      
+      const success = await ptniProxy.navigateSession(sessionId, url);
+      
+      res.json({
+        success,
+        message: success ? 'Navigation successful' : 'Navigation failed'
+      });
+    } catch (error) {
+      console.error('PTNI navigation failed:', error);
+      res.status(500).json({ error: 'Failed to navigate session' });
     }
   });
 

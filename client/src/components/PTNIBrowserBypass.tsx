@@ -12,26 +12,26 @@ interface PTNIBrowserBypassProps {
 export function PTNIBrowserBypass({ url, onUrlChange }: PTNIBrowserBypassProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [bypassActive, setBypassActive] = useState(false);
+  const [sessionId, setSessionId] = useState('');
   const [proxyUrl, setProxyUrl] = useState('');
 
   useEffect(() => {
-    // Initialize PTNI bypass system
     initializePTNIBypass();
-  }, []);
+  }, [url]);
 
   const initializePTNIBypass = async () => {
     setIsLoading(true);
     try {
-      // Activate PTNI browser bypass
       const response = await fetch('/api/ptni/browser-bypass', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, bypassMode: 'quantum_tunnel' })
+        body: JSON.stringify({ url })
       });
       
       if (response.ok) {
         const data = await response.json();
         setBypassActive(true);
+        setSessionId(data.sessionId);
         setProxyUrl(data.proxyUrl);
       }
     } catch (error) {
@@ -43,8 +43,9 @@ export function PTNIBrowserBypass({ url, onUrlChange }: PTNIBrowserBypassProps) 
 
   const handleUrlChange = (newUrl: string) => {
     onUrlChange(newUrl);
-    // Re-initialize bypass for new URL
-    setTimeout(() => initializePTNIBypass(), 100);
+    setBypassActive(false);
+    setSessionId('');
+    setProxyUrl('');
   };
 
   return (
