@@ -9,6 +9,7 @@ import { ptniAnalyticsEngine } from "./ptni-analytics-engine";
 import { quantumRobinhoodBridge } from "./quantum-robinhood-bridge";
 import { ptniDiagnosticCore } from "./ptni-diagnostic-core";
 import { nexusOverrideEngine } from "./nexus-override-engine";
+import { nexusValidationEngine } from "./nexus-validation-engine";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -494,6 +495,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Robinhood portfolio error:', error);
       res.status(500).json({ error: 'Failed to fetch portfolio data' });
+    }
+  });
+
+  // NEXUS Validation API Endpoints
+  app.get('/api/nexus/validate', async (req, res) => {
+    try {
+      const validation = await nexusValidationEngine.performComprehensiveValidation();
+      res.json(validation);
+    } catch (error) {
+      console.error("NEXUS validation error:", error);
+      res.status(500).json({ error: "Failed to perform NEXUS validation" });
+    }
+  });
+
+  app.get('/api/nexus/authenticity-report', async (req, res) => {
+    try {
+      const report = nexusValidationEngine.getAuthenticityReport();
+      res.json(report);
+    } catch (error) {
+      console.error("Authenticity report error:", error);
+      res.status(500).json({ error: "Failed to get authenticity report" });
+    }
+  });
+
+  app.get('/api/nexus/balance-verification', async (req, res) => {
+    try {
+      const accountState = nexusOverrideEngine.getAccountState();
+      const syncValid = await nexusValidationEngine.validateRobinhoodSync();
+      
+      res.json({
+        originalBalance: 834.97,
+        currentBalance: accountState.balance,
+        balanceChanged: accountState.balance !== 834.97,
+        changeAmount: accountState.balance - 834.97,
+        syncValid,
+        positions: accountState.positions,
+        tradeCount: accountState.tradeHistory.length,
+        lastUpdate: accountState.lastUpdate
+      });
+    } catch (error) {
+      console.error("Balance verification error:", error);
+      res.status(500).json({ error: "Failed to verify balance" });
     }
   });
 

@@ -62,8 +62,10 @@ export function RobinhoodAccountStatus() {
     return () => clearInterval(interval);
   }, []);
 
-  const formatCurrency = (value: number) => 
-    `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const formatCurrency = (value: number | undefined) => {
+    if (value === undefined || value === null || isNaN(value)) return '$0.00';
+    return `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
 
   const executeTestTrade = async () => {
     try {
@@ -168,7 +170,7 @@ export function RobinhoodAccountStatus() {
                 <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                   <Activity className="w-8 h-8 text-purple-600 mx-auto mb-2" />
                   <p className="text-sm text-gray-600 dark:text-gray-400">Day Trading Power</p>
-                  <p className="text-xl font-bold text-purple-600">{formatCurrency(account.dayTradingBuyingPower)}</p>
+                  <p className="text-xl font-bold text-purple-600">{formatCurrency(account.dayTradingBuyingPower || 0)}</p>
                 </div>
               </div>
 
