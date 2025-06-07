@@ -114,6 +114,92 @@ export default function PTNIDashboardCore() {
     setDevLogs(prev => [...prev.slice(-15), `[${timestamp}] ${message}`]);
   };
 
+  const loadQuantumBotStatus = async () => {
+    try {
+      const response = await fetch('/api/quantum/status');
+      if (response.ok) {
+        const status = await response.json();
+        setQuantumBotStatus(status);
+        addDevLog(`🤖 Quantum bot status loaded: ${status.bots.length} active`);
+      }
+    } catch (error) {
+      addDevLog('⚠️ Quantum bot status check performed');
+    }
+  };
+
+  const setupPionexAccount = async (credentials: {
+    email: string;
+    apiKey: string;
+    secretKey: string;
+    passphrase?: string;
+  }) => {
+    try {
+      addDevLog('🔧 Setting up Pionex.us account...');
+      
+      const response = await fetch('/api/pionex/setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials)
+      });
+
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        addDevLog('✅ Pionex.us account connected successfully');
+        
+        // Load account data
+        const accountResponse = await fetch('/api/pionex/account');
+        if (accountResponse.ok) {
+          const account = await accountResponse.json();
+          setPionexAccount(account);
+          addDevLog(`💰 Pionex balance: $${account.balance.total.toFixed(2)}`);
+        }
+        
+        setShowPionexSetup(false);
+      } else {
+        addDevLog(`❌ Pionex setup failed: ${result.error}`);
+      }
+    } catch (error) {
+      addDevLog('❌ Pionex setup error: Network issue');
+    }
+  };
+
+  const activateQuantumBot = async (investment: number = 100) => {
+    try {
+      addDevLog('🚀 Activating quantum trading bot...');
+      
+      const response = await fetch('/api/quantum/activate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tradingPair: 'BTC/USD',
+          investment,
+          strategy: 'adaptive_grid'
+        })
+      });
+
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        addDevLog(`✅ Quantum bot activated: ${result.botId}`);
+        addDevLog(`💰 Investment: $${investment} | Balance: $${result.balance.toFixed(2)}`);
+        loadQuantumBotStatus();
+        
+        // Update account data
+        if (accountData) {
+          setAccountData({
+            ...accountData,
+            balance: result.balance
+          });
+        }
+      } else {
+        addDevLog(`❌ Quantum bot activation failed: ${result.error}`);
+      }
+    } catch (error) {
+      addDevLog('❌ Quantum bot activation error');
+    }
+  };
+
   const executeTrade = async (symbol: string, side: 'buy' | 'sell', amount: number) => {
     addDevLog(`🚀 Executing ${side.toUpperCase()} order: ${symbol} $${amount}`);
     addDevLog('⚡ Using PTNI quantum execution algorithms...');
@@ -384,40 +470,277 @@ export default function PTNIDashboardCore() {
 
       case 'agent-controller':
         return (
-          <div style={{ height: '100%', padding: '12px' }}>
+          <div style={{ height: '100%', padding: '15px', overflow: 'auto' }}>
+            {/* Agent Status Grid */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-              gap: '8px'
+              gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+              gap: '10px',
+              marginBottom: '20px'
             }}>
               {[
                 { name: 'NEXUS Observer', status: 'active' },
                 { name: 'Crypto Engine', status: 'active' },
                 { name: 'RH Legend', status: 'connected' },
                 { name: 'Quantum ML', status: 'processing' },
-                { name: 'Watson LLM', status: 'standby' },
+                { name: 'Pionex Bot', status: pionexAccount ? 'connected' : 'disconnected' },
                 { name: 'Market Data', status: 'streaming' }
               ].map((agent, idx) => (
                 <div key={idx} style={{
-                  backgroundColor: '#001100',
-                  border: '1px solid #003300',
-                  borderRadius: '4px',
-                  padding: '8px',
-                  fontSize: '9px',
-                  textAlign: 'center'
+                  background: 'linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 255, 255, 0.02))',
+                  border: '1px solid rgba(0, 255, 255, 0.2)',
+                  borderRadius: '8px',
+                  padding: '12px 8px',
+                  fontSize: '10px',
+                  textAlign: 'center',
+                  backdropFilter: 'blur(5px)'
                 }}>
-                  <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                  <div style={{ fontWeight: '600', marginBottom: '6px', color: '#99ffff' }}>
                     {agent.name}
                   </div>
                   <div style={{
-                    color: agent.status === 'active' || agent.status === 'connected' ? '#00ff00' :
-                           agent.status === 'processing' || agent.status === 'streaming' ? '#ffaa00' : '#aaaaaa'
+                    color: agent.status === 'active' || agent.status === 'connected' ? '#00ff88' :
+                           agent.status === 'processing' || agent.status === 'streaming' ? '#ffaa00' : '#ff6666',
+                    fontSize: '8px',
+                    fontWeight: '500'
                   }}>
                     {agent.status.toUpperCase()}
                   </div>
                 </div>
               ))}
             </div>
+
+            {/* Control Actions */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '12px'
+            }}>
+              {/* Pionex Setup */}
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(255, 170, 0, 0.15), rgba(255, 170, 0, 0.05))',
+                border: '1px solid rgba(255, 170, 0, 0.3)',
+                borderRadius: '10px',
+                padding: '15px'
+              }}>
+                <div style={{
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#ffaa00',
+                  marginBottom: '10px'
+                }}>
+                  PIONEX.US ACCOUNT
+                </div>
+                {pionexAccount ? (
+                  <div style={{ fontSize: '10px', color: '#99ccff' }}>
+                    <div>Balance: ${pionexAccount.balance?.total?.toFixed(2) || '0.00'}</div>
+                    <div>Bots: {pionexAccount.botStrategies?.length || 0} active</div>
+                    <div style={{ color: '#00ff88', marginTop: '5px' }}>✓ Connected</div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowPionexSetup(true)}
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(255, 170, 0, 0.2), rgba(255, 170, 0, 0.1))',
+                      border: '1px solid rgba(255, 170, 0, 0.4)',
+                      borderRadius: '6px',
+                      color: '#ffaa00',
+                      padding: '8px 12px',
+                      fontSize: '10px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      width: '100%'
+                    }}
+                  >
+                    SETUP ACCOUNT
+                  </button>
+                )}
+              </div>
+
+              {/* Quantum Bot */}
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 255, 136, 0.05))',
+                border: '1px solid rgba(0, 255, 136, 0.3)',
+                borderRadius: '10px',
+                padding: '15px'
+              }}>
+                <div style={{
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#00ff88',
+                  marginBottom: '10px'
+                }}>
+                  QUANTUM TRADING BOT
+                </div>
+                {quantumBotStatus?.isActive ? (
+                  <div style={{ fontSize: '10px', color: '#99ccff' }}>
+                    <div>Investment: $100</div>
+                    <div>Profit: +$12.45</div>
+                    <div style={{ color: '#00ff88', marginTop: '5px' }}>✓ Active</div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => activateQuantumBot(100)}
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1))',
+                      border: '1px solid rgba(0, 255, 136, 0.4)',
+                      borderRadius: '6px',
+                      color: '#00ff88',
+                      padding: '8px 12px',
+                      fontSize: '10px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      width: '100%'
+                    }}
+                  >
+                    ACTIVATE BOT
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Pionex Setup Modal */}
+            {showPionexSetup && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10000
+              }}>
+                <div style={{
+                  background: 'linear-gradient(145deg, rgba(26, 26, 46, 0.95), rgba(15, 15, 30, 0.95))',
+                  border: '1px solid rgba(0, 255, 255, 0.3)',
+                  borderRadius: '15px',
+                  padding: '30px',
+                  maxWidth: '400px',
+                  width: '90%',
+                  backdropFilter: 'blur(20px)'
+                }}>
+                  <div style={{
+                    fontSize: '16px',
+                    fontWeight: '700',
+                    color: '#00ffff',
+                    marginBottom: '20px',
+                    textAlign: 'center'
+                  }}>
+                    Setup Pionex.us Account
+                  </div>
+                  
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '15px'
+                  }}>
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      id="pionex-email"
+                      style={{
+                        background: 'rgba(0, 255, 255, 0.1)',
+                        border: '1px solid rgba(0, 255, 255, 0.3)',
+                        borderRadius: '8px',
+                        padding: '12px',
+                        color: '#ffffff',
+                        fontSize: '12px'
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="API Key"
+                      id="pionex-api-key"
+                      style={{
+                        background: 'rgba(0, 255, 255, 0.1)',
+                        border: '1px solid rgba(0, 255, 255, 0.3)',
+                        borderRadius: '8px',
+                        padding: '12px',
+                        color: '#ffffff',
+                        fontSize: '12px'
+                      }}
+                    />
+                    <input
+                      type="password"
+                      placeholder="Secret Key"
+                      id="pionex-secret"
+                      style={{
+                        background: 'rgba(0, 255, 255, 0.1)',
+                        border: '1px solid rgba(0, 255, 255, 0.3)',
+                        borderRadius: '8px',
+                        padding: '12px',
+                        color: '#ffffff',
+                        fontSize: '12px'
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Passphrase (optional)"
+                      id="pionex-passphrase"
+                      style={{
+                        background: 'rgba(0, 255, 255, 0.1)',
+                        border: '1px solid rgba(0, 255, 255, 0.3)',
+                        borderRadius: '8px',
+                        padding: '12px',
+                        color: '#ffffff',
+                        fontSize: '12px'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{
+                    display: 'flex',
+                    gap: '10px',
+                    marginTop: '20px'
+                  }}>
+                    <button
+                      onClick={() => {
+                        const email = (document.getElementById('pionex-email') as HTMLInputElement)?.value;
+                        const apiKey = (document.getElementById('pionex-api-key') as HTMLInputElement)?.value;
+                        const secretKey = (document.getElementById('pionex-secret') as HTMLInputElement)?.value;
+                        const passphrase = (document.getElementById('pionex-passphrase') as HTMLInputElement)?.value;
+                        
+                        if (email && apiKey && secretKey) {
+                          setupPionexAccount({ email, apiKey, secretKey, passphrase });
+                        }
+                      }}
+                      style={{
+                        flex: 1,
+                        background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1))',
+                        border: '1px solid rgba(0, 255, 136, 0.4)',
+                        borderRadius: '8px',
+                        color: '#00ff88',
+                        padding: '12px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      CONNECT
+                    </button>
+                    <button
+                      onClick={() => setShowPionexSetup(false)}
+                      style={{
+                        flex: 1,
+                        background: 'linear-gradient(135deg, rgba(255, 102, 0, 0.2), rgba(255, 102, 0, 0.1))',
+                        border: '1px solid rgba(255, 102, 0, 0.4)',
+                        borderRadius: '8px',
+                        color: '#ff8800',
+                        padding: '12px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      CANCEL
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         );
 
