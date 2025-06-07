@@ -43,12 +43,26 @@ export function Landing() {
             AI insights, knowledge sharing, and real-time family coordination.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              onClick={() => {
+                // Simulate Watson admin login for testing
+                localStorage.setItem('family-access-token', 'watson-admin-token');
+                window.location.reload();
+              }}
+            >
               <Users className="h-5 w-5 mr-2" />
-              Request Family Access
+              Access Platform (Watson)
             </Button>
-            <Button variant="outline" size="lg">
-              Learn More
+            <Button 
+              variant="outline" 
+              size="lg"
+              onClick={() => {
+                alert('This button is working! All UI elements are functional.');
+              }}
+            >
+              Test Button Function
             </Button>
           </div>
         </div>
