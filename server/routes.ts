@@ -29,6 +29,7 @@ import { watsonEngine } from './watson-command-engine';
 import { dnsAutomationService } from './dns-automation-service';
 import { liveTradingEngine } from './live-trading-engine';
 import { quantumTradingService } from './quantum-trading-service';
+import { cryptoTradingEngine } from './crypto-trading-engine';
 
 // Configure multer for file uploads
 const upload = multer({
@@ -2222,6 +2223,124 @@ Provide technical analysis, key support/resistance levels, and short-term outloo
     } catch (error) {
       console.error('Remove position error:', error);
       res.status(500).json({ message: "Failed to remove trading position" });
+    }
+  });
+
+  // === Crypto Trading API Endpoints ===
+  
+  // Get available crypto assets
+  app.get("/api/crypto/assets", async (req, res) => {
+    try {
+      const assets = cryptoTradingEngine.getCryptoAssets();
+      res.json(assets);
+    } catch (error) {
+      console.error('Crypto assets error:', error);
+      res.status(500).json({ message: "Failed to get crypto assets" });
+    }
+  });
+
+  // Get crypto positions
+  app.get("/api/crypto/positions", async (req, res) => {
+    try {
+      const positions = cryptoTradingEngine.getCryptoPositions();
+      res.json(positions);
+    } catch (error) {
+      console.error('Crypto positions error:', error);
+      res.status(500).json({ message: "Failed to get crypto positions" });
+    }
+  });
+
+  // Get crypto trading history
+  app.get("/api/crypto/trades", async (req, res) => {
+    try {
+      const trades = cryptoTradingEngine.getCryptoTrades();
+      res.json(trades);
+    } catch (error) {
+      console.error('Crypto trades error:', error);
+      res.status(500).json({ message: "Failed to get crypto trades" });
+    }
+  });
+
+  // Get crypto market data
+  app.get("/api/crypto/market-data", async (req, res) => {
+    try {
+      const marketData = cryptoTradingEngine.getCryptoMarketData();
+      res.json(marketData);
+    } catch (error) {
+      console.error('Crypto market data error:', error);
+      res.status(500).json({ message: "Failed to get crypto market data" });
+    }
+  });
+
+  // Get crypto trading metrics
+  app.get("/api/crypto/metrics", async (req, res) => {
+    try {
+      const metrics = cryptoTradingEngine.getCryptoTradingMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error('Crypto metrics error:', error);
+      res.status(500).json({ message: "Failed to get crypto metrics" });
+    }
+  });
+
+  // Execute crypto trade
+  app.post("/api/crypto/trade", async (req, res) => {
+    try {
+      const { symbol, side, quantity, orderType, limitPrice } = req.body;
+      
+      if (!symbol || !side || !quantity) {
+        return res.status(400).json({ message: "Missing required fields: symbol, side, quantity" });
+      }
+
+      if (!cryptoTradingEngine.isValidCrypto(symbol)) {
+        return res.status(400).json({ message: `Unsupported crypto: ${symbol}` });
+      }
+
+      const trade = await cryptoTradingEngine.executeCryptoTrade(
+        symbol,
+        side,
+        parseFloat(quantity),
+        orderType || 'market',
+        limitPrice ? parseFloat(limitPrice) : undefined
+      );
+
+      console.log(`CRYPTO TRADE EXECUTED: ${side.toUpperCase()} ${quantity} ${symbol} at $${trade.price}`);
+      res.json({ 
+        success: true, 
+        trade,
+        message: `${side.toUpperCase()} order for ${quantity} ${symbol} executed successfully`
+      });
+    } catch (error) {
+      console.error('Crypto trade execution error:', error);
+      res.status(500).json({ message: error.message || "Failed to execute crypto trade" });
+    }
+  });
+
+  // Get crypto price
+  app.get("/api/crypto/price/:symbol", async (req, res) => {
+    try {
+      const { symbol } = req.params;
+      const price = await cryptoTradingEngine.getCryptoPrice(symbol);
+      res.json({ symbol, price, timestamp: new Date() });
+    } catch (error) {
+      console.error('Crypto price error:', error);
+      res.status(500).json({ message: "Failed to get crypto price" });
+    }
+  });
+
+  // Enable/disable live crypto trading
+  app.post("/api/crypto/toggle-live-trading", async (req, res) => {
+    try {
+      const { enabled } = req.body;
+      if (enabled) {
+        cryptoTradingEngine.enableLiveTrading();
+      } else {
+        cryptoTradingEngine.disableLiveTrading();
+      }
+      res.json({ success: true, liveTrading: enabled });
+    } catch (error) {
+      console.error('Toggle live trading error:', error);
+      res.status(500).json({ message: "Failed to toggle live trading" });
     }
   });
 

@@ -260,9 +260,12 @@ export default function LiveTradingPage() {
               After-hours trading enabled • Quantum execution algorithms active • $834.97 available
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
               <div>
                 <LiveTradingPanel />
+              </div>
+              <div>
+                <CryptoTradingPanel />
               </div>
               <div>
                 <NexusBrowserView />
@@ -452,6 +455,279 @@ function LiveTradingPanel() {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function CryptoTradingPanel() {
+  const [selectedCrypto, setSelectedCrypto] = useState('BTC');
+  const [orderSide, setOrderSide] = useState<'buy' | 'sell'>('buy');
+  const [orderQuantity, setOrderQuantity] = useState('');
+  const queryClient = useQueryClient();
+
+  // Fetch crypto assets
+  const { data: cryptoAssets } = useQuery({
+    queryKey: ['/api/crypto/assets'],
+    refetchInterval: 5000,
+  });
+
+  // Fetch crypto positions
+  const { data: cryptoPositions } = useQuery({
+    queryKey: ['/api/crypto/positions'],
+    refetchInterval: 3000,
+  });
+
+  // Execute crypto trade mutation
+  const cryptoTradeMutation = useMutation({
+    mutationFn: async (tradeData: any) => {
+      return await apiRequest('/api/crypto/trade', {
+        method: 'POST',
+        body: JSON.stringify(tradeData),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/crypto/positions'] });
+      setOrderQuantity('');
+    },
+    onError: (error) => {
+      console.error('Crypto trade error:', error);
+    }
+  });
+
+  const handleCryptoTrade = () => {
+    if (!orderQuantity || parseFloat(orderQuantity) <= 0) {
+      alert('Please enter a valid quantity');
+      return;
+    }
+
+    const tradeData = {
+      symbol: selectedCrypto,
+      side: orderSide,
+      quantity: orderQuantity,
+      orderType: 'market'
+    };
+
+    cryptoTradeMutation.mutate(tradeData);
+  };
+
+  const selectedAsset = cryptoAssets?.find((asset: any) => asset.symbol === selectedCrypto);
+  const currentPosition = cryptoPositions?.find((pos: any) => pos.symbol === selectedCrypto);
+
+  return (
+    <div style={{
+      backgroundColor: '#001122',
+      border: '1px solid #ff6600',
+      borderRadius: '8px',
+      padding: '15px',
+      height: '600px',
+      overflow: 'auto'
+    }}>
+      <h3 style={{
+        color: '#ff6600',
+        fontSize: '16px',
+        marginBottom: '15px',
+        textAlign: 'center'
+      }}>
+        ₿ CRYPTO TRADING
+      </h3>
+
+      {/* Crypto Selection */}
+      <div style={{ marginBottom: '15px' }}>
+        <label style={{ color: '#ff6600', fontSize: '12px', display: 'block', marginBottom: '5px' }}>
+          Select Crypto
+        </label>
+        <select
+          value={selectedCrypto}
+          onChange={(e) => setSelectedCrypto(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '8px',
+            backgroundColor: '#000011',
+            border: '1px solid #ff6600',
+            borderRadius: '4px',
+            color: '#ffffff',
+            fontSize: '12px'
+          }}
+        >
+          <option value="BTC">Bitcoin (BTC)</option>
+          <option value="ETH">Ethereum (ETH)</option>
+          <option value="DOGE">Dogecoin (DOGE)</option>
+          <option value="SOL">Solana (SOL)</option>
+          <option value="ADA">Cardano (ADA)</option>
+          <option value="MATIC">Polygon (MATIC)</option>
+          <option value="AVAX">Avalanche (AVAX)</option>
+          <option value="LINK">Chainlink (LINK)</option>
+          <option value="UNI">Uniswap (UNI)</option>
+          <option value="LTC">Litecoin (LTC)</option>
+        </select>
+      </div>
+
+      {/* Current Price */}
+      {selectedAsset && (
+        <div style={{
+          backgroundColor: '#002211',
+          border: '1px solid #ff6600',
+          borderRadius: '4px',
+          padding: '10px',
+          marginBottom: '15px'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ color: '#ffffff', fontSize: '14px', fontWeight: 'bold' }}>
+              {selectedAsset.name}
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ color: '#ff6600', fontSize: '16px', fontWeight: 'bold' }}>
+                ${selectedAsset.price?.toFixed(selectedCrypto === 'BTC' || selectedCrypto === 'ETH' ? 2 : 6)}
+              </div>
+              <div style={{ 
+                color: selectedAsset.change24h >= 0 ? '#00ff00' : '#ff6666', 
+                fontSize: '10px' 
+              }}>
+                {selectedAsset.change24h >= 0 ? '+' : ''}{selectedAsset.change24h?.toFixed(2)}%
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Order Side */}
+      <div style={{ marginBottom: '15px' }}>
+        <div style={{ display: 'flex', gap: '5px' }}>
+          <button
+            onClick={() => setOrderSide('buy')}
+            style={{
+              flex: 1,
+              padding: '8px',
+              backgroundColor: orderSide === 'buy' ? '#006600' : '#003333',
+              border: '1px solid #ff6600',
+              borderRadius: '4px',
+              color: '#ffffff',
+              cursor: 'pointer',
+              fontSize: '12px'
+            }}
+          >
+            BUY
+          </button>
+          <button
+            onClick={() => setOrderSide('sell')}
+            style={{
+              flex: 1,
+              padding: '8px',
+              backgroundColor: orderSide === 'sell' ? '#660000' : '#003333',
+              border: '1px solid #ff6600',
+              borderRadius: '4px',
+              color: '#ffffff',
+              cursor: 'pointer',
+              fontSize: '12px'
+            }}
+          >
+            SELL
+          </button>
+        </div>
+      </div>
+
+      {/* Quantity Input */}
+      <div style={{ marginBottom: '15px' }}>
+        <label style={{ color: '#ff6600', fontSize: '12px', display: 'block', marginBottom: '5px' }}>
+          Quantity ({selectedCrypto})
+        </label>
+        <input
+          type="number"
+          value={orderQuantity}
+          onChange={(e) => setOrderQuantity(e.target.value)}
+          placeholder={`Min: ${selectedAsset?.minOrderSize || 0.00001}`}
+          step={selectedAsset?.minOrderSize || 0.00001}
+          style={{
+            width: '100%',
+            padding: '8px',
+            backgroundColor: '#000011',
+            border: '1px solid #ff6600',
+            borderRadius: '4px',
+            color: '#ffffff',
+            fontSize: '12px'
+          }}
+        />
+      </div>
+
+      {/* Execute Trade Button */}
+      <button
+        onClick={handleCryptoTrade}
+        disabled={cryptoTradeMutation.isPending || !orderQuantity}
+        style={{
+          width: '100%',
+          padding: '10px',
+          backgroundColor: cryptoTradeMutation.isPending ? '#333333' : 
+                          orderSide === 'buy' ? '#006600' : '#660000',
+          border: '1px solid #ff6600',
+          borderRadius: '4px',
+          color: '#ffffff',
+          cursor: cryptoTradeMutation.isPending ? 'not-allowed' : 'pointer',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          marginBottom: '15px'
+        }}
+      >
+        {cryptoTradeMutation.isPending ? 
+          'EXECUTING...' : 
+          `${orderSide.toUpperCase()} ${selectedCrypto}`
+        }
+      </button>
+
+      {/* Current Position */}
+      {currentPosition && (
+        <div style={{
+          backgroundColor: '#002211',
+          border: '1px solid #ff6600',
+          borderRadius: '4px',
+          padding: '10px',
+          marginBottom: '15px'
+        }}>
+          <h4 style={{ color: '#ff6600', fontSize: '12px', marginBottom: '8px' }}>
+            {selectedCrypto} Position
+          </h4>
+          <div style={{ fontSize: '10px' }}>
+            <div style={{ color: '#aaaaaa', marginBottom: '2px' }}>
+              Quantity: <span style={{ color: '#ffffff' }}>{currentPosition.quantity?.toFixed(6)}</span>
+            </div>
+            <div style={{ color: '#aaaaaa', marginBottom: '2px' }}>
+              Avg Cost: <span style={{ color: '#ffffff' }}>${currentPosition.avgCost?.toFixed(2)}</span>
+            </div>
+            <div style={{ color: '#aaaaaa', marginBottom: '2px' }}>
+              Value: <span style={{ color: '#00ffff' }}>${currentPosition.totalValue?.toFixed(2)}</span>
+            </div>
+            <div style={{ color: '#aaaaaa' }}>
+              P&L: <span style={{ 
+                color: currentPosition.unrealizedPnL >= 0 ? '#00ff00' : '#ff6666' 
+              }}>
+                ${currentPosition.unrealizedPnL?.toFixed(2)}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Portfolio Summary */}
+      <div style={{
+        backgroundColor: '#002211',
+        border: '1px solid #ff6600',
+        borderRadius: '4px',
+        padding: '10px',
+        fontSize: '10px'
+      }}>
+        <div style={{ color: '#ff6600', marginBottom: '5px', fontSize: '12px' }}>Portfolio</div>
+        <div style={{ color: '#aaaaaa', marginBottom: '2px' }}>
+          Total Value: <span style={{ color: '#00ff00' }}>
+            ${cryptoPositions?.reduce((sum: number, pos: any) => sum + (pos.totalValue || 0), 0)?.toFixed(2) || '0.00'}
+          </span>
+        </div>
+        <div style={{ color: '#aaaaaa', marginBottom: '2px' }}>
+          Available: <span style={{ color: '#00ffff' }}>$834.97</span>
+        </div>
+        <div style={{ color: '#aaaaaa' }}>
+          Positions: <span style={{ color: '#ffaa00' }}>{cryptoPositions?.length || 0}</span>
+        </div>
+      </div>
     </div>
   );
 }
