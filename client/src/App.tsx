@@ -23,6 +23,7 @@ import SimpleTradingPage from "@/pages/simple-trading";
 import PTNIDashboardCore from "@/components/ptni/ptni-dashboard-core";
 import { PTNIDashboard } from "@/components/ptni/PTNIDashboard";
 import { RobinhoodAccountStatus } from "@/components/RobinhoodAccountStatus";
+import { RealModeController } from "@/components/RealModeController";
 import QuantumTradingDashboardPage from "@/pages/quantum-trading-dashboard";
 import NotFound from "@/pages/not-found";
 

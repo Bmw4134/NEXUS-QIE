@@ -10,6 +10,7 @@ import { quantumRobinhoodBridge } from "./quantum-robinhood-bridge";
 import { ptniDiagnosticCore } from "./ptni-diagnostic-core";
 import { nexusOverrideEngine } from "./nexus-override-engine";
 import { nexusValidationEngine } from "./nexus-validation-engine";
+import { robinhoodHeadlessController } from "./robinhood-headless-controller";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -301,32 +302,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // NEXUS Override Trading API - Direct Account Balance Updates
+  // PTNI Headless Browser Trading API - Real Account Control
   app.post('/api/robinhood/execute-trade', async (req, res) => {
     try {
       const { symbol, side, amount, useRealMoney = false } = req.body;
       
-      console.log(`🔮 NEXUS Override: Executing ${side.toUpperCase()} order: ${symbol} $${amount}`);
+      console.log(`🎯 PTNI Headless: Executing ${side.toUpperCase()} order: ${symbol} $${amount}`);
       console.log(`💰 Real money trading: ${useRealMoney ? 'ENABLED' : 'DISABLED'}`);
       
-      if (useRealMoney && nexusOverrideEngine.isConnected()) {
-        console.log(`🌐 NEXUS Override: Executing live balance update...`);
+      if (useRealMoney && robinhoodHeadlessController.isRealModeActive()) {
+        console.log(`🌐 PTNI Headless: Executing real browser trade...`);
         
-        // Execute trade through NEXUS Override Engine
-        const overrideExecution = await nexusOverrideEngine.executeQuantumTrade({
+        // Execute trade through headless browser
+        const headlessExecution = await robinhoodHeadlessController.executeRealTrade({
           symbol,
           side,
           amount,
           orderType: 'market'
         });
         
-        console.log(`✅ NEXUS TRADE EXECUTED: ${overrideExecution.orderId}`);
-        console.log(`🔮 Override method: ${overrideExecution.overrideMethod}`);
-        console.log(`💸 Account balance updated: $${overrideExecution.newBalance}`);
+        console.log(`✅ REAL TRADE EXECUTED: ${headlessExecution.orderId}`);
+        console.log(`🔮 Execution method: ${headlessExecution.executionMethod}`);
+        console.log(`💸 Real account balance: $${headlessExecution.newBalance}`);
         
-        // Refresh account state
-        await nexusOverrideEngine.refreshAccountData();
-        const accountState = nexusOverrideEngine.getAccountState();
+        res.json({
+          success: true,
+          orderId: headlessExecution.orderId,
+          symbol: headlessExecution.symbol,
+          side: headlessExecution.side,
+          amount: headlessExecution.amount,
+          price: headlessExecution.price,
+          quantity: headlessExecution.quantity.toFixed(6),
+          status: headlessExecution.status,
+          realMoney: headlessExecution.realMoney,
+          realAccountUpdate: true,
+          executionMethod: headlessExecution.executionMethod,
+          balanceChange: headlessExecution.balanceChange,
+          updatedBalance: headlessExecution.newBalance,
+          screenshots: headlessExecution.screenshots.length,
+          timestamp: headlessExecution.timestamp.toISOString()
+        });
+        return;
+      }
+      
+      // Fallback to override engine for enhanced simulation
+      if (useRealMoney && nexusOverrideEngine.isConnected()) {
+        const overrideExecution = await nexusOverrideEngine.executeQuantumTrade({
+          symbol,
+          side,
+          amount,
+          orderType: 'market'
+        });
         
         res.json({
           success: true,
@@ -337,18 +363,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           price: overrideExecution.price,
           quantity: overrideExecution.quantity.toFixed(6),
           status: overrideExecution.status,
-          realMoney: true,
-          realAccountUpdate: overrideExecution.realAccountUpdate,
-          executionMethod: overrideExecution.overrideMethod,
+          realMoney: false,
+          realAccountUpdate: false,
+          executionMethod: 'enhanced_simulation',
           balanceChange: overrideExecution.balanceChange,
           updatedBalance: overrideExecution.newBalance,
-          accountState,
           timestamp: overrideExecution.timestamp.toISOString()
         });
         return;
       }
       
-      // Standard execution for non-real money trades
+      // Standard simulation execution
       const cryptoAssets = cryptoTradingEngine.getCryptoAssets();
       const asset = cryptoAssets.find(a => a.symbol === symbol);
       const currentPrice = asset ? asset.price : 105650;
@@ -366,12 +391,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
         quantity: quantity.toFixed(6),
         status: 'filled',
         realMoney: false,
-        executionMethod: 'standard',
+        executionMethod: 'standard_simulation',
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error('NEXUS Override trading error:', error);
-      res.status(500).json({ error: 'Failed to execute NEXUS Override trade' });
+      console.error('PTNI trading error:', error);
+      res.status(500).json({ error: 'Failed to execute PTNI trade' });
+    }
+  });
+
+  // Real Mode Toggle API
+  app.post('/api/robinhood/toggle-real-mode', async (req, res) => {
+    try {
+      const { enabled } = req.body;
+      
+      console.log(`🎯 Real Mode Toggle: ${enabled ? 'ENABLING' : 'DISABLING'}`);
+      
+      if (enabled) {
+        // Enable headless browser real mode
+        const success = await robinhoodHeadlessController.enableRealMode();
+        if (success) {
+          const session = robinhoodHeadlessController.getSession();
+          res.json({
+            success: true,
+            realModeEnabled: true,
+            isLoggedIn: session.isLoggedIn,
+            accountBalance: session.accountBalance,
+            message: 'Real mode enabled - headless browser connected to Robinhood'
+          });
+        } else {
+          res.status(400).json({
+            success: false,
+            realModeEnabled: false,
+            error: 'Failed to enable real mode - check credentials'
+          });
+        }
+      } else {
+        // Disable real mode
+        await robinhoodHeadlessController.toggleRealMode(false);
+        res.json({
+          success: true,
+          realModeEnabled: false,
+          message: 'Real mode disabled'
+        });
+      }
+    } catch (error) {
+      console.error('Real mode toggle error:', error);
+      res.status(500).json({ error: 'Failed to toggle real mode' });
+    }
+  });
+
+  app.get('/api/robinhood/real-mode-status', async (req, res) => {
+    try {
+      const isActive = robinhoodHeadlessController.isRealModeActive();
+      const session = robinhoodHeadlessController.getSession();
+      
+      res.json({
+        realModeEnabled: isActive,
+        isLoggedIn: session.isLoggedIn,
+        accountBalance: session.accountBalance,
+        lastActivity: session.lastActivity,
+        hasCredentials: !!process.env.ROBINHOOD_USERNAME
+      });
+    } catch (error) {
+      console.error('Real mode status error:', error);
+      res.status(500).json({ error: 'Failed to get real mode status' });
     }
   });
 
