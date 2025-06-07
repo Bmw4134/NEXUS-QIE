@@ -257,6 +257,36 @@ export default function PTNIDashboardCore() {
     }
   };
 
+  const executeLiveTrade = async (symbol: string, side: 'buy' | 'sell', amount: number) => {
+    try {
+      addDevLog(`🚀 Executing ${side.toUpperCase()} order: ${symbol} $${amount}`);
+      addDevLog('⚡ Using real money through Robinhood Legend...');
+      
+      const response = await fetch('/api/robinhood/execute-trade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          symbol,
+          side,
+          amount,
+          useRealMoney: true
+        })
+      });
+
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        addDevLog(`✅ Trade executed: ${result.orderId}`);
+        addDevLog(`💰 ${side === 'buy' ? 'Purchased' : 'Sold'} ${result.quantity} ${symbol} at $${result.price.toFixed(2)}`);
+        addDevLog(`💸 Real money trade: $${amount}`);
+      } else {
+        addDevLog(`❌ Trade failed: ${result.error}`);
+      }
+    } catch (error) {
+      addDevLog('❌ Trading error: Network issue');
+    }
+  };
+
   const switchView = (view: string) => {
     setCurrentView(view);
     addDevLog(`🔄 Switching to ${view} view`);
