@@ -276,7 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Robinhood Legend Live Trading Routes
+  // Robinhood Live Trading with Real Authentication
   app.post('/api/robinhood/execute-trade', async (req, res) => {
     try {
       const { symbol, side, amount, useRealMoney = false } = req.body;
@@ -284,19 +284,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🚀 Executing ${side.toUpperCase()} order: ${symbol} $${amount}`);
       console.log(`💰 Real money trading: ${useRealMoney ? 'ENABLED' : 'DISABLED'}`);
       
-      // Get current market price
+      // Check for real authentication
+      if (useRealMoney && process.env.ROBINHOOD_USERNAME && process.env.ROBINHOOD_PASSWORD) {
+        console.log(`🔐 Authenticating with Robinhood for real trade...`);
+        
+        // Execute real Robinhood trade
+        const realTrade = await robinhoodLegendClient.executeRealTrade({
+          symbol,
+          side,
+          amount,
+          useCredentials: true
+        });
+        
+        if (realTrade.success) {
+          console.log(`✅ REAL ROBINHOOD TRADE EXECUTED: ${realTrade.orderId}`);
+          console.log(`💸 Live account updated: ${realTrade.quantity} ${symbol} at $${realTrade.price}`);
+          
+          res.json({
+            success: true,
+            orderId: realTrade.orderId,
+            symbol: realTrade.symbol,
+            side: realTrade.side,
+            amount: realTrade.amount,
+            price: realTrade.price,
+            quantity: realTrade.quantity,
+            status: 'filled',
+            realMoney: true,
+            realAccount: true,
+            timestamp: new Date().toISOString()
+          });
+          return;
+        }
+      }
+      
+      // Fallback to simulation if no real auth
       const cryptoAssets = cryptoTradingEngine.getCryptoAssets();
       const asset = cryptoAssets.find(a => a.symbol === symbol);
       const currentPrice = asset ? asset.price : 105650;
       const quantity = amount / currentPrice;
       
-      // Execute real money trade through crypto engine
       if (useRealMoney) {
         await cryptoTradingEngine.executeCryptoTrade(symbol, side, quantity, currentPrice);
-        console.log(`💸 REAL MONEY TRADE: ${side} ${quantity.toFixed(6)} ${symbol} at $${currentPrice}`);
+        console.log(`💸 SIMULATED TRADE: ${side} ${quantity.toFixed(6)} ${symbol} at $${currentPrice}`);
       }
       
-      const orderId = `RH-LEGEND-${Date.now()}`;
+      const orderId = `RH-SIM-${Date.now()}`;
       
       res.json({
         success: true,
@@ -307,7 +339,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         price: currentPrice,
         quantity: quantity.toFixed(6),
         status: 'filled',
-        realMoney: useRealMoney,
+        realMoney: false,
+        simulation: true,
         timestamp: new Date().toISOString()
       });
     } catch (error) {
