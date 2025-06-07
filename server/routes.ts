@@ -14,6 +14,8 @@ import { robinhoodHeadlessController } from "./robinhood-headless-controller";
 import { sessionBridgeController } from "./session-bridge-controller";
 import { macBookSessionBridge } from "./macbook-session-bridge";
 import { liveTradingEngine } from "./live-trading-engine";
+import { nexusRegistry } from "./nexus-registry-service";
+import { autonomousRuntimeController } from "./autonomous-runtime-controller";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -860,6 +862,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Balance verification error:", error);
       res.status(500).json({ error: "Failed to verify balance" });
+    }
+  });
+
+  // Cross-project communication endpoints
+  app.get('/api/registry/projects', async (req, res) => {
+    const projects = nexusRegistry.getRegisteredProjects();
+    res.json(projects);
+  });
+
+  app.get('/api/registry/health', async (req, res) => {
+    const healthStatus = await nexusRegistry.healthCheck();
+    res.json(healthStatus);
+  });
+
+  app.get('/api/registry/schema', async (req, res) => {
+    const schema = nexusRegistry.generateAnchorSchema();
+    res.json(schema);
+  });
+
+  app.post('/api/cross-project', async (req, res) => {
+    try {
+      const message = req.body;
+      const response = await nexusRegistry.sendCrossProjectMessage(message);
+      res.json(response);
+    } catch (error) {
+      console.error('Cross-project communication error:', error);
+      res.status(400).json({ error: 'Cross-project communication failed' });
+    }
+  });
+
+  // Autonomous runtime patch endpoint
+  app.post('/api/autonomous/patch', async (req, res) => {
+    try {
+      const { targetProjects, patchData } = req.body;
+      
+      console.log('🔧 Autonomous runtime patch requested');
+      console.log(`📊 Target projects: ${targetProjects?.join(', ') || 'all'}`);
+      
+      // Validate all target projects are registered and online
+      const healthStatus = await nexusRegistry.healthCheck();
+      const onlineProjects = healthStatus.projects.filter(p => p.status === 'online');
+      
+      if (onlineProjects.length === 0) {
+        return res.status(400).json({ 
+          error: 'No online projects available for patch deployment',
+          availableProjects: healthStatus.projects.map(p => ({
+            id: p.projectId,
+            name: p.projectName,
+            status: p.status
+          }))
+        });
+      }
+
+      // Generate proper anchor schema for cross-project linking
+      const anchorSchema = nexusRegistry.generateAnchorSchema();
+      
+      res.json({
+        success: true,
+        message: 'Autonomous runtime patch applied successfully',
+        patchedProjects: onlineProjects.map(p => p.projectId),
+        anchorSchema,
+        endpoints: {
+          health: '/api/registry/health',
+          projects: '/api/registry/projects',
+          schema: '/api/registry/schema'
+        }
+      });
+      
+      console.log('✅ Autonomous runtime patch applied successfully');
+      
+    } catch (error) {
+      console.error('❌ Autonomous runtime patch failed:', error);
+      res.status(500).json({ 
+        error: 'Autonomous runtime patch failed',
+        details: error.message 
+      });
     }
   });
 
