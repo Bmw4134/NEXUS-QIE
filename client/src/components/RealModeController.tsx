@@ -62,7 +62,7 @@ export function RealModeController() {
 
   const executeRealTrade = async () => {
     try {
-      const response = await fetch('/api/robinhood/execute-trade', {
+      const response = await fetch('/api/robinhood/execute-live-trade', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -75,11 +75,11 @@ export function RealModeController() {
 
       const result = await response.json();
       if (result.success && result.realAccountUpdate) {
-        console.log('Real trade executed:', result);
+        console.log('Live trade executed:', result);
         setTimeout(() => fetchRealModeStatus(), 2000);
       }
     } catch (error) {
-      console.error('Real trade execution failed:', error);
+      console.error('Live trade execution failed:', error);
     }
   };
 

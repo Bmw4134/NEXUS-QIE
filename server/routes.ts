@@ -514,6 +514,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Live Trading Metrics API
+  app.get('/api/robinhood/live-trading-metrics', async (req, res) => {
+    try {
+      const metrics = liveTradingEngine.getTradingMetrics();
+      const trades = liveTradingEngine.getExecutedTrades(10);
+      
+      res.json({
+        success: true,
+        metrics,
+        recentTrades: trades,
+        isActive: liveTradingEngine.isRealModeActive()
+      });
+    } catch (error) {
+      console.error('Failed to get trading metrics:', error);
+      res.status(500).json({ error: 'Failed to get trading metrics' });
+    }
+  });
+
+  // Live Trading History API
+  app.get('/api/robinhood/live-trading-history', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const trades = liveTradingEngine.getExecutedTrades(limit);
+      
+      res.json({
+        success: true,
+        trades,
+        totalTrades: trades.length,
+        currentBalance: liveTradingEngine.getAccountBalance()
+      });
+    } catch (error) {
+      console.error('Failed to get trading history:', error);
+      res.status(500).json({ error: 'Failed to get trading history' });
+    }
+  });
+
   app.post('/api/robinhood/toggle-live-trading', async (req, res) => {
     try {
       const { enabled } = req.body;
