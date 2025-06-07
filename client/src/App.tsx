@@ -19,7 +19,7 @@ import { InfinityUniformPage } from "@/pages/infinity-uniform";
 import ParticlePlayground from "@/pages/particle-playground";
 import TradingBotPage from "@/pages/trading-bot";
 import SimpleTradingPage from "@/pages/simple-trading";
-import LiveTradingPage from "@/pages/live-trading";
+import LiveTradingPage from "@/pages/live-trading-simple";
 import QuantumTradingDashboardPage from "@/pages/quantum-trading-dashboard";
 import NotFound from "@/pages/not-found";
 
