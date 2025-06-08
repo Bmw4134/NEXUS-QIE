@@ -627,6 +627,85 @@ export default function AIConfiguration() {
                 </CardContent>
               </Card>
 
+              {/* Free Public APIs */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Settings className="w-5 h-5 mr-2" />
+                    Free Public APIs
+                    <Badge variant="default" className="ml-2">No Auth Required</Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    Enhance AI capabilities with free public data sources and services
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 gap-3">
+                      {/* Weather API */}
+                      <div className="p-3 border rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium">OpenWeatherMap API</h4>
+                            <p className="text-sm text-gray-600">Global weather data and forecasts</p>
+                          </div>
+                          <Badge variant="outline">Active</Badge>
+                        </div>
+                      </div>
+                      
+                      {/* News API */}
+                      <div className="p-3 border rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium">News API</h4>
+                            <p className="text-sm text-gray-600">Real-time news and headlines</p>
+                          </div>
+                          <Badge variant="outline">Active</Badge>
+                        </div>
+                      </div>
+
+                      {/* REST Countries */}
+                      <div className="p-3 border rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium">REST Countries</h4>
+                            <p className="text-sm text-gray-600">Country information and demographics</p>
+                          </div>
+                          <Badge variant="outline">Active</Badge>
+                        </div>
+                      </div>
+
+                      {/* JSONPlaceholder */}
+                      <div className="p-3 border rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium">Wikipedia API</h4>
+                            <p className="text-sm text-gray-600">Knowledge base and research data</p>
+                          </div>
+                          <Badge variant="outline">Active</Badge>
+                        </div>
+                      </div>
+
+                      {/* Currency Exchange */}
+                      <div className="p-3 border rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium">Exchange Rates API</h4>
+                            <p className="text-sm text-gray-600">Real-time currency conversion</p>
+                          </div>
+                          <Badge variant="outline">Active</Badge>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Button className="w-full" variant="outline">
+                      <Zap className="w-4 h-4 mr-2" />
+                      Configure Public APIs
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Cohere Integration */}
               <Card>
                 <CardHeader>
