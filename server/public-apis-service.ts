@@ -74,7 +74,18 @@ export class PublicApisService {
     breakingbad: 'https://www.breakingbadapi.com/api',
     mealdb: 'https://www.themealdb.com/api/json/v1/1',
     cocktaildb: 'https://www.thecocktaildb.com/api/json/v1/1',
-    zippopotam: 'http://api.zippopotam.us'
+    zippopotam: 'http://api.zippopotam.us',
+    coingecko: 'https://api.coingecko.com/api/v3',
+    dictionaryapi: 'https://api.dictionaryapi.dev/api/v2',
+    httpbin: 'https://httpbin.org',
+    jsontest: 'http://echo.jsontest.com',
+    timeapi: 'http://worldtimeapi.org/api',
+    isbndb: 'https://openlibrary.org',
+    numbersapi: 'http://numbersapi.com',
+    carbonintensity: 'https://api.carbonintensity.org.uk',
+    sunrise: 'https://api.sunrise-sunset.org',
+    randomfox: 'https://randomfox.ca',
+    httpstatusdogs: 'https://httpstatusdogs.com'
   };
 
   // Weather API (requires API key but has free tier)
@@ -746,6 +757,200 @@ export class PublicApisService {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
         source: 'zippopotam'
+      };
+    }
+  }
+
+  // Cryptocurrency Market Data (completely free)
+  async getCryptoPrice(coinId: string = 'bitcoin'): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.coingecko}/simple/price?ids=${coinId}&vs_currencies=usd&include_24hr_change=true&include_market_cap=true`);
+      if (!response.ok) throw new Error('CoinGecko API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: {
+          id: coinId,
+          price: data[coinId]?.usd,
+          change24h: data[coinId]?.usd_24h_change,
+          marketCap: data[coinId]?.usd_market_cap
+        },
+        source: 'coingecko'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'coingecko'
+      };
+    }
+  }
+
+  // Dictionary API (completely free)
+  async getWordDefinition(word: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.dictionaryapi}/entries/en/${word}`);
+      if (!response.ok) throw new Error('Dictionary API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: {
+          word: data[0]?.word,
+          phonetic: data[0]?.phonetic,
+          meanings: data[0]?.meanings?.slice(0, 3).map((meaning: any) => ({
+            partOfSpeech: meaning.partOfSpeech,
+            definitions: meaning.definitions?.slice(0, 2).map((def: any) => ({
+              definition: def.definition,
+              example: def.example
+            }))
+          }))
+        },
+        source: 'dictionaryapi'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'dictionaryapi'
+      };
+    }
+  }
+
+  // World Time API (completely free)
+  async getWorldTime(timezone: string = 'UTC'): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.timeapi}/timezone/${timezone}`);
+      if (!response.ok) throw new Error('World Time API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: {
+          timezone: data.timezone,
+          datetime: data.datetime,
+          utcOffset: data.utc_offset,
+          dayOfWeek: data.day_of_week,
+          dayOfYear: data.day_of_year,
+          weekNumber: data.week_number
+        },
+        source: 'worldtimeapi'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'worldtimeapi'
+      };
+    }
+  }
+
+  // Book Information API (completely free)
+  async getBookInfo(isbn: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.isbndb}/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`);
+      if (!response.ok) throw new Error('Open Library API error');
+      const data = await response.json();
+      const bookData = data[`ISBN:${isbn}`];
+      
+      if (!bookData) {
+        throw new Error('Book not found');
+      }
+      
+      return {
+        success: true,
+        data: {
+          title: bookData.title,
+          authors: bookData.authors?.map((author: any) => author.name),
+          publishDate: bookData.publish_date,
+          publishers: bookData.publishers?.map((pub: any) => pub.name),
+          subjects: bookData.subjects?.slice(0, 5).map((subject: any) => subject.name),
+          pageCount: bookData.number_of_pages
+        },
+        source: 'openlibrary'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'openlibrary'
+      };
+    }
+  }
+
+  // Numbers Facts API (completely free)
+  async getNumberFact(number: number): Promise<ApiResponse<string>> {
+    try {
+      const response = await fetch(`${this.baseUrls.numbersapi}/${number}`);
+      if (!response.ok) throw new Error('Numbers API error');
+      const data = await response.text();
+      
+      return {
+        success: true,
+        data: data,
+        source: 'numbersapi'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'numbersapi'
+      };
+    }
+  }
+
+  // Carbon Intensity API (UK - completely free)
+  async getCarbonIntensity(): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.carbonintensity}/intensity`);
+      if (!response.ok) throw new Error('Carbon Intensity API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: {
+          intensity: data.data[0]?.intensity?.actual,
+          forecast: data.data[0]?.intensity?.forecast,
+          index: data.data[0]?.intensity?.index,
+          from: data.data[0]?.from,
+          to: data.data[0]?.to
+        },
+        source: 'carbonintensity'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'carbonintensity'
+      };
+    }
+  }
+
+  // Sunrise/Sunset API (completely free)
+  async getSunriseSunset(lat: number, lng: number): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.sunrise}/json?lat=${lat}&lng=${lng}&formatted=0`);
+      if (!response.ok) throw new Error('Sunrise Sunset API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: {
+          sunrise: data.results.sunrise,
+          sunset: data.results.sunset,
+          solarNoon: data.results.solar_noon,
+          dayLength: data.results.day_length,
+          civilTwilightBegin: data.results.civil_twilight_begin,
+          civilTwilightEnd: data.results.civil_twilight_end
+        },
+        source: 'sunrise-sunset'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'sunrise-sunset'
       };
     }
   }
