@@ -131,6 +131,72 @@ export default function AIConfiguration() {
     }
   });
 
+  // xAI (Grok) integration mutation
+  const configureXaiMutation = useMutation({
+    mutationFn: async (key: string) => {
+      const response = await fetch('/api/ai/configure/xai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ xaiKey: key })
+      });
+      if (!response.ok) throw new Error('Failed to configure xAI');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/ai/status'] });
+      setShowXaiDialog(false);
+      setXaiKey('');
+      toast({
+        title: "xAI Grok Configured",
+        description: "Advanced Grok models integrated successfully.",
+      });
+    }
+  });
+
+  // Google Gemini integration mutation
+  const configureGeminiMutation = useMutation({
+    mutationFn: async (key: string) => {
+      const response = await fetch('/api/ai/configure/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ geminiKey: key })
+      });
+      if (!response.ok) throw new Error('Failed to configure Gemini');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/ai/status'] });
+      setShowGeminiDialog(false);
+      setGeminiKey('');
+      toast({
+        title: "Google Gemini Configured",
+        description: "Gemini Pro models integrated successfully.",
+      });
+    }
+  });
+
+  // Cohere integration mutation
+  const configureCohereM​utation = useMutation({
+    mutationFn: async (key: string) => {
+      const response = await fetch('/api/ai/configure/cohere', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cohereKey: key })
+      });
+      if (!response.ok) throw new Error('Failed to configure Cohere');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/ai/status'] });
+      setShowCohereDialog(false);
+      setCohereKey('');
+      toast({
+        title: "Cohere Configured",
+        description: "Enterprise AI models integrated successfully.",
+      });
+    }
+  });
+
   const handleGithubSubmit = () => {
     if (!githubToken.trim()) return;
     configureGithubMutation.mutate(githubToken);
