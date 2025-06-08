@@ -8,8 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Brain, Key, Github, Zap, Settings, CheckCircle, AlertCircle, Bot } from 'lucide-react';
+import { Brain, Key, Github, Zap, Settings, CheckCircle, AlertCircle, Bot, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'wouter';
 
 export default function AIConfiguration() {
   const [githubToken, setGithubToken] = useState('');
@@ -27,6 +28,7 @@ export default function AIConfiguration() {
   const [showGeminiDialog, setShowGeminiDialog] = useState(false);
   const [showCohereDialog, setShowCohereDialog] = useState(false);
 
+  const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -230,9 +232,16 @@ export default function AIConfiguration() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Brain Configuration</h1>
             <p className="text-gray-600">Enhance PTNI capabilities with advanced AI integrations</p>
           </div>
-          <Button variant="outline" onClick={() => window.history.back()}>
-            ← Back to Dashboard
-          </Button>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => setLocation('/dashboard')} className="flex items-center gap-2">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Dashboard
+            </Button>
+            <Button variant="outline" onClick={() => setLocation('/qnis-admin')} className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white border-none hover:from-purple-700 hover:to-blue-700">
+              <Settings className="w-4 h-4" />
+              QNIS Admin
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="integrations" className="w-full">
