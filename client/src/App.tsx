@@ -11,6 +11,7 @@ import { WealthPulse } from "./pages/WealthPulse";
 import { QuantumInsights } from "./pages/QuantumInsights";
 import { NexusNotes } from "./pages/NexusNotes";
 import { FamilySync } from "./pages/FamilySync";
+import FamilyBoards from "./pages/FamilyBoards";
 import { useAuth } from "./hooks/useAuth";
 import "./index.css";
 
@@ -49,6 +50,7 @@ function Router() {
           <Route path="/quantum-insights" component={QuantumInsights} />
           <Route path="/nexus-notes" component={NexusNotes} />
           <Route path="/family-sync" component={FamilySync} />
+          <Route path="/family-boards" component={FamilyBoards} />
           {user?.role === "admin" && (
             <Route path="/admin" component={AdminPanel} />
           )}

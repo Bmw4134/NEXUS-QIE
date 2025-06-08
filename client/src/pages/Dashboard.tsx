@@ -48,6 +48,13 @@ export function Dashboard() {
       icon: Users,
       path: "/family-sync",
       color: "red"
+    },
+    {
+      title: "Family Boards",
+      description: "PTNI-Enhanced Trello for family collaboration",
+      icon: Users,
+      path: "/family-boards",
+      color: "indigo"
     }
   ];
 
