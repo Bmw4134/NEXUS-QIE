@@ -1816,6 +1816,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI-Powered Family Insights API
+  app.post("/api/ai/family-insights", async (req, res) => {
+    try {
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ error: "AI service not configured" });
+      }
+
+      const { familyData } = req.body;
+      
+      // Import OpenAI service
+      const { familyAI } = await import('./openai-service');
+      
+      const insights = await familyAI.generateFamilyInsights(familyData);
+      console.log("🤖 Generated AI family insights:", insights.length);
+      
+      res.json({ insights });
+    } catch (error) {
+      console.error("Error generating AI insights:", error);
+      res.status(500).json({ error: "Failed to generate AI insights" });
+    }
+  });
+
+  app.post("/api/ai/smart-recommendations", async (req, res) => {
+    try {
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ error: "AI service not configured" });
+      }
+
+      const { context, query } = req.body;
+      
+      const { familyAI } = await import('./openai-service');
+      
+      const recommendation = await familyAI.generateSmartRecommendations(context, query);
+      console.log("🤖 Generated smart recommendation for:", query.substring(0, 50));
+      
+      res.json({ recommendation });
+    } catch (error) {
+      console.error("Error generating recommendation:", error);
+      res.status(500).json({ error: "Failed to generate recommendation" });
+    }
+  });
+
+  app.post("/api/ai/expense-analysis", async (req, res) => {
+    try {
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ error: "AI service not configured" });
+      }
+
+      const { expenses } = req.body;
+      
+      const { familyAI } = await import('./openai-service');
+      
+      const analysis = await familyAI.analyzeExpensePatterns(expenses);
+      console.log("🤖 Generated expense analysis");
+      
+      res.json(analysis || { patterns: [], savings_opportunities: [], budget_recommendations: [] });
+    } catch (error) {
+      console.error("Error analyzing expenses:", error);
+      res.status(500).json({ error: "Failed to analyze expenses" });
+    }
+  });
+
+  app.post("/api/ai/task-priorities", async (req, res) => {
+    try {
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ error: "AI service not configured" });
+      }
+
+      const { tasks, familyContext } = req.body;
+      
+      const { familyAI } = await import('./openai-service');
+      
+      const priorities = await familyAI.generateTaskPriorities(tasks, familyContext);
+      console.log("🤖 Generated task priorities");
+      
+      res.json(priorities || { priority_suggestions: [], scheduling_tips: [] });
+    } catch (error) {
+      console.error("Error generating task priorities:", error);
+      res.status(500).json({ error: "Failed to generate task priorities" });
+    }
+  });
+
+  app.post("/api/ai/family-goals", async (req, res) => {
+    try {
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ error: "AI service not configured" });
+      }
+
+      const { familyData } = req.body;
+      
+      const { familyAI } = await import('./openai-service');
+      
+      const goals = await familyAI.generateFamilyGoalSuggestions(familyData);
+      console.log("🤖 Generated family goal suggestions:", goals.length);
+      
+      res.json({ goals });
+    } catch (error) {
+      console.error("Error generating family goals:", error);
+      res.status(500).json({ error: "Failed to generate family goals" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

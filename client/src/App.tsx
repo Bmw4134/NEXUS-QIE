@@ -13,6 +13,7 @@ import { NexusNotes } from "./pages/NexusNotes";
 import { FamilySync } from "./pages/FamilySync";
 import FamilyBoards from "./pages/FamilyBoardsSimple";
 import AIConfiguration from "./pages/AIConfiguration";
+import { AIAssistant } from "./pages/AIAssistant";
 import { useAuth } from "./hooks/useAuth";
 import "./index.css";
 
@@ -53,6 +54,7 @@ function Router() {
           <Route path="/family-sync" component={FamilySync} />
           <Route path="/family-boards" component={FamilyBoards} />
           <Route path="/ai-config" component={AIConfiguration} />
+          <Route path="/ai-assistant" component={AIAssistant} />
           {user?.role === "admin" && (
             <Route path="/admin" component={AdminPanel} />
           )}

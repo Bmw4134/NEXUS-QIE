@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
-import { Calendar, DollarSign, Brain, FileText, Users, Settings, LogOut } from "lucide-react";
+import { Calendar, DollarSign, Brain, FileText, Users, Settings, LogOut, Bot } from "lucide-react";
 
 export function Dashboard() {
   const { user } = useAuth();
