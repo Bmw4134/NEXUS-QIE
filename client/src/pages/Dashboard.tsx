@@ -62,6 +62,13 @@ export function Dashboard() {
       icon: Brain,
       path: "/ai-config",
       color: "purple"
+    },
+    {
+      title: "AI Assistant",
+      description: "OpenAI-powered family insights and smart recommendations",
+      icon: Bot,
+      path: "/ai-assistant",
+      color: "cyan"
     }
   ];
 
