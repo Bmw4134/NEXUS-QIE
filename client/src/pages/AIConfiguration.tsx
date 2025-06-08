@@ -16,10 +16,16 @@ export default function AIConfiguration() {
   const [openaiKey, setOpenaiKey] = useState('');
   const [anthropicKey, setAnthropicKey] = useState('');
   const [perplexityKey, setPerplexityKey] = useState('');
+  const [xaiKey, setXaiKey] = useState('');
+  const [geminiKey, setGeminiKey] = useState('');
+  const [cohereKey, setCohereKey] = useState('');
   const [showGithubDialog, setShowGithubDialog] = useState(false);
   const [showOpenAIDialog, setShowOpenAIDialog] = useState(false);
   const [showAnthropicDialog, setShowAnthropicDialog] = useState(false);
   const [showPerplexityDialog, setShowPerplexityDialog] = useState(false);
+  const [showXaiDialog, setShowXaiDialog] = useState(false);
+  const [showGeminiDialog, setShowGeminiDialog] = useState(false);
+  const [showCohereDialog, setShowCohereDialog] = useState(false);
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
