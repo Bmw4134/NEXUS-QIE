@@ -58,7 +58,23 @@ export class PublicApisService {
     dogImages: 'https://dog.ceo/api',
     cats: 'https://api.thecatapi.com/v1',
     bored: 'https://www.boredapi.com/api',
-    github: 'https://api.github.com'
+    github: 'https://api.github.com',
+    agify: 'https://api.agify.io',
+    genderize: 'https://api.genderize.io',
+    nationalize: 'https://api.nationalize.io',
+    spacex: 'https://api.spacexdata.com/v4',
+    pokemonAPI: 'https://pokeapi.co/api/v2',
+    jsonplaceholder: 'https://jsonplaceholder.typicode.com',
+    randomuser: 'https://randomuser.me/api',
+    catfacts: 'https://catfact.ninja',
+    kanye: 'https://api.kanye.rest',
+    chucknorris: 'https://api.chucknorris.io/jokes',
+    uselessfacts: 'https://uselessfacts.jsph.pl',
+    quotegarden: 'https://quotegarden.herokuapp.com/api/v3',
+    breakingbad: 'https://www.breakingbadapi.com/api',
+    mealdb: 'https://www.themealdb.com/api/json/v1/1',
+    cocktaildb: 'https://www.thecocktaildb.com/api/json/v1/1',
+    zippopotam: 'http://api.zippopotam.us'
   };
 
   // Weather API (requires API key but has free tier)
@@ -469,6 +485,267 @@ export class PublicApisService {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
         source: 'github'
+      };
+    }
+  }
+
+  // Name Demographics APIs (completely free)
+  async getNameAge(name: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.agify}?name=${name}`);
+      if (!response.ok) throw new Error('Agify API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: { name: data.name, age: data.age, count: data.count },
+        source: 'agify'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'agify'
+      };
+    }
+  }
+
+  async getNameGender(name: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.genderize}?name=${name}`);
+      if (!response.ok) throw new Error('Genderize API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: { name: data.name, gender: data.gender, probability: data.probability },
+        source: 'genderize'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'genderize'
+      };
+    }
+  }
+
+  async getNameNationality(name: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.nationalize}?name=${name}`);
+      if (!response.ok) throw new Error('Nationalize API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: { name: data.name, countries: data.country },
+        source: 'nationalize'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'nationalize'
+      };
+    }
+  }
+
+  // SpaceX API (completely free)
+  async getSpaceXLaunches(): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await fetch(`${this.baseUrls.spacex}/launches/latest`);
+      if (!response.ok) throw new Error('SpaceX API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: [{
+          name: data.name,
+          date: data.date_utc,
+          success: data.success,
+          details: data.details,
+          rocket: data.rocket
+        }],
+        source: 'spacex'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'spacex'
+      };
+    }
+  }
+
+  // Pokemon API (completely free)
+  async getPokemon(name: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.pokemonAPI}/pokemon/${name.toLowerCase()}`);
+      if (!response.ok) throw new Error('Pokemon API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: {
+          name: data.name,
+          id: data.id,
+          height: data.height,
+          weight: data.weight,
+          types: data.types.map((t: any) => t.type.name),
+          abilities: data.abilities.map((a: any) => a.ability.name),
+          sprite: data.sprites.front_default
+        },
+        source: 'pokemon'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'pokemon'
+      };
+    }
+  }
+
+  // Random User API (completely free)
+  async getRandomUser(): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.randomuser}`);
+      if (!response.ok) throw new Error('Random User API error');
+      const data = await response.json();
+      const user = data.results[0];
+      
+      return {
+        success: true,
+        data: {
+          name: `${user.name.first} ${user.name.last}`,
+          email: user.email,
+          phone: user.phone,
+          location: `${user.location.city}, ${user.location.country}`,
+          picture: user.picture.medium,
+          age: user.dob.age
+        },
+        source: 'randomuser'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'randomuser'
+      };
+    }
+  }
+
+  // Cat Facts API (completely free)
+  async getCatFact(): Promise<ApiResponse<string>> {
+    try {
+      const response = await fetch(`${this.baseUrls.catfacts}/fact`);
+      if (!response.ok) throw new Error('Cat Facts API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: data.fact,
+        source: 'catfacts'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'catfacts'
+      };
+    }
+  }
+
+  // Recipe API (completely free)
+  async getRandomRecipe(): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.mealdb}/random.php`);
+      if (!response.ok) throw new Error('MealDB API error');
+      const data = await response.json();
+      const meal = data.meals[0];
+      
+      return {
+        success: true,
+        data: {
+          name: meal.strMeal,
+          category: meal.strCategory,
+          area: meal.strArea,
+          instructions: meal.strInstructions,
+          image: meal.strMealThumb,
+          ingredients: Object.keys(meal)
+            .filter(key => key.startsWith('strIngredient') && meal[key])
+            .map(key => meal[key])
+            .filter(Boolean)
+        },
+        source: 'mealdb'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'mealdb'
+      };
+    }
+  }
+
+  // Cocktail API (completely free)
+  async getRandomCocktail(): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.cocktaildb}/random.php`);
+      if (!response.ok) throw new Error('CocktailDB API error');
+      const data = await response.json();
+      const drink = data.drinks[0];
+      
+      return {
+        success: true,
+        data: {
+          name: drink.strDrink,
+          category: drink.strCategory,
+          instructions: drink.strInstructions,
+          image: drink.strDrinkThumb,
+          glass: drink.strGlass,
+          ingredients: Object.keys(drink)
+            .filter(key => key.startsWith('strIngredient') && drink[key])
+            .map(key => drink[key])
+            .filter(Boolean)
+        },
+        source: 'cocktaildb'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'cocktaildb'
+      };
+    }
+  }
+
+  // Zip Code Lookup (completely free)
+  async getLocationByZip(zipCode: string, countryCode: string = 'us'): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.zippopotam}/${countryCode}/${zipCode}`);
+      if (!response.ok) throw new Error('Zippopotam API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: {
+          country: data.country,
+          countryAbbr: data['country abbreviation'],
+          places: data.places.map((place: any) => ({
+            placeName: place['place name'],
+            longitude: place.longitude,
+            latitude: place.latitude,
+            state: place.state
+          }))
+        },
+        source: 'zippopotam'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'zippopotam'
       };
     }
   }
