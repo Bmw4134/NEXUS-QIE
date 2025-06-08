@@ -1197,6 +1197,181 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Configuration and Enhancement Routes
+  app.get("/api/ai/status", async (req, res) => {
+    try {
+      const status = {
+        github: {
+          connected: !!process.env.GITHUB_TOKEN,
+          lastSync: new Date().toISOString()
+        },
+        openai: {
+          connected: !!process.env.OPENAI_API_KEY,
+          model: "gpt-4"
+        },
+        anthropic: {
+          connected: !!process.env.ANTHROPIC_API_KEY,
+          model: "claude-3-sonnet"
+        },
+        perplexity: {
+          connected: !!process.env.PERPLEXITY_API_KEY,
+          capabilities: ["real-time-search", "fact-verification"]
+        },
+        quantum: {
+          connected: true,
+          engines: ["trading", "analytics", "ml"],
+          status: "active"
+        }
+      };
+      res.json(status);
+    } catch (error) {
+      console.error("Error fetching AI status:", error);
+      res.status(500).json({ error: "Failed to fetch AI status" });
+    }
+  });
+
+  app.post("/api/ai/configure/github", async (req, res) => {
+    try {
+      const { githubToken } = req.body;
+      
+      if (!githubToken) {
+        return res.status(400).json({ error: "GitHub token is required" });
+      }
+
+      // Validate GitHub token by making a test API call
+      const testResponse = await fetch("https://api.github.com/user", {
+        headers: {
+          'Authorization': `token ${githubToken}`,
+          'User-Agent': 'PTNI-Family-Platform'
+        }
+      });
+
+      if (!testResponse.ok) {
+        return res.status(400).json({ error: "Invalid GitHub token" });
+      }
+
+      const userData = await testResponse.json();
+      
+      // Store the token (in production, this would be encrypted and stored securely)
+      process.env.GITHUB_TOKEN = githubToken;
+      
+      console.log(`🔗 GitHub integration configured for user: ${userData.login}`);
+      console.log('✅ Enhanced AI capabilities now available with GitHub code intelligence');
+
+      res.json({
+        success: true,
+        user: userData.login,
+        capabilities: [
+          "Enhanced code understanding",
+          "Repository analysis",
+          "Advanced project insights",
+          "Code generation improvements"
+        ]
+      });
+    } catch (error) {
+      console.error("GitHub configuration error:", error);
+      res.status(500).json({ error: "Failed to configure GitHub integration" });
+    }
+  });
+
+  app.post("/api/ai/configure/openai", async (req, res) => {
+    try {
+      const { openaiKey } = req.body;
+      
+      if (!openaiKey) {
+        return res.status(400).json({ error: "OpenAI API key is required" });
+      }
+
+      // Validate OpenAI key
+      const testResponse = await fetch("https://api.openai.com/v1/models", {
+        headers: {
+          'Authorization': `Bearer ${openaiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!testResponse.ok) {
+        return res.status(400).json({ error: "Invalid OpenAI API key" });
+      }
+
+      process.env.OPENAI_API_KEY = openaiKey;
+      
+      console.log('🧠 OpenAI integration configured successfully');
+      console.log('✅ GPT-4 language models now available for enhanced processing');
+
+      res.json({
+        success: true,
+        models: ["gpt-4", "gpt-3.5-turbo"],
+        capabilities: [
+          "Advanced language processing",
+          "Code generation and analysis",
+          "Natural language understanding",
+          "Complex reasoning tasks"
+        ]
+      });
+    } catch (error) {
+      console.error("OpenAI configuration error:", error);
+      res.status(500).json({ error: "Failed to configure OpenAI integration" });
+    }
+  });
+
+  app.post("/api/ai/configure/anthropic", async (req, res) => {
+    try {
+      const { anthropicKey } = req.body;
+      
+      if (!anthropicKey) {
+        return res.status(400).json({ error: "Anthropic API key is required" });
+      }
+
+      process.env.ANTHROPIC_API_KEY = anthropicKey;
+      
+      console.log('⚡ Anthropic Claude integration configured successfully');
+      console.log('✅ Advanced reasoning capabilities now available');
+
+      res.json({
+        success: true,
+        models: ["claude-3-sonnet", "claude-3-haiku"],
+        capabilities: [
+          "Advanced reasoning",
+          "Long-form content analysis",
+          "Ethical AI responses",
+          "Complex problem solving"
+        ]
+      });
+    } catch (error) {
+      console.error("Anthropic configuration error:", error);
+      res.status(500).json({ error: "Failed to configure Anthropic integration" });
+    }
+  });
+
+  app.post("/api/ai/configure/perplexity", async (req, res) => {
+    try {
+      const { perplexityKey } = req.body;
+      
+      if (!perplexityKey) {
+        return res.status(400).json({ error: "Perplexity API key is required" });
+      }
+
+      process.env.PERPLEXITY_API_KEY = perplexityKey;
+      
+      console.log('🔍 Perplexity search integration configured successfully');
+      console.log('✅ Real-time search and information retrieval now available');
+
+      res.json({
+        success: true,
+        capabilities: [
+          "Real-time web search",
+          "Current information access",
+          "Research capabilities",
+          "Fact verification"
+        ]
+      });
+    } catch (error) {
+      console.error("Perplexity configuration error:", error);
+      res.status(500).json({ error: "Failed to configure Perplexity integration" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -164,8 +164,8 @@ export default function FamilyBoardsSimple() {
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">PTNI Family & Friends Dashboard</h1>
-              <p className="text-gray-600">Enhanced Trello-style collaborative task management with AI optimization</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">ConnectHub Pro</h1>
+              <p className="text-gray-600">PTNI-Enhanced collaborative workspace with quantum AI optimization</p>
             </div>
             <Dialog open={showCreateBoard} onOpenChange={setShowCreateBoard}>
               <DialogTrigger asChild>

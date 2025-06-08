@@ -50,11 +50,18 @@ export function Dashboard() {
       color: "red"
     },
     {
-      title: "Family Boards",
-      description: "PTNI-Enhanced Trello for family collaboration",
+      title: "ConnectHub Pro",
+      description: "PTNI-Enhanced collaboration workspace with AI optimization",
       icon: Users,
       path: "/family-boards",
       color: "indigo"
+    },
+    {
+      title: "AI Brain Center",
+      description: "Configure advanced AI integrations and GitHub connectivity",
+      icon: Brain,
+      path: "/ai-config",
+      color: "purple"
     }
   ];
 
