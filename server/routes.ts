@@ -1372,6 +1372,223 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Family Events API
+  app.get("/api/family/events", async (req, res) => {
+    try {
+      const events = [
+        {
+          id: "1",
+          title: "Family Dinner",
+          description: "Weekly family dinner at home",
+          date: "2025-06-09",
+          time: "18:00",
+          priority: "medium",
+          category: "family",
+          status: "upcoming",
+          assignedTo: ["family"]
+        },
+        {
+          id: "2", 
+          title: "Doctor Appointment",
+          description: "Annual checkup for Mom",
+          date: "2025-06-10",
+          time: "10:30",
+          priority: "high",
+          category: "appointment",
+          status: "upcoming",
+          assignedTo: ["Mom"]
+        }
+      ];
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ error: "Failed to fetch events" });
+    }
+  });
+
+  app.post("/api/family/events", async (req, res) => {
+    try {
+      const eventData = req.body;
+      const newEvent = {
+        id: Date.now().toString(),
+        ...eventData,
+        createdAt: new Date()
+      };
+      console.log("✅ Family event created:", newEvent.title);
+      res.json(newEvent);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      res.status(500).json({ error: "Failed to create event" });
+    }
+  });
+
+  // Family Tasks API
+  app.get("/api/family/tasks", async (req, res) => {
+    try {
+      const tasks = [
+        {
+          id: "1",
+          title: "Clean Kitchen",
+          description: "Weekly kitchen deep clean",
+          dueDate: "2025-06-09",
+          priority: "medium",
+          category: "household",
+          status: "pending",
+          assignedTo: "family",
+          estimatedTime: 45
+        },
+        {
+          id: "2",
+          title: "Buy Groceries", 
+          description: "Weekly grocery shopping",
+          dueDate: "2025-06-08",
+          priority: "high",
+          category: "household",
+          status: "pending",
+          assignedTo: "Dad",
+          estimatedTime: 60
+        }
+      ];
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      res.status(500).json({ error: "Failed to fetch tasks" });
+    }
+  });
+
+  app.post("/api/family/tasks", async (req, res) => {
+    try {
+      const taskData = req.body;
+      const newTask = {
+        id: Date.now().toString(),
+        ...taskData,
+        createdAt: new Date()
+      };
+      console.log("✅ Family task created:", newTask.title);
+      res.json(newTask);
+    } catch (error) {
+      console.error("Error creating task:", error);
+      res.status(500).json({ error: "Failed to create task" });
+    }
+  });
+
+  app.patch("/api/family/tasks/:taskId/complete", async (req, res) => {
+    try {
+      const { taskId } = req.params;
+      console.log("✅ Task completed:", taskId);
+      res.json({ success: true, taskId, status: "completed" });
+    } catch (error) {
+      console.error("Error completing task:", error);
+      res.status(500).json({ error: "Failed to complete task" });
+    }
+  });
+
+  // Family Budgets API
+  app.get("/api/family/budgets", async (req, res) => {
+    try {
+      const budgets = [
+        {
+          id: "1",
+          category: "Groceries",
+          allocated: 800,
+          spent: 620,
+          remaining: 180,
+          period: "monthly"
+        },
+        {
+          id: "2",
+          category: "Entertainment", 
+          allocated: 300,
+          spent: 150,
+          remaining: 150,
+          period: "monthly"
+        },
+        {
+          id: "3",
+          category: "Utilities",
+          allocated: 400,
+          spent: 380,
+          remaining: 20,
+          period: "monthly"
+        }
+      ];
+      res.json(budgets);
+    } catch (error) {
+      console.error("Error fetching budgets:", error);
+      res.status(500).json({ error: "Failed to fetch budgets" });
+    }
+  });
+
+  app.post("/api/family/budgets", async (req, res) => {
+    try {
+      const budgetData = req.body;
+      const newBudget = {
+        id: Date.now().toString(),
+        ...budgetData,
+        spent: 0,
+        remaining: budgetData.allocated,
+        createdAt: new Date()
+      };
+      console.log("💰 Budget created:", newBudget.category);
+      res.json(newBudget);
+    } catch (error) {
+      console.error("Error creating budget:", error);
+      res.status(500).json({ error: "Failed to create budget" });
+    }
+  });
+
+  // Family Expenses API
+  app.get("/api/family/expenses", async (req, res) => {
+    try {
+      const expenses = [
+        {
+          id: "1",
+          description: "Grocery shopping at Walmart",
+          amount: 120.50,
+          category: "Groceries",
+          date: "2025-06-07",
+          paidBy: "Dad"
+        },
+        {
+          id: "2",
+          description: "Electric bill",
+          amount: 180.00,
+          category: "Utilities", 
+          date: "2025-06-06",
+          paidBy: "Mom"
+        },
+        {
+          id: "3",
+          description: "Movie tickets",
+          amount: 45.00,
+          category: "Entertainment",
+          date: "2025-06-05",
+          paidBy: "Family"
+        }
+      ];
+      res.json(expenses);
+    } catch (error) {
+      console.error("Error fetching expenses:", error);
+      res.status(500).json({ error: "Failed to fetch expenses" });
+    }
+  });
+
+  app.post("/api/family/expenses", async (req, res) => {
+    try {
+      const expenseData = req.body;
+      const newExpense = {
+        id: Date.now().toString(),
+        ...expenseData,
+        createdAt: new Date()
+      };
+      console.log("💳 Expense recorded:", newExpense.description, `$${newExpense.amount}`);
+      res.json(newExpense);
+    } catch (error) {
+      console.error("Error creating expense:", error);
+      res.status(500).json({ error: "Failed to create expense" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
