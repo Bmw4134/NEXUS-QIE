@@ -1982,6 +1982,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Additional free API endpoints
+  app.get('/api/public-apis/ip-location/:ip?', async (req, res) => {
+    try {
+      const { ip } = req.params;
+      const result = await publicApisService.getIPLocation(ip);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ success: false, error: 'IP location API error' });
+    }
+  });
+
+  app.get('/api/public-apis/advice', async (req, res) => {
+    try {
+      const result = await publicApisService.getRandomAdvice();
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ success: false, error: 'Advice API error' });
+    }
+  });
+
+  app.get('/api/public-apis/quote', async (req, res) => {
+    try {
+      const result = await publicApisService.getRandomQuote();
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ success: false, error: 'Quote API error' });
+    }
+  });
+
+  app.get('/api/public-apis/universities/:country', async (req, res) => {
+    try {
+      const { country } = req.params;
+      const result = await publicApisService.getUniversities(country);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ success: false, error: 'Universities API error' });
+    }
+  });
+
+  app.get('/api/public-apis/holidays/:year/:countryCode', async (req, res) => {
+    try {
+      const { year, countryCode } = req.params;
+      const result = await publicApisService.getPublicHolidays(parseInt(year), countryCode);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ success: false, error: 'Holidays API error' });
+    }
+  });
+
+  app.get('/api/public-apis/dog-image', async (req, res) => {
+    try {
+      const result = await publicApisService.getRandomDogImage();
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ success: false, error: 'Dog image API error' });
+    }
+  });
+
+  app.get('/api/public-apis/activity/:type?', async (req, res) => {
+    try {
+      const { type } = req.params;
+      const result = await publicApisService.getActivitySuggestion(type);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ success: false, error: 'Activity API error' });
+    }
+  });
+
+  app.get('/api/public-apis/github/:username', async (req, res) => {
+    try {
+      const { username } = req.params;
+      const result = await publicApisService.getGitHubUser(username);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ success: false, error: 'GitHub API error' });
+    }
+  });
+
   // QNIS Unified Patch Application
   app.post('/api/qnis/apply-patch', async (req, res) => {
     try {

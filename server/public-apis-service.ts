@@ -47,7 +47,18 @@ export class PublicApisService {
     news: 'https://newsapi.org/v2',
     countries: 'https://restcountries.com/v3.1',
     wikipedia: 'https://en.wikipedia.org/api/rest_v1',
-    exchange: 'https://api.exchangerate-api.com/v4/latest'
+    exchange: 'https://api.exchangerate-api.com/v4/latest',
+    ipapi: 'https://ipapi.co',
+    advice: 'https://api.adviceslip.com',
+    jokes: 'https://v2.jokeapi.dev',
+    quotes: 'https://api.quotable.io',
+    facts: 'http://numbersapi.com',
+    universities: 'http://universities.hipolabs.com',
+    publicHolidays: 'https://date.nager.at/api/v3',
+    dogImages: 'https://dog.ceo/api',
+    cats: 'https://api.thecatapi.com/v1',
+    bored: 'https://www.boredapi.com/api',
+    github: 'https://api.github.com'
   };
 
   // Weather API (requires API key but has free tier)
@@ -239,6 +250,229 @@ export class PublicApisService {
     }
   }
 
+  // IP Geolocation API (completely free)
+  async getIPLocation(ip?: string): Promise<ApiResponse<any>> {
+    try {
+      const endpoint = ip ? `/${ip}/json` : '/json';
+      const response = await fetch(`${this.baseUrls.ipapi}${endpoint}`);
+      
+      if (!response.ok) throw new Error('IP API error');
+      
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: {
+          ip: data.ip,
+          city: data.city,
+          region: data.region,
+          country: data.country_name,
+          timezone: data.timezone,
+          currency: data.currency,
+          languages: data.languages
+        },
+        source: 'ipapi'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'ipapi'
+      };
+    }
+  }
+
+  // Random Advice API (completely free)
+  async getRandomAdvice(): Promise<ApiResponse<string>> {
+    try {
+      const response = await fetch(`${this.baseUrls.advice}/advice`);
+      
+      if (!response.ok) throw new Error('Advice API error');
+      
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: data.slip.advice,
+        source: 'adviceslip'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'adviceslip'
+      };
+    }
+  }
+
+  // Random Quotes API (completely free)
+  async getRandomQuote(): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.quotes}/random`);
+      
+      if (!response.ok) throw new Error('Quotes API error');
+      
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: {
+          content: data.content,
+          author: data.author,
+          tags: data.tags
+        },
+        source: 'quotable'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'quotable'
+      };
+    }
+  }
+
+  // Universities API (completely free)
+  async getUniversities(country: string): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await fetch(`${this.baseUrls.universities}/search?country=${country}`);
+      
+      if (!response.ok) throw new Error('Universities API error');
+      
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: data.slice(0, 10).map((uni: any) => ({
+          name: uni.name,
+          country: uni.country,
+          domains: uni.domains,
+          webPages: uni.web_pages
+        })),
+        source: 'universities'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'universities'
+      };
+    }
+  }
+
+  // Public Holidays API (completely free)
+  async getPublicHolidays(year: number, countryCode: string): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await fetch(`${this.baseUrls.publicHolidays}/PublicHolidays/${year}/${countryCode}`);
+      
+      if (!response.ok) throw new Error('Public holidays API error');
+      
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: data.map((holiday: any) => ({
+          date: holiday.date,
+          name: holiday.name,
+          localName: holiday.localName,
+          countryCode: holiday.countryCode
+        })),
+        source: 'nager'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'nager'
+      };
+    }
+  }
+
+  // Random Dog Images API (completely free)
+  async getRandomDogImage(): Promise<ApiResponse<string>> {
+    try {
+      const response = await fetch(`${this.baseUrls.dogImages}/breeds/image/random`);
+      
+      if (!response.ok) throw new Error('Dog API error');
+      
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: data.message,
+        source: 'dog-ceo'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'dog-ceo'
+      };
+    }
+  }
+
+  // Activity Suggestions API (completely free)
+  async getActivitySuggestion(type?: string): Promise<ApiResponse<any>> {
+    try {
+      const url = type ? `${this.baseUrls.bored}/activity?type=${type}` : `${this.baseUrls.bored}/activity`;
+      const response = await fetch(url);
+      
+      if (!response.ok) throw new Error('Bored API error');
+      
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: {
+          activity: data.activity,
+          type: data.type,
+          participants: data.participants,
+          price: data.price,
+          accessibility: data.accessibility
+        },
+        source: 'boredapi'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'boredapi'
+      };
+    }
+  }
+
+  // GitHub User API (completely free, no auth required for public data)
+  async getGitHubUser(username: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.github}/users/${username}`);
+      
+      if (!response.ok) throw new Error('GitHub API error');
+      
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: {
+          login: data.login,
+          name: data.name,
+          bio: data.bio,
+          publicRepos: data.public_repos,
+          followers: data.followers,
+          following: data.following,
+          location: data.location,
+          company: data.company
+        },
+        source: 'github'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'github'
+      };
+    }
+  }
+
   // Get all API statuses
   async getApiStatuses(): Promise<Record<string, boolean>> {
     const statuses: Record<string, boolean> = {};
@@ -255,6 +489,26 @@ export class PublicApisService {
       // Test Wikipedia (always free)
       const wikiTest = await this.searchWikipedia('Technology');
       statuses.wikipedia = wikiTest.success;
+
+      // Test IP Location (always free)
+      const ipTest = await this.getIPLocation();
+      statuses.ipLocation = ipTest.success;
+
+      // Test Random Advice (always free)
+      const adviceTest = await this.getRandomAdvice();
+      statuses.advice = adviceTest.success;
+
+      // Test Random Quotes (always free)
+      const quoteTest = await this.getRandomQuote();
+      statuses.quotes = quoteTest.success;
+
+      // Test Universities (always free)
+      const uniTest = await this.getUniversities('United States');
+      statuses.universities = uniTest.success;
+
+      // Test GitHub (always free for public data)
+      const githubTest = await this.getGitHubUser('octocat');
+      statuses.github = githubTest.success;
       
       // Demo statuses for APIs requiring keys
       statuses.weather = true; // Demo mode
@@ -267,6 +521,11 @@ export class PublicApisService {
         countries: false,
         exchange: false,
         wikipedia: false,
+        ipLocation: false,
+        advice: false,
+        quotes: false,
+        universities: false,
+        github: false,
         weather: false,
         news: false
       };
