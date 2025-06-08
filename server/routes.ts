@@ -1589,6 +1589,233 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Family Notes API
+  app.get("/api/family/notes", async (req, res) => {
+    try {
+      const notes = [
+        {
+          id: "1",
+          title: "Family Vacation Planning",
+          content: "Summer vacation ideas:\n- Beach resort in Florida\n- Mountain cabin in Colorado\n- European city tour\n\nBudget: $5000\nDates: July 15-25",
+          category: "family",
+          tags: ["vacation", "planning", "summer"],
+          priority: "high",
+          isShared: true,
+          createdBy: "Mom",
+          createdAt: "2025-06-07",
+          updatedAt: "2025-06-08",
+          isFavorite: true
+        },
+        {
+          id: "2",
+          title: "Investment Research",
+          content: "Crypto research notes:\n- Bitcoin showing upward trend\n- Consider DCA strategy\n- Risk management important\n\nNext steps: Review portfolio allocation",
+          category: "finance",
+          tags: ["crypto", "investment", "research"],
+          priority: "medium",
+          isShared: false,
+          createdBy: "Dad",
+          createdAt: "2025-06-06",
+          updatedAt: "2025-06-07",
+          isFavorite: false
+        },
+        {
+          id: "3",
+          title: "Health & Wellness Goals",
+          content: "Family health goals for 2025:\n- Exercise 3x per week\n- Healthy meal planning\n- Regular check-ups\n- Mental health awareness",
+          category: "health",
+          tags: ["health", "goals", "wellness"],
+          priority: "high",
+          isShared: true,
+          createdBy: "Family",
+          createdAt: "2025-06-05",
+          updatedAt: "2025-06-08",
+          isFavorite: true
+        }
+      ];
+      res.json(notes);
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+      res.status(500).json({ error: "Failed to fetch notes" });
+    }
+  });
+
+  app.post("/api/family/notes", async (req, res) => {
+    try {
+      const noteData = req.body;
+      const newNote = {
+        id: Date.now().toString(),
+        ...noteData,
+        createdAt: new Date().toISOString().split('T')[0],
+        updatedAt: new Date().toISOString().split('T')[0],
+        isFavorite: false
+      };
+      console.log("📝 Family note created:", newNote.title);
+      res.json(newNote);
+    } catch (error) {
+      console.error("Error creating note:", error);
+      res.status(500).json({ error: "Failed to create note" });
+    }
+  });
+
+  // Family Members API
+  app.get("/api/family/members", async (req, res) => {
+    try {
+      const members = [
+        {
+          id: "1",
+          name: "Sarah Johnson",
+          email: "sarah@family.com",
+          role: "parent",
+          avatar: "SJ",
+          status: "online",
+          lastSeen: "2 minutes ago"
+        },
+        {
+          id: "2",
+          name: "Mike Johnson",
+          email: "mike@family.com",
+          role: "parent",
+          avatar: "MJ",
+          status: "busy",
+          lastSeen: "1 hour ago"
+        },
+        {
+          id: "3",
+          name: "Emma Johnson",
+          email: "emma@family.com",
+          role: "child",
+          avatar: "EJ",
+          status: "online",
+          lastSeen: "5 minutes ago"
+        }
+      ];
+      res.json(members);
+    } catch (error) {
+      console.error("Error fetching family members:", error);
+      res.status(500).json({ error: "Failed to fetch family members" });
+    }
+  });
+
+  app.post("/api/family/members", async (req, res) => {
+    try {
+      const memberData = req.body;
+      const newMember = {
+        id: Date.now().toString(),
+        ...memberData,
+        avatar: memberData.name?.split(' ').map((n: string) => n[0]).join('') || 'FM',
+        status: 'offline',
+        lastSeen: 'Just added'
+      };
+      console.log("👤 Family member added:", newMember.name);
+      res.json(newMember);
+    } catch (error) {
+      console.error("Error adding family member:", error);
+      res.status(500).json({ error: "Failed to add family member" });
+    }
+  });
+
+  // Family Messages API
+  app.get("/api/family/messages", async (req, res) => {
+    try {
+      const messages = [
+        {
+          id: "1",
+          content: "Don't forget about Emma's soccer practice at 4 PM today!",
+          senderId: "1",
+          senderName: "Sarah Johnson",
+          timestamp: "2025-06-08 14:30",
+          type: "reminder",
+          priority: "high"
+        },
+        {
+          id: "2",
+          content: "Great job everyone on completing this week's tasks! Pizza night tonight to celebrate.",
+          senderId: "2",
+          senderName: "Mike Johnson",
+          timestamp: "2025-06-08 12:15",
+          type: "announcement",
+          priority: "medium"
+        },
+        {
+          id: "3",
+          content: "Can someone help me with my math homework after dinner?",
+          senderId: "3",
+          senderName: "Emma Johnson",
+          timestamp: "2025-06-08 10:45",
+          type: "text",
+          priority: "low"
+        }
+      ];
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching family messages:", error);
+      res.status(500).json({ error: "Failed to fetch family messages" });
+    }
+  });
+
+  app.post("/api/family/messages", async (req, res) => {
+    try {
+      const messageData = req.body;
+      const newMessage = {
+        id: Date.now().toString(),
+        ...messageData,
+        senderId: "1",
+        senderName: "You",
+        timestamp: new Date().toISOString()
+      };
+      console.log("💬 Family message sent:", newMessage.content.substring(0, 50));
+      res.json(newMessage);
+    } catch (error) {
+      console.error("Error sending family message:", error);
+      res.status(500).json({ error: "Failed to send family message" });
+    }
+  });
+
+  // Family Activities API
+  app.get("/api/family/activities", async (req, res) => {
+    try {
+      const activities = [
+        {
+          id: "1",
+          type: "task_completed",
+          description: "Completed task: Clean Kitchen",
+          memberId: "3",
+          memberName: "Emma Johnson",
+          timestamp: "2025-06-08 09:30"
+        },
+        {
+          id: "2",
+          type: "expense_added",
+          description: "Added expense: Grocery shopping ($125.50)",
+          memberId: "1",
+          memberName: "Sarah Johnson",
+          timestamp: "2025-06-08 08:15"
+        },
+        {
+          id: "3",
+          type: "event_created",
+          description: "Created event: Family Movie Night",
+          memberId: "2",
+          memberName: "Mike Johnson",
+          timestamp: "2025-06-07 19:45"
+        },
+        {
+          id: "4",
+          type: "note_shared",
+          description: "Shared note: Summer Vacation Planning",
+          memberId: "1",
+          memberName: "Sarah Johnson",
+          timestamp: "2025-06-07 16:20"
+        }
+      ];
+      res.json(activities);
+    } catch (error) {
+      console.error("Error fetching family activities:", error);
+      res.status(500).json({ error: "Failed to fetch family activities" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
