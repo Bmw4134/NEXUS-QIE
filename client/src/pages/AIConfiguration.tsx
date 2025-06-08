@@ -175,28 +175,6 @@ export default function AIConfiguration() {
     }
   });
 
-  // Cohere integration mutation
-  const configureCohereM​utation = useMutation({
-    mutationFn: async (key: string) => {
-      const response = await fetch('/api/ai/configure/cohere', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cohereKey: key })
-      });
-      if (!response.ok) throw new Error('Failed to configure Cohere');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/ai/status'] });
-      setShowCohereDialog(false);
-      setCohereKey('');
-      toast({
-        title: "Cohere Configured",
-        description: "Enterprise AI models integrated successfully.",
-      });
-    }
-  });
-
   const handleGithubSubmit = () => {
     if (!githubToken.trim()) return;
     configureGithubMutation.mutate(githubToken);
@@ -215,6 +193,25 @@ export default function AIConfiguration() {
   const handlePerplexitySubmit = () => {
     if (!perplexityKey.trim()) return;
     configurePerplexityMutation.mutate(perplexityKey);
+  };
+
+  const handleXaiSubmit = () => {
+    if (!xaiKey.trim()) return;
+    configureXaiMutation.mutate(xaiKey);
+  };
+
+  const handleGeminiSubmit = () => {
+    if (!geminiKey.trim()) return;
+    configureGeminiMutation.mutate(geminiKey);
+  };
+
+  const handleCohereSubmit = () => {
+    if (!cohereKey.trim()) return;
+    // Add mutation call when backend is ready
+    toast({
+      title: "Coming Soon",
+      description: "Cohere integration will be available soon.",
+    });
   };
 
   const getStatusIcon = (isConnected: boolean) => {
@@ -486,6 +483,180 @@ export default function AIConfiguration() {
                           </Button>
                         </DialogFooter>
                       </DialogContent>
+                    </Dialog>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* xAI (Grok) Integration */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Bot className="w-5 h-5 mr-2" />
+                    xAI Grok Integration
+                    {getStatusIcon(aiStatus?.xai?.connected)}
+                  </CardTitle>
+                  <CardDescription>
+                    Connect xAI's Grok models for advanced reasoning and real-time information processing
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="text-sm text-gray-600">
+                      <p>Benefits:</p>
+                      <ul className="list-disc list-inside mt-2">
+                        <li>Advanced reasoning capabilities</li>
+                        <li>Real-time web information access</li>
+                        <li>Humor and personality</li>
+                        <li>Vision and image understanding</li>
+                      </ul>
+                    </div>
+                    <Dialog open={showXaiDialog} onOpenChange={setShowXaiDialog}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full" variant="outline">
+                          <Key className="w-4 h-4 mr-2" />
+                          Configure xAI API Key
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>xAI API Key Setup</DialogTitle>
+                          <DialogDescription>
+                            Get your API key from the xAI console to enable Grok models.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="space-y-3">
+                            <div className="p-3 bg-blue-50 rounded-lg">
+                              <p className="text-sm font-medium text-blue-900">Setup Instructions:</p>
+                              <ol className="text-sm text-blue-800 mt-2 space-y-1">
+                                <li>1. Visit x.ai and create an account</li>
+                                <li>2. Navigate to API settings</li>
+                                <li>3. Generate a new API key</li>
+                                <li>4. Copy and paste it below</li>
+                              </ol>
+                            </div>
+                            <Label htmlFor="xai-key">API Key</Label>
+                            <Input
+                              id="xai-key"
+                              type="password"
+                              value={xaiKey}
+                              onChange={(e) => setXaiKey(e.target.value)}
+                              placeholder="xai-xxxxxxxxxxxxxxxxxxxx"
+                            />
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button onClick={handleXaiSubmit} disabled={configureXaiMutation.isPending}>
+                            {configureXaiMutation.isPending ? 'Configuring...' : 'Configure'}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Google Gemini Integration */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Brain className="w-5 h-5 mr-2" />
+                    Google Gemini Integration
+                    {getStatusIcon(aiStatus?.gemini?.connected)}
+                  </CardTitle>
+                  <CardDescription>
+                    Connect Google's Gemini Pro models for multimodal AI capabilities
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="text-sm text-gray-600">
+                      <p>Benefits:</p>
+                      <ul className="list-disc list-inside mt-2">
+                        <li>Multimodal processing (text, images, video)</li>
+                        <li>Advanced reasoning and math</li>
+                        <li>Code generation and analysis</li>
+                        <li>Large context window</li>
+                      </ul>
+                    </div>
+                    <Dialog open={showGeminiDialog} onOpenChange={setShowGeminiDialog}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full" variant="outline">
+                          <Key className="w-4 h-4 mr-2" />
+                          Configure Gemini API Key
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Google Gemini API Key Setup</DialogTitle>
+                          <DialogDescription>
+                            Get your API key from Google AI Studio to enable Gemini models.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="space-y-3">
+                            <div className="p-3 bg-green-50 rounded-lg">
+                              <p className="text-sm font-medium text-green-900">Setup Instructions:</p>
+                              <ol className="text-sm text-green-800 mt-2 space-y-1">
+                                <li>1. Visit aistudio.google.com</li>
+                                <li>2. Sign in with your Google account</li>
+                                <li>3. Click "Get API key" in the left sidebar</li>
+                                <li>4. Create a new API key</li>
+                                <li>5. Copy and paste it below</li>
+                              </ol>
+                            </div>
+                            <Label htmlFor="gemini-key">API Key</Label>
+                            <Input
+                              id="gemini-key"
+                              type="password"
+                              value={geminiKey}
+                              onChange={(e) => setGeminiKey(e.target.value)}
+                              placeholder="AIzaSyxxxxxxxxxxxxxxxxxxxxxxx"
+                            />
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button onClick={handleGeminiSubmit} disabled={configureGeminiMutation.isPending}>
+                            {configureGeminiMutation.isPending ? 'Configuring...' : 'Configure'}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Cohere Integration */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Zap className="w-5 h-5 mr-2" />
+                    Cohere Integration
+                    <Badge variant="secondary" className="ml-2">Coming Soon</Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    Enterprise-grade language models for business applications
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="text-sm text-gray-600">
+                      <p>Planned Features:</p>
+                      <ul className="list-disc list-inside mt-2">
+                        <li>Enterprise-focused language models</li>
+                        <li>Advanced text classification</li>
+                        <li>Semantic search capabilities</li>
+                        <li>Content generation</li>
+                      </ul>
+                    </div>
+                    <Dialog open={showCohereDialog} onOpenChange={setShowCohereDialog}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full" variant="outline" disabled>
+                          <Key className="w-4 h-4 mr-2" />
+                          Coming Soon
+                        </Button>
+                      </DialogTrigger>
                     </Dialog>
                   </div>
                 </CardContent>
