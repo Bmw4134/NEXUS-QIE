@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Brain, Key, Github, Zap, Settings, CheckCircle, AlertCircle } from 'lucide-react';
+import { Brain, Key, Github, Zap, Settings, CheckCircle, AlertCircle, Bot } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function AIConfiguration() {
