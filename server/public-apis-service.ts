@@ -85,7 +85,16 @@ export class PublicApisService {
     carbonintensity: 'https://api.carbonintensity.org.uk',
     sunrise: 'https://api.sunrise-sunset.org',
     randomfox: 'https://randomfox.ca',
-    httpstatusdogs: 'https://httpstatusdogs.com'
+    httpstatusdogs: 'https://httpstatusdogs.com',
+    nominatim: 'https://nominatim.openstreetmap.org',
+    overpass: 'https://overpass-api.de/api',
+    geonames: 'http://api.geonames.org',
+    mapbox: 'https://api.mapbox.com/geocoding/v5/mapbox.places',
+    earthquake: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0',
+    openweather: 'https://openweathermap.org/data/2.5',
+    airvisual: 'http://api.airvisual.com/v2',
+    postcodes: 'https://api.postcodes.io',
+    georef: 'https://apis.datos.gob.ar/georef/api'
   };
 
   // Weather API (requires API key but has free tier)
@@ -951,6 +960,203 @@ export class PublicApisService {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
         source: 'sunrise-sunset'
+      };
+    }
+  }
+
+  // OpenStreetMap Nominatim Geocoding (completely free)
+  async geocodeAddress(address: string): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await fetch(`${this.baseUrls.nominatim}/search?q=${encodeURIComponent(address)}&format=json&limit=5`);
+      if (!response.ok) throw new Error('Nominatim API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: data.map((result: any) => ({
+          displayName: result.display_name,
+          latitude: parseFloat(result.lat),
+          longitude: parseFloat(result.lon),
+          type: result.type,
+          importance: result.importance,
+          boundingBox: result.boundingbox
+        })),
+        source: 'nominatim'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'nominatim'
+      };
+    }
+  }
+
+  // Reverse Geocoding (completely free)
+  async reverseGeocode(lat: number, lon: number): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.nominatim}/reverse?lat=${lat}&lon=${lon}&format=json`);
+      if (!response.ok) throw new Error('Reverse geocoding error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: {
+          displayName: data.display_name,
+          address: {
+            house_number: data.address?.house_number,
+            road: data.address?.road,
+            city: data.address?.city || data.address?.town || data.address?.village,
+            state: data.address?.state,
+            postcode: data.address?.postcode,
+            country: data.address?.country,
+            countryCode: data.address?.country_code
+          },
+          latitude: parseFloat(data.lat),
+          longitude: parseFloat(data.lon)
+        },
+        source: 'nominatim'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'nominatim'
+      };
+    }
+  }
+
+  // Find nearby places (completely free)
+  async findNearbyPlaces(lat: number, lon: number, amenity: string): Promise<ApiResponse<any[]>> {
+    try {
+      const overpassQuery = `
+        [out:json][timeout:25];
+        (
+          node["amenity"="${amenity}"](around:1000,${lat},${lon});
+          way["amenity"="${amenity}"](around:1000,${lat},${lon});
+          relation["amenity"="${amenity}"](around:1000,${lat},${lon});
+        );
+        out center meta;
+      `;
+      
+      const response = await fetch(`${this.baseUrls.overpass}/interpreter`, {
+        method: 'POST',
+        body: overpassQuery
+      });
+      
+      if (!response.ok) throw new Error('Overpass API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: data.elements.slice(0, 10).map((element: any) => ({
+          id: element.id,
+          name: element.tags?.name || 'Unnamed',
+          amenity: element.tags?.amenity,
+          address: element.tags?.['addr:full'] || element.tags?.['addr:street'],
+          phone: element.tags?.phone,
+          website: element.tags?.website,
+          latitude: element.lat || element.center?.lat,
+          longitude: element.lon || element.center?.lon,
+          openingHours: element.tags?.opening_hours
+        })),
+        source: 'overpass'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'overpass'
+      };
+    }
+  }
+
+  // Recent earthquake data (completely free)
+  async getRecentEarthquakes(): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await fetch(`${this.baseUrls.earthquake}/summary/significant_day.geojson`);
+      if (!response.ok) throw new Error('USGS earthquake API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: data.features.map((quake: any) => ({
+          magnitude: quake.properties.mag,
+          place: quake.properties.place,
+          time: new Date(quake.properties.time).toISOString(),
+          latitude: quake.geometry.coordinates[1],
+          longitude: quake.geometry.coordinates[0],
+          depth: quake.geometry.coordinates[2],
+          url: quake.properties.url,
+          felt: quake.properties.felt,
+          tsunami: quake.properties.tsunami
+        })),
+        source: 'usgs'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'usgs'
+      };
+    }
+  }
+
+  // UK Postcode lookup (completely free)
+  async lookupPostcode(postcode: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await fetch(`${this.baseUrls.postcodes}/postcodes/${postcode}`);
+      if (!response.ok) throw new Error('Postcodes API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: {
+          postcode: data.result.postcode,
+          latitude: data.result.latitude,
+          longitude: data.result.longitude,
+          country: data.result.country,
+          region: data.result.region,
+          adminDistrict: data.result.admin_district,
+          adminWard: data.result.admin_ward,
+          parish: data.result.parish,
+          constituency: data.result.parliamentary_constituency,
+          nuts: data.result.nuts
+        },
+        source: 'postcodes.io'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'postcodes.io'
+      };
+    }
+  }
+
+  // Get nearby postcodes (completely free)
+  async getNearbyPostcodes(postcode: string): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await fetch(`${this.baseUrls.postcodes}/postcodes/${postcode}/nearest`);
+      if (!response.ok) throw new Error('Postcodes API error');
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: data.result.slice(0, 10).map((pc: any) => ({
+          postcode: pc.postcode,
+          latitude: pc.latitude,
+          longitude: pc.longitude,
+          distance: pc.distance,
+          adminDistrict: pc.admin_district
+        })),
+        source: 'postcodes.io'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'postcodes.io'
       };
     }
   }
