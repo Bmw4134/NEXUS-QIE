@@ -1049,6 +1049,154 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register Family Platform Routes
   registerFamilyPlatformRoutes(app);
 
+  // PTNI Enhanced Family Dashboard - Advanced Trello Integration
+  app.get("/api/family/boards", async (req, res) => {
+    try {
+      const boards = await ptniAnalyticsEngine.getFamilyBoards();
+      res.json(boards);
+    } catch (error) {
+      console.error("Error fetching family boards:", error);
+      res.status(500).json({ error: "Failed to fetch boards" });
+    }
+  });
+
+  app.post("/api/family/board", async (req, res) => {
+    try {
+      const { name, description, type, members } = req.body;
+      const board = await ptniAnalyticsEngine.createFamilyBoard({
+        name,
+        description,
+        type: type || 'family',
+        members: members || [],
+        createdBy: req.headers.authorization?.replace('Bearer ', '') || 'watson-admin'
+      });
+      res.json(board);
+    } catch (error) {
+      console.error("Error creating family board:", error);
+      res.status(500).json({ error: "Failed to create board" });
+    }
+  });
+
+  app.get("/api/family/board/:boardId/lists", async (req, res) => {
+    try {
+      const { boardId } = req.params;
+      const lists = await ptniAnalyticsEngine.getBoardLists(boardId);
+      res.json(lists);
+    } catch (error) {
+      console.error("Error fetching board lists:", error);
+      res.status(500).json({ error: "Failed to fetch lists" });
+    }
+  });
+
+  app.post("/api/family/list", async (req, res) => {
+    try {
+      const { boardId, name, position } = req.body;
+      const list = await ptniAnalyticsEngine.createBoardList({
+        boardId,
+        name,
+        position: position || 0
+      });
+      res.json(list);
+    } catch (error) {
+      console.error("Error creating list:", error);
+      res.status(500).json({ error: "Failed to create list" });
+    }
+  });
+
+  app.get("/api/family/list/:listId/cards", async (req, res) => {
+    try {
+      const { listId } = req.params;
+      const cards = await ptniAnalyticsEngine.getListCards(listId);
+      res.json(cards);
+    } catch (error) {
+      console.error("Error fetching cards:", error);
+      res.status(500).json({ error: "Failed to fetch cards" });
+    }
+  });
+
+  app.post("/api/family/card", async (req, res) => {
+    try {
+      const { listId, title, description, assignedTo, dueDate, priority, labels } = req.body;
+      const card = await ptniAnalyticsEngine.createCard({
+        listId,
+        title,
+        description: description || '',
+        assignedTo: assignedTo || [],
+        dueDate,
+        priority: priority || 'medium',
+        labels: labels || [],
+        createdBy: req.headers.authorization?.replace('Bearer ', '') || 'watson-admin'
+      });
+      res.json(card);
+    } catch (error) {
+      console.error("Error creating card:", error);
+      res.status(500).json({ error: "Failed to create card" });
+    }
+  });
+
+  app.put("/api/family/card/:cardId", async (req, res) => {
+    try {
+      const { cardId } = req.params;
+      const updates = req.body;
+      const card = await ptniAnalyticsEngine.updateCard(cardId, updates);
+      res.json(card);
+    } catch (error) {
+      console.error("Error updating card:", error);
+      res.status(500).json({ error: "Failed to update card" });
+    }
+  });
+
+  app.post("/api/family/card/:cardId/move", async (req, res) => {
+    try {
+      const { cardId } = req.params;
+      const { targetListId, position } = req.body;
+      const result = await ptniAnalyticsEngine.moveCard(cardId, targetListId, position);
+      res.json(result);
+    } catch (error) {
+      console.error("Error moving card:", error);
+      res.status(500).json({ error: "Failed to move card" });
+    }
+  });
+
+  app.post("/api/family/card/:cardId/comment", async (req, res) => {
+    try {
+      const { cardId } = req.params;
+      const { comment } = req.body;
+      const result = await ptniAnalyticsEngine.addCardComment(cardId, {
+        comment,
+        author: req.headers.authorization?.replace('Bearer ', '') || 'watson-admin',
+        timestamp: new Date()
+      });
+      res.json(result);
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      res.status(500).json({ error: "Failed to add comment" });
+    }
+  });
+
+  // AI-Enhanced Task Management
+  app.post("/api/family/board/:boardId/optimize", async (req, res) => {
+    try {
+      const { boardId } = req.params;
+      const optimization = await ptniAnalyticsEngine.optimizeBoard(boardId);
+      res.json(optimization);
+    } catch (error) {
+      console.error("Error optimizing board:", error);
+      res.status(500).json({ error: "Failed to optimize board" });
+    }
+  });
+
+  app.get("/api/family/board/:boardId/analytics", async (req, res) => {
+    try {
+      const { boardId } = req.params;
+      const analytics = await ptniAnalyticsEngine.getBoardAnalytics(boardId);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+      res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

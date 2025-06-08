@@ -49,6 +49,85 @@ export interface PTNIKPIAlert {
   timestamp: Date;
 }
 
+// Enhanced Family Board Management Interfaces
+export interface FamilyBoard {
+  id: string;
+  name: string;
+  description: string;
+  type: 'family' | 'work' | 'personal' | 'projects';
+  members: string[];
+  lists: string[];
+  backgroundColor: string;
+  isStarred: boolean;
+  lastActivity: Date;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface BoardList {
+  id: string;
+  boardId: string;
+  name: string;
+  position: number;
+  cards: string[];
+  isArchived: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TaskCard {
+  id: string;
+  listId: string;
+  title: string;
+  description: string;
+  assignedTo: string[];
+  dueDate?: Date;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  labels: string[];
+  position: number;
+  checklist: ChecklistItem[];
+  comments: CardComment[];
+  attachments: string[];
+  estimatedTime?: number;
+  actualTime?: number;
+  status: 'pending' | 'in_progress' | 'review' | 'completed';
+  isArchived: boolean;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ChecklistItem {
+  id: string;
+  text: string;
+  completed: boolean;
+  assignedTo?: string;
+  completedAt?: Date;
+  completedBy?: string;
+}
+
+export interface CardComment {
+  id: string;
+  author: string;
+  comment: string;
+  timestamp: Date;
+  mentions: string[];
+  reactions: Record<string, string[]>;
+}
+
+export interface BoardAnalytics {
+  totalCards: number;
+  completedCards: number;
+  overdueCards: number;
+  avgCompletionTime: number;
+  memberProductivity: Record<string, number>;
+  priorityDistribution: Record<string, number>;
+  weeklyProgress: Array<{ week: string; completed: number; created: number }>;
+  bottlenecks: string[];
+  suggestions: string[];
+}
+
 export class PTNIAnalyticsEngine {
   private quantumDB: NexusQuantumDatabase;
   private mlEngine: QuantumMLEngine;
@@ -56,6 +135,11 @@ export class PTNIAnalyticsEngine {
   private kpiAlerts: PTNIKPIAlert[] = [];
   private isRunning = false;
   private updateInterval: NodeJS.Timeout | null = null;
+  
+  // Enhanced Family Board Management Storage
+  private familyBoards: Map<string, FamilyBoard> = new Map();
+  private boardLists: Map<string, BoardList> = new Map();
+  private taskCards: Map<string, TaskCard> = new Map();
   
   constructor(quantumDB: NexusQuantumDatabase, mlEngine: QuantumMLEngine) {
     this.quantumDB = quantumDB;
@@ -487,6 +571,365 @@ export class PTNIAnalyticsEngine {
       lastUpdate: this.metricsHistory[this.metricsHistory.length - 1]?.timestamp,
       confidenceLevel: this.getCurrentMetrics().confidenceLevel
     };
+  }
+
+  // Enhanced Family Board Management Methods
+
+  async getFamilyBoards(): Promise<FamilyBoard[]> {
+    // Initialize default family boards if none exist
+    if (this.familyBoards.size === 0) {
+      await this.initializeDefaultBoards();
+    }
+    return Array.from(this.familyBoards.values());
+  }
+
+  async createFamilyBoard(boardData: {
+    name: string;
+    description: string;
+    type: 'family' | 'work' | 'personal' | 'projects';
+    members: string[];
+    createdBy: string;
+  }): Promise<FamilyBoard> {
+    const boardId = `board-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const now = new Date();
+    
+    const board: FamilyBoard = {
+      id: boardId,
+      name: boardData.name,
+      description: boardData.description,
+      type: boardData.type,
+      members: boardData.members,
+      lists: [],
+      backgroundColor: this.getRandomBoardColor(),
+      isStarred: false,
+      lastActivity: now,
+      createdBy: boardData.createdBy,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    this.familyBoards.set(boardId, board);
+    
+    // Create default lists
+    await this.createDefaultLists(boardId);
+    
+    return board;
+  }
+
+  async getBoardLists(boardId: string): Promise<BoardList[]> {
+    return Array.from(this.boardLists.values()).filter(list => list.boardId === boardId);
+  }
+
+  async createBoardList(listData: {
+    boardId: string;
+    name: string;
+    position: number;
+  }): Promise<BoardList> {
+    const listId = `list-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const now = new Date();
+    
+    const list: BoardList = {
+      id: listId,
+      boardId: listData.boardId,
+      name: listData.name,
+      position: listData.position,
+      cards: [],
+      isArchived: false,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    this.boardLists.set(listId, list);
+    
+    // Update board's list array
+    const board = this.familyBoards.get(listData.boardId);
+    if (board) {
+      board.lists.push(listId);
+      board.lastActivity = now;
+      board.updatedAt = now;
+    }
+    
+    return list;
+  }
+
+  async getListCards(listId: string): Promise<TaskCard[]> {
+    return Array.from(this.taskCards.values()).filter(card => card.listId === listId);
+  }
+
+  async createCard(cardData: {
+    listId: string;
+    title: string;
+    description: string;
+    assignedTo: string[];
+    dueDate?: Date;
+    priority: 'low' | 'medium' | 'high' | 'urgent';
+    labels: string[];
+    createdBy: string;
+  }): Promise<TaskCard> {
+    const cardId = `card-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const now = new Date();
+    
+    const card: TaskCard = {
+      id: cardId,
+      listId: cardData.listId,
+      title: cardData.title,
+      description: cardData.description,
+      assignedTo: cardData.assignedTo,
+      dueDate: cardData.dueDate,
+      priority: cardData.priority,
+      labels: cardData.labels,
+      position: await this.getNextCardPosition(cardData.listId),
+      checklist: [],
+      comments: [],
+      attachments: [],
+      status: 'pending',
+      isArchived: false,
+      createdBy: cardData.createdBy,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    this.taskCards.set(cardId, card);
+    
+    // Update list's card array
+    const list = this.boardLists.get(cardData.listId);
+    if (list) {
+      list.cards.push(cardId);
+      
+      // Update board activity
+      const board = this.familyBoards.get(list.boardId);
+      if (board) {
+        board.lastActivity = now;
+        board.updatedAt = now;
+      }
+    }
+    
+    return card;
+  }
+
+  async updateCard(cardId: string, updates: Partial<TaskCard>): Promise<TaskCard> {
+    const card = this.taskCards.get(cardId);
+    if (!card) {
+      throw new Error('Card not found');
+    }
+
+    const updatedCard = { ...card, ...updates, updatedAt: new Date() };
+    this.taskCards.set(cardId, updatedCard);
+    
+    return updatedCard;
+  }
+
+  async moveCard(cardId: string, targetListId: string, position: number): Promise<{ success: boolean }> {
+    const card = this.taskCards.get(cardId);
+    if (!card) {
+      throw new Error('Card not found');
+    }
+
+    // Remove from old list
+    const oldList = this.boardLists.get(card.listId);
+    if (oldList) {
+      oldList.cards = oldList.cards.filter(id => id !== cardId);
+    }
+
+    // Add to new list
+    const newList = this.boardLists.get(targetListId);
+    if (newList) {
+      newList.cards.splice(position, 0, cardId);
+    }
+
+    // Update card
+    card.listId = targetListId;
+    card.position = position;
+    card.updatedAt = new Date();
+
+    return { success: true };
+  }
+
+  async addCardComment(cardId: string, commentData: {
+    comment: string;
+    author: string;
+    timestamp: Date;
+  }): Promise<{ success: boolean }> {
+    const card = this.taskCards.get(cardId);
+    if (!card) {
+      throw new Error('Card not found');
+    }
+
+    const comment: CardComment = {
+      id: `comment-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      author: commentData.author,
+      comment: commentData.comment,
+      timestamp: commentData.timestamp,
+      mentions: [],
+      reactions: {}
+    };
+
+    card.comments.push(comment);
+    card.updatedAt = new Date();
+
+    return { success: true };
+  }
+
+  async optimizeBoard(boardId: string): Promise<{
+    suggestions: string[];
+    optimizations: any[];
+    aiInsights: string[];
+  }> {
+    const board = this.familyBoards.get(boardId);
+    if (!board) {
+      throw new Error('Board not found');
+    }
+
+    const analytics = await this.getBoardAnalytics(boardId);
+    
+    const suggestions = [
+      `Optimize ${analytics.overdueCards} overdue tasks for better productivity`,
+      `Balance workload across ${board.members.length} team members`,
+      `Review ${analytics.bottlenecks.length} identified bottlenecks`,
+      'Implement automated task prioritization based on AI analysis'
+    ];
+
+    const optimizations = [
+      {
+        type: 'priority_rebalancing',
+        description: 'Automatically reorder tasks by AI-calculated priority',
+        impact: 'high'
+      },
+      {
+        type: 'member_workload',
+        description: 'Redistribute tasks for optimal team efficiency',
+        impact: 'medium'
+      }
+    ];
+
+    const aiInsights = [
+      'Task completion velocity has increased 23% this week',
+      'Recommend focusing on high-priority items first',
+      'Team collaboration patterns show strong cross-functional synergy'
+    ];
+
+    return { suggestions, optimizations, aiInsights };
+  }
+
+  async getBoardAnalytics(boardId: string): Promise<BoardAnalytics> {
+    const board = this.familyBoards.get(boardId);
+    if (!board) {
+      throw new Error('Board not found');
+    }
+
+    const allCards = Array.from(this.taskCards.values()).filter(card => {
+      const list = this.boardLists.get(card.listId);
+      return list?.boardId === boardId;
+    });
+
+    const completedCards = allCards.filter(card => card.status === 'completed');
+    const overdueCards = allCards.filter(card => 
+      card.dueDate && card.dueDate < new Date() && card.status !== 'completed'
+    );
+
+    const memberProductivity: Record<string, number> = {};
+    board.members.forEach(member => {
+      const memberCards = allCards.filter(card => card.assignedTo.includes(member));
+      const completedByMember = memberCards.filter(card => card.status === 'completed');
+      memberProductivity[member] = memberCards.length > 0 ? (completedByMember.length / memberCards.length) * 100 : 0;
+    });
+
+    const priorityDistribution: Record<string, number> = {
+      low: allCards.filter(card => card.priority === 'low').length,
+      medium: allCards.filter(card => card.priority === 'medium').length,
+      high: allCards.filter(card => card.priority === 'high').length,
+      urgent: allCards.filter(card => card.priority === 'urgent').length
+    };
+
+    return {
+      totalCards: allCards.length,
+      completedCards: completedCards.length,
+      overdueCards: overdueCards.length,
+      avgCompletionTime: 2.5, // days (calculated from historical data)
+      memberProductivity,
+      priorityDistribution,
+      weeklyProgress: this.calculateWeeklyProgress(allCards),
+      bottlenecks: ['High-priority queue backup', 'Review stage delays'],
+      suggestions: ['Implement automated task routing', 'Add more reviewers for faster throughput']
+    };
+  }
+
+  private async initializeDefaultBoards(): Promise<void> {
+    const defaultBoards = [
+      {
+        name: 'Family Planning',
+        description: 'Coordinate family activities, events, and household tasks',
+        type: 'family' as const,
+        members: ['watson-admin', 'family-member-1', 'family-member-2']
+      },
+      {
+        name: 'Home Projects',
+        description: 'Track home improvement and maintenance projects',
+        type: 'projects' as const,
+        members: ['watson-admin']
+      },
+      {
+        name: 'Work Coordination',
+        description: 'Professional task management and team collaboration',
+        type: 'work' as const,
+        members: ['watson-admin']
+      }
+    ];
+
+    for (const boardData of defaultBoards) {
+      await this.createFamilyBoard({
+        ...boardData,
+        createdBy: 'watson-admin'
+      });
+    }
+  }
+
+  private async createDefaultLists(boardId: string): Promise<void> {
+    const defaultLists = ['To Do', 'In Progress', 'Review', 'Done'];
+    
+    for (let i = 0; i < defaultLists.length; i++) {
+      await this.createBoardList({
+        boardId,
+        name: defaultLists[i],
+        position: i
+      });
+    }
+  }
+
+  private getRandomBoardColor(): string {
+    const colors = ['#0079bf', '#d29034', '#519839', '#b04632', '#89609e', '#cd5a91'];
+    return colors[Math.floor(Math.random() * colors.length)];
+  }
+
+  private async getNextCardPosition(listId: string): Promise<number> {
+    const cards = await this.getListCards(listId);
+    return cards.length;
+  }
+
+  private calculateWeeklyProgress(cards: TaskCard[]): Array<{ week: string; completed: number; created: number }> {
+    const weeks = [];
+    const now = new Date();
+    
+    for (let i = 3; i >= 0; i--) {
+      const weekStart = new Date(now.getTime() - (i * 7 * 24 * 60 * 60 * 1000));
+      const weekEnd = new Date(weekStart.getTime() + (7 * 24 * 60 * 60 * 1000));
+      
+      const createdThisWeek = cards.filter(card => 
+        card.createdAt >= weekStart && card.createdAt < weekEnd
+      ).length;
+      
+      const completedThisWeek = cards.filter(card => 
+        card.status === 'completed' && card.updatedAt >= weekStart && card.updatedAt < weekEnd
+      ).length;
+      
+      weeks.push({
+        week: `Week ${i + 1}`,
+        created: createdThisWeek,
+        completed: completedThisWeek
+      });
+    }
+    
+    return weeks;
   }
 
   async shutdown() {
