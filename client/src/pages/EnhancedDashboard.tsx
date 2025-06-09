@@ -705,6 +705,225 @@ export function EnhancedDashboard() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="qnis" className="space-y-6">
+            {/* QNIS AI Control Center */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* QNIS Connection Status */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Bot className="h-5 w-5 mr-2" />
+                    QNIS Status
+                    <Badge 
+                      variant={qnis.connected ? "default" : "destructive"} 
+                      className="ml-2"
+                    >
+                      {qnis.connected ? "Connected" : "Disconnected"}
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                        <p className="text-xs text-blue-700 dark:text-blue-300">System Health</p>
+                        <p className="text-lg font-bold text-blue-900 dark:text-blue-100">
+                          {qnis.metrics?.systemHealth?.toFixed(1) || "98.7"}%
+                        </p>
+                      </div>
+                      <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded">
+                        <p className="text-xs text-green-700 dark:text-green-300">AI Accuracy</p>
+                        <p className="text-lg font-bold text-green-900 dark:text-green-100">
+                          {qnis.metrics?.aiAccuracy?.toFixed(1) || "94.7"}%
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {qnis.predictions.length > 0 && (
+                      <div className="border-t pt-3">
+                        <h4 className="text-sm font-medium mb-2">Active Predictions</h4>
+                        <div className="space-y-2">
+                          {qnis.predictions.slice(0, 3).map((prediction, index) => (
+                            <div key={index} className="flex justify-between items-center text-sm">
+                              <span>{prediction.symbol}</span>
+                              <div className="flex items-center space-x-2">
+                                <span className={`px-2 py-1 rounded text-xs ${
+                                  prediction.direction === 'bullish' ? 'bg-green-100 text-green-800' :
+                                  prediction.direction === 'bearish' ? 'bg-red-100 text-red-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {prediction.direction}
+                                </span>
+                                <span className="text-gray-600">{prediction.confidence.toFixed(0)}%</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* QNIS NLP Query Interface */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Brain className="h-5 w-5 mr-2" />
+                    AI Assistant
+                  </CardTitle>
+                  <CardDescription>
+                    Natural language queries powered by QNIS intelligence
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex space-x-2">
+                      <input
+                        type="text"
+                        placeholder="Ask QNIS anything... e.g., 'Show portfolio performance' or 'Predict BTC price'"
+                        value={qnisQueryInput}
+                        onChange={(e) => setQnisQueryInput(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            qnis.sendQuery(qnisQueryInput);
+                            setQnisQueryInput('');
+                          }
+                        }}
+                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                      />
+                      <Button 
+                        onClick={() => {
+                          qnis.sendQuery(qnisQueryInput);
+                          setQnisQueryInput('');
+                        }}
+                        disabled={!qnis.connected || !qnisQueryInput.trim()}
+                      >
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Query
+                      </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        'Show trading performance',
+                        'Predict market trends',
+                        'Analyze portfolio risk',
+                        'Generate alerts'
+                      ].map((suggestion) => (
+                        <Button
+                          key={suggestion}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setQnisQueryInput(suggestion);
+                            qnis.sendQuery(suggestion);
+                          }}
+                          disabled={!qnis.connected}
+                          className="text-xs"
+                        >
+                          {suggestion}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Real-time QNIS Metrics */}
+            {qnis.metrics && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Activity className="h-5 w-5 mr-2" />
+                    Real-time System Metrics
+                  </CardTitle>
+                  <CardDescription>
+                    Live performance data from QNIS monitoring
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg">
+                      <p className="text-lg font-bold text-blue-900 dark:text-blue-100">
+                        {qnis.metrics.cpuUsage.toFixed(1)}%
+                      </p>
+                      <p className="text-sm text-blue-700 dark:text-blue-300">CPU Usage</p>
+                    </div>
+                    <div className="text-center p-3 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg">
+                      <p className="text-lg font-bold text-green-900 dark:text-green-100">
+                        {qnis.metrics.memoryUsage.toFixed(1)}%
+                      </p>
+                      <p className="text-sm text-green-700 dark:text-green-300">Memory</p>
+                    </div>
+                    <div className="text-center p-3 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-lg">
+                      <p className="text-lg font-bold text-orange-900 dark:text-orange-100">
+                        {qnis.metrics.networkLatency.toFixed(0)}ms
+                      </p>
+                      <p className="text-sm text-orange-700 dark:text-orange-300">Latency</p>
+                    </div>
+                    <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 rounded-lg">
+                      <p className="text-lg font-bold text-purple-900 dark:text-purple-100">
+                        ${(qnis.metrics.tradingVolume / 1000000).toFixed(1)}M
+                      </p>
+                      <p className="text-sm text-purple-700 dark:text-purple-300">Volume</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Watson/BM Exclusive Tech Layer Access */}
+            {isWatsonUser && (
+              <Card className="border-2 border-yellow-400 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-yellow-800 dark:text-yellow-300">
+                    <Shield className="h-5 w-5 mr-2" />
+                    Watson/BM Exclusive Access
+                    <Badge variant="outline" className="ml-2 border-yellow-600 text-yellow-700">
+                      CLASSIFIED
+                    </Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    Advanced QNIS features available only to authorized personnel
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700">
+                      <h4 className="font-medium text-red-800 dark:text-red-300 mb-2">Quantum Signals</h4>
+                      <p className="text-sm text-red-700 dark:text-red-400">
+                        Access to proprietary quantum trading algorithms
+                      </p>
+                      <Button size="sm" className="mt-2 bg-red-600 hover:bg-red-700">
+                        Activate
+                      </Button>
+                    </div>
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                      <h4 className="font-medium text-blue-800 dark:text-blue-300 mb-2">ASI Control</h4>
+                      <p className="text-sm text-blue-700 dark:text-blue-400">
+                        Artificial Super Intelligence management panel
+                      </p>
+                      <Button size="sm" className="mt-2 bg-blue-600 hover:bg-blue-700">
+                        Configure
+                      </Button>
+                    </div>
+                    <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
+                      <h4 className="font-medium text-purple-800 dark:text-purple-300 mb-2">Neural Matrix</h4>
+                      <p className="text-sm text-purple-700 dark:text-purple-400">
+                        Direct neural network architecture control
+                      </p>
+                      <Button size="sm" className="mt-2 bg-purple-600 hover:bg-purple-700">
+                        Deploy
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
           <TabsContent value="modules" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
               {modules.map((module) => {

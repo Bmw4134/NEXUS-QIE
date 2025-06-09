@@ -22,6 +22,7 @@ import { canvasSyncService } from "./canvas-sync-service";
 import { realMarketDataService } from "./real-market-data";
 import { alpacaTradeEngine } from "./alpaca-trading-engine";
 import { qnisCoreEngine } from "./qnis-core-engine";
+import { qnisDeploymentEngine } from "./qnis-deployment-engine";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -2748,10 +2749,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // QNIS Deployment Management Endpoints
+  app.post('/api/qnis/deploy/silent', async (req, res) => {
+    try {
+      console.log('🔇 Initiating silent QNIS deployment across NEXUS ecosystem');
+      await qnisDeploymentEngine.startSilentDeployment();
+      
+      res.json({
+        success: true,
+        message: 'Silent deployment initiated',
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error('QNIS Silent Deployment error:', error);
+      res.status(500).json({ error: 'Failed to start silent deployment' });
+    }
+  });
+
+  app.get('/api/qnis/deploy/status', async (req, res) => {
+    try {
+      const status = qnisDeploymentEngine.getDeploymentStatus();
+      res.json(status);
+    } catch (error) {
+      console.error('QNIS Deployment Status error:', error);
+      res.status(500).json({ error: 'Failed to get deployment status' });
+    }
+  });
+
+  app.get('/api/qnis/deploy/logs', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const logs = qnisDeploymentEngine.getDeploymentLogs(limit);
+      res.json(logs);
+    } catch (error) {
+      console.error('QNIS Deployment Logs error:', error);
+      res.status(500).json({ error: 'Failed to get deployment logs' });
+    }
+  });
+
+  app.post('/api/qnis/deploy/redeploy/:targetId?', async (req, res) => {
+    try {
+      const targetId = req.params.targetId;
+      await qnisDeploymentEngine.forceRedeploy(targetId);
+      
+      res.json({
+        success: true,
+        message: targetId ? `Redeployed to ${targetId}` : 'Redeployed to all targets',
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error('QNIS Force Redeploy error:', error);
+      res.status(500).json({ error: 'Failed to force redeploy' });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Initialize QNIS Core Engine with WebSocket support
   qnisCoreEngine.initialize(httpServer);
+  
+  // Start silent QNIS deployment in background
+  setTimeout(async () => {
+    try {
+      console.log('🔇 Starting background QNIS deployment across NEXUS ecosystem...');
+      await qnisDeploymentEngine.startSilentDeployment();
+      console.log('✅ Background QNIS deployment completed');
+    } catch (error) {
+      console.error('❌ Background QNIS deployment failed:', error);
+    }
+  }, 5000); // Start deployment 5 seconds after server startup
   
   return httpServer;
 }
