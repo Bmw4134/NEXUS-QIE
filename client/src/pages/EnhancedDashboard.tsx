@@ -288,8 +288,8 @@ export function EnhancedDashboard() {
               <div className="flex items-center space-x-3">
                 <Shield className="h-8 w-8 text-blue-600" />
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">ConnectHub Pro</h1>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Quantum Intelligence Platform</p>
+                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">NEXUS Quantum Intelligence</h1>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Advanced Family Platform</p>
                 </div>
               </div>
               
