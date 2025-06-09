@@ -18,6 +18,7 @@ import CanvasBoards from "./pages/CanvasBoards";
 import { AIAssistant } from "./pages/AIAssistant";
 import { useAuth } from "./hooks/useAuth";
 import RealModeIndicator from "./components/RealModeIndicator";
+import LiveTradingPanel from "./components/LiveTradingPanel";
 import "./index.css";
 
 const queryClient = new QueryClient({
@@ -43,6 +44,7 @@ function Router() {
   return (
     <>
       {isAuthenticated && <RealModeIndicator />}
+      {isAuthenticated && <LiveTradingPanel />}
       <Switch>
         {!isAuthenticated ? (
           <>
