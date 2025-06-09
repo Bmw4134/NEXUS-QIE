@@ -2378,6 +2378,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Canvas Boards API Routes
+  app.get('/api/canvas/boards', (req, res) => {
+    const boards = canvasSyncService.getBoards();
+    res.json({ boards });
+  });
+
+  app.get('/api/canvas/sync-status', (req, res) => {
+    const metrics = canvasSyncService.getSyncMetrics();
+    const status = canvasSyncService.getSyncStatus();
+    res.json({ ...metrics, ...status });
+  });
+
+  app.post('/api/canvas/sync', async (req, res) => {
+    try {
+      const { source, targets, canvasType, enhanceUX, secureMount } = req.body;
+      const result = await canvasSyncService.syncCanvas(source, targets, canvasType, enhanceUX, secureMount);
+      res.json(result);
+    } catch (error) {
+      console.error('Canvas sync error:', error);
+      res.status(500).json({ error: 'Canvas sync failed' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
