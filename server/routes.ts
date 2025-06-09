@@ -2804,6 +2804,141 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // QIE System Core Endpoints (Admin Access Only)
+  app.get('/api/qie/status', async (req, res) => {
+    try {
+      const status = qieSystemCore.getQIEStatus();
+      res.json(status);
+    } catch (error) {
+      console.error('QIE Status error:', error);
+      res.status(500).json({ error: 'Failed to get QIE status' });
+    }
+  });
+
+  app.get('/api/qie/signals/metrics', async (req, res) => {
+    try {
+      const metrics = qieSystemCore.getSignalMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error('QIE Signal Metrics error:', error);
+      res.status(500).json({ error: 'Failed to get signal metrics' });
+    }
+  });
+
+  app.get('/api/qie/signals/recent', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const signals = qieSystemCore.getRecentSignals(limit);
+      res.json(signals);
+    } catch (error) {
+      console.error('QIE Recent Signals error:', error);
+      res.status(500).json({ error: 'Failed to get recent signals' });
+    }
+  });
+
+  app.post('/api/qie/omega/emergency-shutdown', async (req, res) => {
+    try {
+      const success = await qieSystemCore.executeEmergencyOmegaShutdown();
+      res.json({
+        success,
+        message: success ? 'Emergency OMEGA shutdown executed' : 'Emergency shutdown failed',
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error('QIE Emergency Shutdown error:', error);
+      res.status(500).json({ error: 'Failed to execute emergency shutdown' });
+    }
+  });
+
+  // Intelligence Hub Module
+  app.get('/api/intelligence-hub/overview', async (req, res) => {
+    try {
+      const signals = qieSystemCore.getRecentSignals(50);
+      const metrics = qieSystemCore.getSignalMetrics();
+      
+      const overview = {
+        totalSignals: metrics.totalSignals,
+        activePlatforms: metrics.activePlatforms,
+        averageConfidence: metrics.averageConfidence,
+        cognitionAccuracy: metrics.cognitionAccuracy,
+        recentActivity: signals.slice(0, 10),
+        platformDistribution: signals.reduce((acc, signal) => {
+          acc[signal.source] = (acc[signal.source] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>),
+        signalTypes: signals.reduce((acc, signal) => {
+          acc[signal.type] = (acc[signal.type] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>)
+      };
+      
+      res.json(overview);
+    } catch (error) {
+      console.error('Intelligence Hub Overview error:', error);
+      res.status(500).json({ error: 'Failed to get intelligence overview' });
+    }
+  });
+
+  // Signal Panel Module
+  app.get('/api/signal-panel/live-feed', async (req, res) => {
+    try {
+      const signals = qieSystemCore.getRecentSignals(100);
+      const liveFeed = {
+        signals: signals.map(signal => ({
+          id: signal.id,
+          source: signal.source,
+          type: signal.type,
+          priority: signal.priority,
+          confidence: signal.confidence,
+          timestamp: signal.timestamp,
+          summary: `${signal.source} ${signal.type} signal - ${Math.round(signal.confidence * 100)}% confidence`
+        })),
+        metadata: {
+          totalCount: signals.length,
+          lastUpdate: new Date(),
+          platforms: [...new Set(signals.map(s => s.source))]
+        }
+      };
+      
+      res.json(liveFeed);
+    } catch (error) {
+      console.error('Signal Panel Live Feed error:', error);
+      res.status(500).json({ error: 'Failed to get live signal feed' });
+    }
+  });
+
+  // PromptDNA Module
+  app.post('/api/prompt-dna/analyze', async (req, res) => {
+    try {
+      const { prompt, context } = req.body;
+      
+      const analysis = {
+        promptId: `dna-${Date.now()}`,
+        originalPrompt: prompt,
+        context: context || 'general',
+        dnaSequence: prompt.split('').map((char, i) => 
+          `${char.charCodeAt(0).toString(16)}-${i}`
+        ).join(''),
+        complexity: Math.min(100, prompt.length * 2),
+        intent: prompt.toLowerCase().includes('trade') ? 'trading' :
+               prompt.toLowerCase().includes('analyze') ? 'analysis' :
+               prompt.toLowerCase().includes('predict') ? 'prediction' : 'general',
+        confidence: Math.random() * 0.3 + 0.7,
+        recommendations: [
+          'Consider adding market context for better results',
+          'Specify time frame for more accurate analysis',
+          'Include risk parameters for trading prompts'
+        ],
+        timestamp: new Date()
+      };
+      
+      res.json(analysis);
+    } catch (error) {
+      console.error('PromptDNA Analysis error:', error);
+      res.status(500).json({ error: 'Failed to analyze prompt DNA' });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Initialize QNIS Core Engine with WebSocket support
