@@ -118,7 +118,7 @@ export default function LiveTradingPanel() {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 sm:left-auto sm:right-4 z-40 w-full sm:w-96 max-w-[calc(100vw-2rem)] sm:max-w-none">
+    <div className="fixed bottom-4 left-4 sm:left-auto sm:right-4 z-20 w-full sm:w-96 max-w-[calc(100vw-2rem)] sm:max-w-none md:z-30">
       <Card className="bg-black/90 border-red-500 shadow-red-500/50 shadow-xl backdrop-blur-sm mx-4 sm:mx-0">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">

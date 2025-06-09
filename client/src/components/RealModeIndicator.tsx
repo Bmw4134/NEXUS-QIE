@@ -59,7 +59,7 @@ export default function RealModeIndicator() {
   const successRate = realModeStatus?.metrics?.successRate || 0;
 
   return (
-    <div className="fixed top-4 right-4 z-50 w-full sm:w-auto max-w-[calc(100vw-2rem)] sm:max-w-none">
+    <div className="fixed top-4 right-4 z-30 w-full sm:w-auto max-w-[calc(100vw-2rem)] sm:max-w-none md:z-40">
       <Card className={`w-full sm:w-80 mx-4 sm:mx-0 transition-all duration-300 ${
         isRealMode 
           ? 'bg-red-900/90 border-red-500 shadow-red-500/50 shadow-lg' 
