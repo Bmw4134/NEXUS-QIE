@@ -4,8 +4,18 @@
  * Enhanced UX with Secure Mounting for Family Collaboration
  */
 
-import { NexusQuantumDatabase } from './nexus-quantum-database';
-import { QuantumMLEngine } from './quantum-ml-engine';
+// Mock implementations for quantum database and ML engine
+interface NexusQuantumDatabase {
+  storeEnhancedCard: (card: any) => Promise<void>;
+  getCanvasData: (source: string) => Promise<any[]>;
+  logSecurityEvent: (event: any) => Promise<void>;
+}
+
+interface QuantumMLEngine {
+  enhanceCard: (card: any) => Promise<any>;
+  generateSuggestions: (card: any) => Promise<string[]>;
+  calculateScore: (card: any) => Promise<number>;
+}
 
 export interface QNISCanvasSync {
   id: string;
@@ -61,15 +71,11 @@ export interface SecureMountConfig {
 }
 
 export class QNISSyncCanvas {
-  private quantumDB: NexusQuantumDatabase;
-  private mlEngine: QuantumMLEngine;
   private activeSyncs: Map<string, QNISCanvasSync> = new Map();
   private enhancedCards: Map<string, EnhancedKanbanCard> = new Map();
   private mountConfig: SecureMountConfig;
 
-  constructor(quantumDB: NexusQuantumDatabase, mlEngine: QuantumMLEngine) {
-    this.quantumDB = quantumDB;
-    this.mlEngine = mlEngine;
+  constructor() {
     this.mountConfig = {
       encryptionEnabled: true,
       accessControlList: ['WATSON', 'FAMILY_ADMIN', 'BOARD_MEMBER'],
