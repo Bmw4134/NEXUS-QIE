@@ -23,6 +23,7 @@ import QIEPromptDNA from "./pages/QIEPromptDNA";
 import { useAuth } from "./hooks/useAuth";
 import RealModeIndicator from "./components/RealModeIndicator";
 import LiveTradingPanel from "./components/LiveTradingPanel";
+import QIEEmbeddedPanel from "./components/QIEEmbeddedPanel";
 import "./index.css";
 
 const queryClient = new QueryClient({
@@ -49,6 +50,28 @@ function Router() {
     <>
       {isAuthenticated && <RealModeIndicator />}
       {isAuthenticated && <LiveTradingPanel />}
+      {isAuthenticated && (
+        <>
+          <QIEEmbeddedPanel 
+            panelId="enhanced_dashboard_intelligence" 
+            type="mini_intelligence" 
+            position="top_right" 
+            dashboard="enhanced_dashboard" 
+          />
+          <QIEEmbeddedPanel 
+            panelId="enhanced_dashboard_signals" 
+            type="signal_feed" 
+            position="bottom_left" 
+            dashboard="enhanced_dashboard" 
+          />
+          <QIEEmbeddedPanel 
+            panelId="enhanced_dashboard_ops" 
+            type="ops_daemon" 
+            position="floating" 
+            dashboard="enhanced_dashboard" 
+          />
+        </>
+      )}
       <Switch>
         {!isAuthenticated ? (
           <>

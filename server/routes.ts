@@ -24,6 +24,7 @@ import { alpacaTradeEngine } from "./alpaca-trading-engine";
 import { qnisCoreEngine } from "./qnis-core-engine";
 import { qnisDeploymentEngine } from "./qnis-deployment-engine";
 import { qieSystemCore } from "./qie-system-core";
+import { qieUnifiedMode } from "./qie-unified-mode";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -2916,7 +2917,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         promptId: `dna-${Date.now()}`,
         originalPrompt: prompt,
         context: context || 'general',
-        dnaSequence: prompt.split('').map((char, i) => 
+        dnaSequence: prompt.split('').map((char: string, i: number) => 
           `${char.charCodeAt(0).toString(16)}-${i}`
         ).join(''),
         complexity: Math.min(100, prompt.length * 2),
@@ -2939,6 +2940,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // QIE Unified Mode Endpoints
+  app.post('/api/qie/unified/activate', async (req, res) => {
+    try {
+      const success = await qieUnifiedMode.activateUnifiedMode();
+      res.json({
+        success,
+        message: success ? 'QIE Unified Mode activated' : 'Failed to activate Unified Mode',
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error('QIE Unified Mode Activation error:', error);
+      res.status(500).json({ error: 'Failed to activate unified mode' });
+    }
+  });
+
+  app.post('/api/qie/unified/deactivate', async (req, res) => {
+    try {
+      const success = await qieUnifiedMode.deactivateUnifiedMode();
+      res.json({
+        success,
+        message: success ? 'QIE Unified Mode deactivated' : 'Failed to deactivate Unified Mode',
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error('QIE Unified Mode Deactivation error:', error);
+      res.status(500).json({ error: 'Failed to deactivate unified mode' });
+    }
+  });
+
+  app.get('/api/qie/unified/status', async (req, res) => {
+    try {
+      const status = qieUnifiedMode.getUnifiedModeStatus();
+      res.json(status);
+    } catch (error) {
+      console.error('QIE Unified Mode Status error:', error);
+      res.status(500).json({ error: 'Failed to get unified mode status' });
+    }
+  });
+
+  app.get('/api/qie/embedded-panel/:panelId', async (req, res) => {
+    try {
+      const panelId = req.params.panelId;
+      const panelData = qieUnifiedMode.getEmbeddedPanelData(panelId);
+      
+      if (!panelData) {
+        return res.status(404).json({ error: 'Panel not found' });
+      }
+      
+      res.json(panelData);
+    } catch (error) {
+      console.error('QIE Embedded Panel error:', error);
+      res.status(500).json({ error: 'Failed to get panel data' });
+    }
+  });
+
+  app.post('/api/qie/embedded-panel/:panelId/toggle', async (req, res) => {
+    try {
+      const panelId = req.params.panelId;
+      const success = qieUnifiedMode.togglePanel(panelId);
+      
+      res.json({
+        success,
+        message: success ? 'Panel toggled successfully' : 'Panel not found',
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error('QIE Panel Toggle error:', error);
+      res.status(500).json({ error: 'Failed to toggle panel' });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Initialize QNIS Core Engine with WebSocket support
@@ -2954,6 +3026,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('❌ Background QNIS deployment failed:', error);
     }
   }, 5000); // Start deployment 5 seconds after server startup
+  
+  // Activate QIE Unified Mode with embedded panels
+  setTimeout(async () => {
+    try {
+      console.log('🌐 Activating QIE Unified Mode across all dashboards...');
+      const success = await qieUnifiedMode.activateUnifiedMode();
+      if (success) {
+        console.log('✅ QIE Unified Mode activated with embedded panels');
+      } else {
+        console.error('❌ Failed to activate QIE Unified Mode');
+      }
+    } catch (error) {
+      console.error('❌ QIE Unified Mode activation failed:', error);
+    }
+  }, 7000); // Start unified mode 7 seconds after server startup
   
   return httpServer;
 }
