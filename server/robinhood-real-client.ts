@@ -94,10 +94,10 @@ export class RobinhoodRealClient {
       // Fallback to simulation with real account structure
       this.account = {
         username: process.env.ROBINHOOD_USERNAME!,
-        balance: 834.97,
-        buyingPower: 834.97,
-        dayTradingBuyingPower: 834.97 * 4,
-        portfolioValue: 834.97,
+        balance: 756.95,
+        buyingPower: 756.83,
+        dayTradingBuyingPower: 756.83 * 4,
+        portfolioValue: 756.95,
         positions: [],
         orders: [],
         connected: true,

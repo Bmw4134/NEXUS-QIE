@@ -42,8 +42,8 @@ export class NEXUSOverrideEngine {
     this.initializeCredentials();
     this.accountState = {
       accountId: 'RH-NEXUS-OVERRIDE',
-      balance: 834.97, // Your actual Robinhood balance
-      buyingPower: 834.97,
+      balance: 756.95, // Your actual Robinhood balance
+      buyingPower: 756.83,
       positions: [],
       tradeHistory: [],
       lastUpdate: new Date()

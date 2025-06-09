@@ -31,7 +31,7 @@ export class LiveTradingEngine {
   constructor() {
     this.session = {
       isActive: false,
-      accountBalance: 834.97,
+      accountBalance: 756.95,
       totalTrades: 0,
       successfulTrades: 0,
       lastTradeTime: new Date(),
