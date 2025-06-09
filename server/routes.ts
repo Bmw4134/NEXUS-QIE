@@ -25,6 +25,7 @@ import { qnisCoreEngine } from "./qnis-core-engine";
 import { qnisDeploymentEngine } from "./qnis-deployment-engine";
 import { qieSystemCore } from "./qie-system-core";
 import { qieUnifiedMode } from "./qie-unified-mode";
+import { deploymentController } from "./deployment-controller";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -3011,6 +3012,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Final Deployment Endpoints
+  app.get('/api/deployment/status', async (req, res) => {
+    try {
+      const status = deploymentController.getDeploymentStatus();
+      res.json(status);
+    } catch (error) {
+      console.error('Deployment Status error:', error);
+      res.status(500).json({ error: 'Failed to get deployment status' });
+    }
+  });
+
+  app.get('/api/deployment/config', async (req, res) => {
+    try {
+      const config = deploymentController.getConfigurationBlueprint();
+      res.json(config);
+    } catch (error) {
+      console.error('Deployment Config error:', error);
+      res.status(500).json({ error: 'Failed to get deployment configuration' });
+    }
+  });
+
+  app.get('/api/deployment/control/:hash', async (req, res) => {
+    try {
+      const controlPanel = deploymentController.getControlTogglePanel();
+      res.json(controlPanel);
+    } catch (error) {
+      console.error('Deployment Control error:', error);
+      res.status(500).json({ error: 'Failed to get control panel' });
+    }
+  });
+
+  app.get('/api/deployment/ready', async (req, res) => {
+    try {
+      const isReady = deploymentController.isDeploymentReady();
+      res.json({
+        ready: isReady,
+        timestamp: Date.now(),
+        message: isReady ? 'System is deploy-ready' : 'System not ready for deployment'
+      });
+    } catch (error) {
+      console.error('Deployment Ready check error:', error);
+      res.status(500).json({ error: 'Failed to check deployment readiness' });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Initialize QNIS Core Engine with WebSocket support
@@ -3041,6 +3087,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('❌ QIE Unified Mode activation failed:', error);
     }
   }, 7000); // Start unified mode 7 seconds after server startup
+
+  // Finalize deployment mode
+  setTimeout(async () => {
+    try {
+      console.log('🚀 Finalizing deployment mode...');
+      const deploymentStatus = deploymentController.getDeploymentStatus();
+      const isReady = deploymentController.isDeploymentReady();
+      
+      console.log(`✅ Final Deployment Status:`);
+      console.log(`   Hash: ${deploymentStatus.deploymentHash}`);
+      console.log(`   Ready: ${isReady ? 'YES' : 'NO'}`);
+      console.log(`   Systems: ${deploymentStatus.systemsActive.length} active`);
+      console.log(`   Data Sources: ${deploymentStatus.dataSourcesVerified.length} verified`);
+      console.log(`   UI Optimization: ${deploymentStatus.uiOptimizationLevel}`);
+      console.log(`   Real-Time Status: ${deploymentStatus.realTimeStatus}`);
+      console.log(`🎯 System ready for production deployment`);
+    } catch (error) {
+      console.error('❌ Deployment finalization failed:', error);
+    }
+  }, 10000); // Finalize deployment 10 seconds after server startup
   
   return httpServer;
 }

@@ -166,9 +166,9 @@ export default function QIEEmbeddedPanel({ panelId, type, position = 'floating',
 
   return (
     <div className={`${getPositionClass()} ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}>
-      <Card className={`transition-all duration-300 ${
+      <Card className={`premium-glass haptic-feedback transition-all duration-300 ${
         isMinimized ? 'w-48 h-12' : 'w-64 h-auto'
-      } bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border shadow-lg hover:shadow-xl`}>
+      } bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border shadow-lg hover:shadow-xl qie-embedded-panel`}>
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm flex items-center">
