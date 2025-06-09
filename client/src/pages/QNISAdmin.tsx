@@ -143,6 +143,7 @@ export default function QNISAdmin() {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="bg-white/10 border-white/20">
             <TabsTrigger value="overview" className="data-[state=active]:bg-white/20 text-white">System Overview</TabsTrigger>
+            <TabsTrigger value="canvas" className="data-[state=active]:bg-white/20 text-white">Canvas Sync</TabsTrigger>
             <TabsTrigger value="trading" className="data-[state=active]:bg-white/20 text-white">Trading Control</TabsTrigger>
             <TabsTrigger value="nexus" className="data-[state=active]:bg-white/20 text-white">NEXUS Observer</TabsTrigger>
             <TabsTrigger value="security" className="data-[state=active]:bg-white/20 text-white">Security Matrix</TabsTrigger>
@@ -256,6 +257,167 @@ export default function QNISAdmin() {
                     <span className="text-gray-300">Crypto Trading</span>
                     <Badge className="bg-orange-500/20 border-orange-500 text-orange-400">24/7</Badge>
                   </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="canvas" className="space-y-6">
+            <Alert className="bg-purple-500/20 border-purple-500">
+              <Command className="h-4 w-4 text-purple-400" />
+              <AlertDescription className="text-purple-300">
+                QNIS Canvas Sync provides enhanced Kanban board management with TRAXOVO-NEXUS integration, 
+                secure mounting, and AI-powered family collaboration features.
+              </AlertDescription>
+            </Alert>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="bg-white/10 border-white/20">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Globe className="w-5 h-5 text-blue-400" />
+                    Canvas Sync Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Active Syncs</span>
+                    <Badge className="bg-green-500/20 border-green-500 text-green-400">
+                      {syncStatus?.activeSyncs || 0}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Enhanced UX</span>
+                    <Badge className="bg-blue-500/20 border-blue-500 text-blue-400">
+                      {syncStatus?.enhancedUX ? 'ENABLED' : 'DISABLED'}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Secure Mount</span>
+                    <Badge className="bg-purple-500/20 border-purple-500 text-purple-400">
+                      {syncStatus?.secureMount ? 'ACTIVE' : 'INACTIVE'}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Last Update</span>
+                    <span className="text-gray-400 text-sm">
+                      {syncStatus?.lastUpdate ? new Date(syncStatus.lastUpdate).toLocaleTimeString() : 'Never'}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/10 border-white/20">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Brain className="w-5 h-5 text-green-400" />
+                    Enhanced Cards
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Total Cards</span>
+                    <Badge className="bg-blue-500/20 border-blue-500 text-blue-400">
+                      {enhancedCards?.totalCards || 0}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">AI Enhanced</span>
+                    <Badge className="bg-green-500/20 border-green-500 text-green-400">
+                      {enhancedCards?.aiEnhanced || 0}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Security Level</span>
+                    <Badge className="bg-purple-500/20 border-purple-500 text-purple-400">
+                      {enhancedCards?.securityLevel?.toUpperCase() || 'FAMILY'}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="bg-white/10 border-white/20">
+                <CardHeader>
+                  <CardTitle className="text-white">Canvas Sync Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button 
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    onClick={() => syncCanvasMutation.mutate({
+                      source: 'TRAXOVO-NEXUS',
+                      targets: ['ALL'],
+                      canvasType: 'kanban',
+                      enhanceUX: true,
+                      secureMount: true
+                    })}
+                    disabled={syncCanvasMutation.isPending}
+                  >
+                    {syncCanvasMutation.isPending ? 'Syncing...' : 'Sync Kanban Boards'}
+                  </Button>
+                  <Button 
+                    className="w-full bg-green-600 hover:bg-green-700"
+                    onClick={() => syncCanvasMutation.mutate({
+                      source: 'TRAXOVO-NEXUS',
+                      targets: ['ALL'],
+                      canvasType: 'family-board',
+                      enhanceUX: true,
+                      secureMount: true
+                    })}
+                    disabled={syncCanvasMutation.isPending}
+                  >
+                    Sync Family Boards
+                  </Button>
+                  <Button 
+                    className="w-full bg-purple-600 hover:bg-purple-700"
+                    onClick={() => syncCanvasMutation.mutate({
+                      source: 'WATSON-COMMAND',
+                      targets: ['ALL'],
+                      canvasType: 'scrum',
+                      enhanceUX: true,
+                      secureMount: true
+                    })}
+                    disabled={syncCanvasMutation.isPending}
+                  >
+                    Sync Scrum Boards
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/10 border-white/20">
+                <CardHeader>
+                  <CardTitle className="text-white">Sync Metrics</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {syncStatus?.syncs?.map((sync: any, index: number) => (
+                    <div key={index} className="border border-white/20 rounded-lg p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-300 text-sm">{sync.source}</span>
+                        <Badge 
+                          className={`${
+                            sync.syncStatus === 'active' 
+                              ? 'bg-green-500/20 border-green-500 text-green-400'
+                              : sync.syncStatus === 'synced'
+                              ? 'bg-blue-500/20 border-blue-500 text-blue-400'
+                              : 'bg-yellow-500/20 border-yellow-500 text-yellow-400'
+                          }`}
+                        >
+                          {sync.syncStatus?.toUpperCase()}
+                        </Badge>
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        Cards: {sync.metrics?.cardsTransferred || 0} | 
+                        Columns: {sync.metrics?.columnsCreated || 0} | 
+                        Members: {sync.metrics?.membersNotified || 0}
+                      </div>
+                    </div>
+                  ))}
+                  {(!syncStatus?.syncs || syncStatus.syncs.length === 0) && (
+                    <div className="text-center text-gray-400 py-4">
+                      No active syncs
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
