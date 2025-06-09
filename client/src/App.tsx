@@ -14,6 +14,7 @@ import { FamilySync } from "./pages/FamilySync";
 import FamilyBoards from "./pages/FamilyBoardsSimple";
 import AIConfiguration from "./pages/AIConfiguration";
 import QNISAdmin from "./pages/QNISAdmin";
+import CanvasBoards from "./pages/CanvasBoards";
 import { AIAssistant } from "./pages/AIAssistant";
 import { useAuth } from "./hooks/useAuth";
 import "./index.css";
