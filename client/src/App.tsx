@@ -17,6 +17,9 @@ import AIConfiguration from "./pages/AIConfiguration";
 import QNISAdmin from "./pages/QNISAdmin";
 import CanvasBoards from "./pages/CanvasBoards";
 import { AIAssistant } from "./pages/AIAssistant";
+import QIEIntelligenceHub from "./pages/QIEIntelligenceHub";
+import QIESignalPanel from "./pages/QIESignalPanel";
+import QIEPromptDNA from "./pages/QIEPromptDNA";
 import { useAuth } from "./hooks/useAuth";
 import RealModeIndicator from "./components/RealModeIndicator";
 import LiveTradingPanel from "./components/LiveTradingPanel";
@@ -65,6 +68,9 @@ function Router() {
             <Route path="/ai-config" component={AIConfiguration} />
             <Route path="/qnis-admin" component={QNISAdmin} />
             <Route path="/ai-assistant" component={AIAssistant} />
+            <Route path="/qie-intelligence" component={QIEIntelligenceHub} />
+            <Route path="/qie-signals" component={QIESignalPanel} />
+            <Route path="/qie-prompt-dna" component={QIEPromptDNA} />
             {user?.role === "admin" && (
               <Route path="/admin" component={AdminPanel} />
             )}
