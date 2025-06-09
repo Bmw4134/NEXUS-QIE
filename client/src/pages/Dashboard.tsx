@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
-import { Calendar, DollarSign, Brain, FileText, Users, Settings, LogOut, Bot } from "lucide-react";
+import CanvasWidget from "@/components/CanvasWidget";
+import { Calendar, DollarSign, Brain, FileText, Users, Settings, LogOut, Bot, Kanban } from "lucide-react";
 
 export function Dashboard() {
   const { user } = useAuth();
@@ -55,6 +56,13 @@ export function Dashboard() {
       icon: Users,
       path: "/family-boards",
       color: "indigo"
+    },
+    {
+      title: "Canvas Boards",
+      description: "Interactive Trello-style Kanban boards with NEXUS sync",
+      icon: Kanban,
+      path: "/canvas-boards",
+      color: "violet"
     },
     {
       title: "AI Brain Center",
@@ -142,6 +150,11 @@ export function Dashboard() {
               </Link>
             );
           })}
+        </div>
+
+        {/* NEXUS Canvas Widget - Injected with Trello Theme */}
+        <div className="mt-12 mb-8">
+          <CanvasWidget variant="dashboard" theme="nexus" />
         </div>
 
         {/* Quick Stats */}

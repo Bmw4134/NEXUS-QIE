@@ -55,6 +55,7 @@ function Router() {
           <Route path="/nexus-notes" component={NexusNotes} />
           <Route path="/family-sync" component={FamilySync} />
           <Route path="/family-boards" component={FamilyBoards} />
+          <Route path="/canvas-boards" component={CanvasBoards} />
           <Route path="/ai-config" component={AIConfiguration} />
           <Route path="/qnis-admin" component={QNISAdmin} />
           <Route path="/ai-assistant" component={AIAssistant} />

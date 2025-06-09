@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Brain, Key, Github, Zap, Settings, CheckCircle, AlertCircle, Bot, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
+import CanvasWidget from '@/components/CanvasWidget';
 
 export default function AIConfiguration() {
   const [githubToken, setGithubToken] = useState('');
@@ -838,6 +839,11 @@ export default function AIConfiguration() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Canvas Widget Injection - AI-Enhanced Trello Style */}
+        <div className="mt-8">
+          <CanvasWidget variant="dashboard" theme="trello" />
+        </div>
       </div>
     </div>
   );
