@@ -23,6 +23,7 @@ import { realMarketDataService } from "./real-market-data";
 import { alpacaTradeEngine } from "./alpaca-trading-engine";
 import { qnisCoreEngine } from "./qnis-core-engine";
 import { qnisDeploymentEngine } from "./qnis-deployment-engine";
+import { qieSystemCore } from "./qie-system-core";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
