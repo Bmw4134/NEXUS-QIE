@@ -250,6 +250,14 @@ export function EnhancedDashboard() {
       metrics: { accuracy: "94.7%", predictions: 8 }
     },
     {
+      title: "Family",
+      description: "Communication and coordination center",
+      icon: Users,
+      path: "/family-sync",
+      color: "emerald",
+      metrics: { members: 4, messages: 12 }
+    },
+    {
       title: "Canvas Boards",
       description: "Advanced project management",
       icon: Kanban,
@@ -280,8 +288,8 @@ export function EnhancedDashboard() {
               <div className="flex items-center space-x-3">
                 <Shield className="h-8 w-8 text-blue-600" />
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">NEXUS Command Center</h1>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Real-time Family Platform</p>
+                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">ConnectHub Pro</h1>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Quantum Intelligence Platform</p>
                 </div>
               </div>
               
