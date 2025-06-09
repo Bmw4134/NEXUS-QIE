@@ -19,6 +19,7 @@ import { autonomousRuntimeController } from "./autonomous-runtime-controller";
 import { ptniProxy } from "./ptni-browser-proxy";
 import { registerFamilyPlatformRoutes } from "./family-platform-routes";
 import { canvasSyncService } from "./canvas-sync-service";
+import { realMarketDataService } from "./real-market-data";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
