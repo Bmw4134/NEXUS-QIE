@@ -21,6 +21,7 @@ import { registerFamilyPlatformRoutes } from "./family-platform-routes";
 import { canvasSyncService } from "./canvas-sync-service";
 import { realMarketDataService } from "./real-market-data";
 import { alpacaTradeEngine } from "./alpaca-trading-engine";
+import { qnisCoreEngine } from "./qnis-core-engine";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -2661,6 +2662,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // QNIS Chat-LLM Endpoint for NLP Querying
+  app.post('/api/chat-llm', async (req, res) => {
+    try {
+      const { query, context } = req.body;
+      
+      console.log(`🔮 QNIS NLP Query: "${query}"`);
+      
+      // Process natural language query through QNIS
+      const response = await qnisCoreEngine.processQuery(query, context);
+      
+      res.json({
+        success: true,
+        response,
+        timestamp: Date.now(),
+        qnisVersion: "4.7.2"
+      });
+    } catch (error) {
+      console.error('QNIS Chat-LLM error:', error);
+      res.status(500).json({ error: 'Failed to process NLP query' });
+    }
+  });
+
+  // QNIS Feature Matrix Endpoints
+  app.get('/api/qnis/predictive/forecast/:symbol?', async (req, res) => {
+    try {
+      const symbol = req.params.symbol;
+      const forecast = qnisCoreEngine.predictive.forecast(symbol);
+      res.json(forecast);
+    } catch (error) {
+      console.error('QNIS Predictive error:', error);
+      res.status(500).json({ error: 'Failed to generate forecast' });
+    }
+  });
+
+  app.post('/api/qnis/ui/adapt', async (req, res) => {
+    try {
+      const context = req.body;
+      const adaptedUI = qnisCoreEngine.ui.adapt(context);
+      res.json(adaptedUI);
+    } catch (error) {
+      console.error('QNIS UI Adapt error:', error);
+      res.status(500).json({ error: 'Failed to adapt UI' });
+    }
+  });
+
+  app.get('/api/qnis/alerts/contextual', async (req, res) => {
+    try {
+      const alerts = qnisCoreEngine.alerts.contextual();
+      res.json(alerts);
+    } catch (error) {
+      console.error('QNIS Alerts error:', error);
+      res.status(500).json({ error: 'Failed to get contextual alerts' });
+    }
+  });
+
+  app.get('/api/qnis/self-heal/monitor', async (req, res) => {
+    try {
+      const status = qnisCoreEngine.selfHeal.monitor();
+      res.json(status);
+    } catch (error) {
+      console.error('QNIS Self-Heal error:', error);
+      res.status(500).json({ error: 'Failed to get monitor status' });
+    }
+  });
+
+  app.post('/api/qnis/visual/auto', async (req, res) => {
+    try {
+      const { type, data } = req.body;
+      const visualization = qnisCoreEngine.visual.auto(type, data);
+      res.json(visualization);
+    } catch (error) {
+      console.error('QNIS Visual error:', error);
+      res.status(500).json({ error: 'Failed to generate visualization' });
+    }
+  });
+
+  app.get('/api/qnis/build/assistant', async (req, res) => {
+    try {
+      const config = qnisCoreEngine.build.assistant();
+      res.json(config);
+    } catch (error) {
+      console.error('QNIS Build Assistant error:', error);
+      res.status(500).json({ error: 'Failed to get assistant config' });
+    }
+  });
+
   const httpServer = createServer(app);
+  
+  // Initialize QNIS Core Engine with WebSocket support
+  qnisCoreEngine.initialize(httpServer);
+  
   return httpServer;
 }

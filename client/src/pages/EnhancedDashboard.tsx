@@ -34,6 +34,7 @@ import { useQuery } from '@tanstack/react-query';
 import CanvasWidget from '@/components/CanvasWidget';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useAuth } from '@/hooks/useAuth';
+import { useQNIS } from '@/hooks/useQNIS';
 
 interface DashboardMetrics {
   totalValue: number;
@@ -70,10 +71,13 @@ const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'
 
 export function EnhancedDashboard() {
   const { user } = useAuth();
+  const qnis = useQNIS();
   const [layoutMode, setLayoutMode] = useState<'compact' | 'expanded' | 'focus'>('expanded');
   const [alertsVisible, setAlertsVisible] = useState(true);
   const [realTimeData, setRealTimeData] = useState<DashboardMetrics | null>(null);
   const [automatedAlerts, setAutomatedAlerts] = useState<AutomatedAlert[]>([]);
+  const [qnisQueryInput, setQnisQueryInput] = useState('');
+  const [isWatsonUser, setIsWatsonUser] = useState(false);
 
   // Real-time dashboard metrics
   const { data: dashboardMetrics, isLoading: metricsLoading } = useQuery({
@@ -451,10 +455,11 @@ export function EnhancedDashboard() {
 
         {/* Dynamic Content Layout */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="trading">Trading Center</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="qnis">QNIS AI</TabsTrigger>
             <TabsTrigger value="modules">Modules</TabsTrigger>
           </TabsList>
 
