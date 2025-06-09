@@ -4,6 +4,7 @@ import { ThemeProvider } from "./components/theme-provider";
 import { Toaster } from "./components/ui/toaster";
 import { Landing } from "./pages/Landing";
 import { Dashboard } from "./pages/Dashboard";
+import { EnhancedDashboard } from "./pages/EnhancedDashboard";
 import { JoinFamily } from "./pages/JoinFamily";
 import { AdminPanel } from "./pages/AdminPanel";
 import { SmartPlanner } from "./pages/SmartPlanner";
@@ -53,7 +54,7 @@ function Router() {
           </>
         ) : (
           <>
-            <Route path="/" component={Dashboard} />
+            <Route path="/" component={EnhancedDashboard} />
             <Route path="/smart-planner" component={SmartPlanner} />
             <Route path="/wealth-pulse" component={WealthPulse} />
             <Route path="/quantum-insights" component={QuantumInsights} />

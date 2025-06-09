@@ -20,6 +20,7 @@ import { ptniProxy } from "./ptni-browser-proxy";
 import { registerFamilyPlatformRoutes } from "./family-platform-routes";
 import { canvasSyncService } from "./canvas-sync-service";
 import { realMarketDataService } from "./real-market-data";
+import { alpacaTradeEngine } from "./alpaca-trading-engine";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -653,6 +654,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Quantum stealth auto-execution failed:', error);
       res.status(500).json({ error: 'Failed to execute quantum stealth batch' });
+    }
+  });
+
+  // Alpaca Stock Trading API Endpoints
+  app.post('/api/alpaca/execute-trade', async (req, res) => {
+    try {
+      const { symbol, side, quantity, orderType, limitPrice } = req.body;
+      
+      console.log(`🔮 NEXUS Alpaca: Executing ${side.toUpperCase()} ${quantity} ${symbol}`);
+      
+      const result = await alpacaTradeEngine.executeTrade({
+        symbol,
+        side,
+        quantity,
+        orderType: orderType || 'market',
+        limitPrice
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Alpaca trade execution failed:', error);
+      res.status(500).json({ error: 'Failed to execute Alpaca trade' });
+    }
+  });
+
+  app.get('/api/alpaca/account', async (req, res) => {
+    try {
+      const accountInfo = await alpacaTradeEngine.getAccountInfo();
+      res.json(accountInfo);
+    } catch (error) {
+      console.error('Failed to fetch Alpaca account:', error);
+      res.status(500).json({ error: 'Failed to fetch account information' });
+    }
+  });
+
+  app.get('/api/alpaca/positions', async (req, res) => {
+    try {
+      const positions = await alpacaTradeEngine.getPositions();
+      res.json(positions);
+    } catch (error) {
+      console.error('Failed to fetch Alpaca positions:', error);
+      res.status(500).json({ error: 'Failed to fetch positions' });
+    }
+  });
+
+  app.get('/api/alpaca/status', async (req, res) => {
+    try {
+      const status = alpacaTradeEngine.getConnectionStatus();
+      res.json(status);
+    } catch (error) {
+      console.error('Failed to get Alpaca status:', error);
+      res.status(500).json({ error: 'Failed to get trading status' });
     }
   });
 
