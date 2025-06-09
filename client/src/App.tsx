@@ -17,6 +17,7 @@ import QNISAdmin from "./pages/QNISAdmin";
 import CanvasBoards from "./pages/CanvasBoards";
 import { AIAssistant } from "./pages/AIAssistant";
 import { useAuth } from "./hooks/useAuth";
+import RealModeIndicator from "./components/RealModeIndicator";
 import "./index.css";
 
 const queryClient = new QueryClient({
@@ -40,39 +41,42 @@ function Router() {
   }
 
   return (
-    <Switch>
-      {!isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route path="/join/:token" component={JoinFamily} />
-        </>
-      ) : (
-        <>
-          <Route path="/" component={Dashboard} />
-          <Route path="/smart-planner" component={SmartPlanner} />
-          <Route path="/wealth-pulse" component={WealthPulse} />
-          <Route path="/quantum-insights" component={QuantumInsights} />
-          <Route path="/nexus-notes" component={NexusNotes} />
-          <Route path="/family-sync" component={FamilySync} />
-          <Route path="/family-boards" component={FamilyBoards} />
-          <Route path="/canvas-boards" component={CanvasBoards} />
-          <Route path="/ai-config" component={AIConfiguration} />
-          <Route path="/qnis-admin" component={QNISAdmin} />
-          <Route path="/ai-assistant" component={AIAssistant} />
-          {user?.role === "admin" && (
-            <Route path="/admin" component={AdminPanel} />
-          )}
-        </>
-      )}
-      <Route>
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">404</h1>
-            <p className="text-gray-600 dark:text-gray-300">Page not found</p>
+    <>
+      {isAuthenticated && <RealModeIndicator />}
+      <Switch>
+        {!isAuthenticated ? (
+          <>
+            <Route path="/" component={Landing} />
+            <Route path="/join/:token" component={JoinFamily} />
+          </>
+        ) : (
+          <>
+            <Route path="/" component={Dashboard} />
+            <Route path="/smart-planner" component={SmartPlanner} />
+            <Route path="/wealth-pulse" component={WealthPulse} />
+            <Route path="/quantum-insights" component={QuantumInsights} />
+            <Route path="/nexus-notes" component={NexusNotes} />
+            <Route path="/family-sync" component={FamilySync} />
+            <Route path="/family-boards" component={FamilyBoards} />
+            <Route path="/canvas-boards" component={CanvasBoards} />
+            <Route path="/ai-config" component={AIConfiguration} />
+            <Route path="/qnis-admin" component={QNISAdmin} />
+            <Route path="/ai-assistant" component={AIAssistant} />
+            {user?.role === "admin" && (
+              <Route path="/admin" component={AdminPanel} />
+            )}
+          </>
+        )}
+        <Route>
+          <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+            <div className="text-center">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">404</h1>
+              <p className="text-gray-600 dark:text-gray-300">Page not found</p>
+            </div>
           </div>
-        </div>
-      </Route>
-    </Switch>
+        </Route>
+      </Switch>
+    </>
   );
 }
 
