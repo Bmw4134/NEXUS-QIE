@@ -46,6 +46,46 @@ export default function QNISAdmin() {
     refetchInterval: 2000
   });
 
+  // Fetch QNIS sync status
+  const { data: syncStatus } = useQuery({
+    queryKey: ['/api/qnis/sync-status'],
+    refetchInterval: 3000
+  });
+
+  // Fetch enhanced cards
+  const { data: enhancedCards } = useQuery({
+    queryKey: ['/api/qnis/enhanced-cards'],
+    refetchInterval: 5000
+  });
+
+  // QNIS Sync Canvas mutation
+  const syncCanvasMutation = useMutation({
+    mutationFn: async (syncData: any) => {
+      const response = await fetch('/api/qnis/sync-canvas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(syncData)
+      });
+      if (!response.ok) throw new Error('Sync failed');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Canvas Sync Successful",
+        description: "QNIS enhanced Kanban board synchronization completed",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/qnis/sync-status'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/qnis/enhanced-cards'] });
+    },
+    onError: () => {
+      toast({
+        title: "Sync Failed",
+        description: "Canvas synchronization encountered an error",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Emergency override mutation
   const emergencyOverrideMutation = useMutation({
     mutationFn: async (action: string) => {
