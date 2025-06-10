@@ -30,7 +30,8 @@ import {
   Sparkles,
   Bot,
   Kanban,
-  LogOut
+  LogOut,
+  ChevronDown
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import CanvasWidget from '@/components/CanvasWidget';
@@ -40,6 +41,7 @@ import { useQNIS } from '@/hooks/useQNIS';
 import { SuccessCelebration, useSuccessCelebration } from '@/components/SuccessCelebration';
 import { AnimatedButton } from '@/components/AnimatedButton';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
+import { OnboardingOverlay } from '@/components/OnboardingOverlay';
 
 interface DashboardMetrics {
   totalValue: number;
@@ -1045,8 +1047,9 @@ export function EnhancedDashboard() {
           </TabsContent>
 
           <TabsContent value="modules" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-              {modules.map((module) => {
+            {/* Essential Modules - Above the Fold */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {modules.slice(0, 2).map((module) => {
                 const IconComponent = module.icon;
                 return (
                   <Link key={module.path} href={module.path}>
@@ -1085,6 +1088,82 @@ export function EnhancedDashboard() {
                 );
               })}
             </div>
+
+            {/* Additional Modules - Collapsible Section */}
+            {modules.length > 2 && (
+              <Collapsible>
+                <CollapsibleTrigger asChild>
+                  <Card className="cursor-pointer hover:shadow-md transition-all duration-200 bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800 dark:to-slate-800">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <Kanban className="h-5 w-5 mr-2" />
+                          <CardTitle>Additional Modules</CardTitle>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                            {modules.length - 2} More
+                          </Badge>
+                          <ChevronDown className="h-4 w-4 transition-transform" />
+                        </div>
+                      </div>
+                      <CardDescription>
+                        Expand to access additional platform modules and features
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4 mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {modules.slice(2).map((module) => {
+                      const IconComponent = module.icon;
+                      return (
+                        <motion.div
+                          key={module.path}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <Link href={module.path}>
+                            <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer hover:border-blue-200 dark:hover:border-blue-700 h-full">
+                              <CardHeader>
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-3">
+                                    <div className={`p-2 rounded-lg bg-${module.color}-100 dark:bg-${module.color}-900/20`}>
+                                      <IconComponent className={`h-5 w-5 text-${module.color}-600`} />
+                                    </div>
+                                    <div>
+                                      <CardTitle className="text-base group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                        {module.title}
+                                      </CardTitle>
+                                      <CardDescription className="text-sm mt-1">
+                                        {module.description}
+                                      </CardDescription>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    {module.metrics && (
+                                      <div className="space-y-1">
+                                        {Object.entries(module.metrics).map(([key, value]) => (
+                                          <div key={key} className="text-xs">
+                                            <span className="text-gray-500 dark:text-gray-400 capitalize">{key}:</span>
+                                            <span className="ml-1 font-medium">{value}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </CardHeader>
+                            </Card>
+                          </Link>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            )}
           </TabsContent>
         </Tabs>
 
