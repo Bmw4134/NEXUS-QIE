@@ -35,6 +35,8 @@ import CanvasWidget from '@/components/CanvasWidget';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useAuth } from '@/hooks/useAuth';
 import { useQNIS } from '@/hooks/useQNIS';
+import { SuccessCelebration, useSuccessCelebration } from '@/components/SuccessCelebration';
+import { AnimatedButton } from '@/components/AnimatedButton';
 
 interface DashboardMetrics {
   totalValue: number;
@@ -72,6 +74,7 @@ const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'
 export function EnhancedDashboard() {
   const { user } = useAuth();
   const qnis = useQNIS();
+  const { celebration, celebrate, hideCelebration } = useSuccessCelebration();
   const [layoutMode, setLayoutMode] = useState<'compact' | 'expanded' | 'focus'>('expanded');
   const [alertsVisible, setAlertsVisible] = useState(true);
   const [realTimeData, setRealTimeData] = useState<DashboardMetrics | null>(null);
@@ -392,23 +395,32 @@ export function EnhancedDashboard() {
         {/* QIE Intelligence Suite Dashboard */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
           {/* Quantum Trading Engine */}
-          <Card className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 border-cyan-200 dark:border-cyan-700">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-cyan-800 dark:text-cyan-300 text-lg flex items-center">
-                <Zap className="h-5 w-5 mr-2" />
-                Quantum Engine
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-cyan-900 dark:text-cyan-100">
-                ${(tradingData as any)?.metrics?.accountBalance?.toLocaleString() || '756.95'}
-              </div>
-              <div className="flex items-center mt-2">
-                <Activity className="h-4 w-4 text-cyan-600 mr-1" />
-                <span className="text-sm text-cyan-700 dark:text-cyan-300">Live Trading Active</span>
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Card 
+              className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 border-cyan-200 dark:border-cyan-700 cursor-pointer"
+              onClick={() => celebrate('trade', 'Quantum trading engine accessed!', 'center')}
+            >
+              <CardHeader className="pb-2">
+                <CardTitle className="text-cyan-800 dark:text-cyan-300 text-lg flex items-center">
+                  <Zap className="h-5 w-5 mr-2" />
+                  Quantum Engine
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-cyan-900 dark:text-cyan-100">
+                  ${(tradingData as any)?.metrics?.accountBalance?.toLocaleString() || '756.95'}
+                </div>
+                <div className="flex items-center mt-2">
+                  <Activity className="h-4 w-4 text-cyan-600 mr-1" />
+                  <span className="text-sm text-cyan-700 dark:text-cyan-300">Live Trading Active</span>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* AI Prediction Accuracy */}
           <Card className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200 dark:border-emerald-700">
@@ -823,16 +835,19 @@ export function EnhancedDashboard() {
                         }}
                         className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                       />
-                      <Button 
+                      <AnimatedButton 
                         onClick={() => {
                           qnis.sendQuery(qnisQueryInput);
                           setQnisQueryInput('');
+                          celebrate('prediction', 'AI analysis initiated!', 'top-right');
                         }}
                         disabled={!qnis.connected || !qnisQueryInput.trim()}
+                        glowEffect={true}
+                        className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                       >
                         <Sparkles className="h-4 w-4 mr-2" />
                         Query
-                      </Button>
+                      </AnimatedButton>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-2">
@@ -945,9 +960,14 @@ export function EnhancedDashboard() {
                       <p className="text-sm text-purple-700 dark:text-purple-400">
                         Direct neural network architecture control
                       </p>
-                      <Button size="sm" className="mt-2 bg-purple-600 hover:bg-purple-700">
+                      <AnimatedButton 
+                        size="sm" 
+                        className="mt-2 bg-purple-600 hover:bg-purple-700"
+                        glowEffect={true}
+                        onClick={() => celebrate('system', 'Quantum algorithm deployed successfully!', 'top-right')}
+                      >
                         Deploy
-                      </Button>
+                      </AnimatedButton>
                     </div>
                   </div>
                 </CardContent>
@@ -1003,6 +1023,15 @@ export function EnhancedDashboard() {
         <div className="mt-8">
           <CanvasWidget />
         </div>
+
+        {/* Success Celebration Overlay */}
+        <SuccessCelebration
+          show={celebration.show}
+          type={celebration.type}
+          message={celebration.message}
+          position={celebration.position}
+          onComplete={hideCelebration}
+        />
       </div>
     </div>
   );
