@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { Link } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,6 +38,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useQNIS } from '@/hooks/useQNIS';
 import { SuccessCelebration, useSuccessCelebration } from '@/components/SuccessCelebration';
 import { AnimatedButton } from '@/components/AnimatedButton';
+import { FloatingActionButton } from '@/components/FloatingActionButton';
 
 interface DashboardMetrics {
   totalValue: number;
@@ -1031,6 +1033,14 @@ export function EnhancedDashboard() {
           message={celebration.message}
           position={celebration.position}
           onComplete={hideCelebration}
+        />
+
+        {/* Floating Action Button */}
+        <FloatingActionButton
+          onTradeAction={() => console.log('Trade action triggered')}
+          onPredictionAction={() => console.log('Prediction action triggered')}
+          onAIAction={() => console.log('AI action triggered')}
+          onSystemAction={() => console.log('System action triggered')}
         />
       </div>
     </div>
