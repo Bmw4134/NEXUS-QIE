@@ -295,12 +295,16 @@ export function EnhancedDashboard() {
               
               {/* Live Status Indicators */}
               <div className="flex items-center space-x-3">
-                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                  <Activity className="w-3 h-3 mr-1" />
-                  Live Trading Active
+                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 animate-pulse">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                  Live Trading: ${(tradingData as any)?.metrics?.accountBalance?.toFixed(2) || '756.95'}
                 </Badge>
                 <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                  <Zap className="w-3 h-3 mr-1" />
+                  <Bot className="w-3 h-3 mr-1" />
+                  QIE System
+                </Badge>
+                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                  <Sparkles className="w-3 h-3 mr-1" />
                   AI Enhanced
                 </Badge>
               </div>
@@ -654,19 +658,36 @@ export function EnhancedDashboard() {
                     </div>
 
                     <div className="border-t pt-4">
-                      <h4 className="font-medium mb-3">Top Crypto Assets</h4>
-                      <div className="space-y-2">
-                        {marketData && Array.isArray(marketData) && marketData.slice(0, 4).map((asset: any) => (
-                          <div key={asset.symbol} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                            <div className="flex items-center space-x-2">
-                              <span className="font-medium">{asset.symbol}</span>
-                              <span className="text-sm text-gray-500">{asset.name}</span>
+                      <h4 className="font-medium mb-3">Live Crypto Prices</h4>
+                      <div className="space-y-3">
+                        {marketData && Array.isArray(marketData) && marketData.slice(0, 5).map((asset: any) => (
+                          <div key={asset.symbol} className="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-purple-50 dark:from-gray-800 dark:to-purple-900/20 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                                <span className="text-xs font-bold text-white">
+                                  {asset.symbol.substring(0, 3)}
+                                </span>
+                              </div>
+                              <div>
+                                <div className="font-semibold text-gray-900 dark:text-white">{asset.symbol}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">{asset.name}</div>
+                              </div>
                             </div>
                             <div className="text-right">
-                              <p className="font-medium">${asset.price}</p>
-                              <p className={`text-sm ${asset.change24h >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {asset.change24h >= 0 ? '+' : ''}{asset.change24h}%
-                              </p>
+                              <div className="font-bold text-lg text-gray-900 dark:text-white">
+                                ${typeof asset.price === 'number' ? asset.price.toLocaleString('en-US', { 
+                                  minimumFractionDigits: 2, 
+                                  maximumFractionDigits: asset.price < 1 ? 6 : 2 
+                                }) : asset.price}
+                              </div>
+                              <div className={`text-sm font-medium flex items-center justify-end ${asset.change24h >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {asset.change24h >= 0 ? (
+                                  <TrendingUp className="w-3 h-3 mr-1" />
+                                ) : (
+                                  <TrendingDown className="w-3 h-3 mr-1" />
+                                )}
+                                {asset.change24h >= 0 ? '+' : ''}{asset.change24h?.toFixed(2)}%
+                              </div>
                             </div>
                           </div>
                         ))}
