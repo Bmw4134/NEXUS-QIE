@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   Calendar, 
   DollarSign, 
@@ -479,40 +480,97 @@ export function EnhancedDashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Predictive Market Chart */}
-              <Card>
+            {/* Quick Actions Panel */}
+            <Card className="border-purple-200 dark:border-purple-700 bg-gradient-to-r from-purple-50/50 to-blue-50/50 dark:from-purple-900/10 dark:to-blue-900/10">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center text-lg">
+                  <Sparkles className="h-5 w-5 mr-2 text-purple-600" />
+                  Quick Actions & Demo Features
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <AnimatedButton
+                    glowEffect={true}
+                    className="bg-green-600 hover:bg-green-700 text-sm py-2"
+                    onClick={() => celebrate('trade', 'Trade executed successfully! +$127.53', 'center')}
+                  >
+                    <TrendingUp className="h-4 w-4 mr-1" />
+                    Execute Trade
+                  </AnimatedButton>
+                  
+                  <AnimatedButton
+                    glowEffect={true}
+                    className="bg-blue-600 hover:bg-blue-700 text-sm py-2"
+                    onClick={() => celebrate('prediction', 'AI prediction accuracy: 94.7%', 'center')}
+                  >
+                    <Target className="h-4 w-4 mr-1" />
+                    AI Prediction
+                  </AnimatedButton>
+                  
+                  <AnimatedButton
+                    glowEffect={true}
+                    className="bg-purple-600 hover:bg-purple-700 text-sm py-2"
+                    onClick={() => celebrate('system', 'Quantum algorithms optimized!', 'center')}
+                  >
+                    <Zap className="h-4 w-4 mr-1" />
+                    System Boost
+                  </AnimatedButton>
+                  
+                  <AnimatedButton
+                    glowEffect={true}
+                    className="bg-yellow-600 hover:bg-yellow-700 text-sm py-2"
+                    onClick={() => celebrate('achievement', 'Trading milestone achieved!', 'center')}
+                  >
+                    <Sparkles className="h-4 w-4 mr-1" />
+                    Achievement
+                  </AnimatedButton>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Primary Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Market Analysis - Priority Position */}
+              <Card className="lg:col-span-2">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <BarChart3 className="h-5 w-5 mr-2" />
-                    Market Trends & Predictions
+                    Market Intelligence & Predictions
                   </CardTitle>
                   <CardDescription>
-                    Real-time data with AI-powered forecasting
+                    Real-time cryptocurrency data with AI-powered forecasting
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64">
+                  <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={predictiveData}>
-                        <CartesianGrid strokeDasharray="3 3" />
+                        <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                         <XAxis dataKey="time" />
                         <YAxis />
-                        <Tooltip />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '8px'
+                          }}
+                        />
                         <Area 
                           type="monotone" 
                           dataKey="value" 
                           stroke="#3B82F6" 
                           fill="#3B82F6" 
                           fillOpacity={0.1}
-                          name="Current"
+                          name="Current Price"
                         />
                         <Line 
                           type="monotone" 
                           dataKey="prediction" 
                           stroke="#10B981" 
                           strokeDasharray="5 5"
-                          name="Prediction"
+                          strokeWidth={2}
+                          name="AI Prediction"
                         />
                       </AreaChart>
                     </ResponsiveContainer>
@@ -557,30 +615,52 @@ export function EnhancedDashboard() {
               </Card>
             </div>
 
-            {/* AI-Generated Insights */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Brain className="h-5 w-5 mr-2" />
-                  AI-Generated Insights
-                </CardTitle>
-                <CardDescription>
-                  Real-time analysis and recommendations
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {generatedInsights.map((insight: string, index: number) => (
-                    <div key={index} className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
-                      <div className="flex items-start space-x-3">
-                        <Sparkles className="h-5 w-5 text-blue-600 mt-0.5" />
-                        <p className="text-sm text-gray-700 dark:text-gray-300">{insight}</p>
+            {/* Intelligent Insights Collapsible */}
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <Card className="cursor-pointer hover:shadow-md transition-all duration-200">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Brain className="h-5 w-5 mr-2" />
+                        <CardTitle>AI Intelligence & Insights</CardTitle>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                          {generatedInsights.length} Active
+                        </Badge>
+                        <ChevronDown className="h-4 w-4 transition-transform" />
                       </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    <CardDescription>
+                      Expand to view real-time AI analysis and recommendations
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-4 mt-4">
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {generatedInsights.map((insight: string, index: number) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-200 dark:border-blue-700"
+                        >
+                          <div className="flex items-start space-x-3">
+                            <Sparkles className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <p className="text-sm text-gray-700 dark:text-gray-300">{insight}</p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </CollapsibleContent>
+            </Collapsible>
           </TabsContent>
 
           <TabsContent value="trading" className="space-y-6">
