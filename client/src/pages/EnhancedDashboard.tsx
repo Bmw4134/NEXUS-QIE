@@ -284,11 +284,11 @@ export function EnhancedDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Enhanced Header with Real-time Status */}
-      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* Streamlined Header - Reduced Height for Better Flow */}
+      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-8xl mx-auto px-6 lg:px-8">
+          <div className="flex justify-between items-center py-3">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3">
                 <Shield className="h-8 w-8 text-blue-600" />
@@ -394,88 +394,75 @@ export function EnhancedDashboard() {
           </div>
         )}
 
-        {/* QIE Intelligence Suite Dashboard */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-          {/* Quantum Trading Engine */}
+        {/* Hero Metrics - Streamlined Above-the-Fold */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {/* Primary Trading Balance */}
           <motion.div
-            whileHover={{ scale: 1.02, y: -2 }}
+            whileHover={{ scale: 1.02, y: -1 }}
             whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.15 }}
+            className="lg:col-span-2"
           >
             <Card 
-              className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 border-cyan-200 dark:border-cyan-700 cursor-pointer"
+              className="bg-gradient-to-r from-cyan-500/5 to-blue-500/5 dark:from-cyan-500/10 dark:to-blue-500/10 border-cyan-200/30 dark:border-cyan-700/30 cursor-pointer hover:shadow-lg transition-all duration-200"
               onClick={() => celebrate('trade', 'Quantum trading engine accessed!', 'center')}
             >
-              <CardHeader className="pb-2">
-                <CardTitle className="text-cyan-800 dark:text-cyan-300 text-lg flex items-center">
-                  <Zap className="h-5 w-5 mr-2" />
-                  Quantum Engine
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-cyan-900 dark:text-cyan-100">
-                  ${(tradingData as any)?.metrics?.accountBalance?.toLocaleString() || '756.95'}
-                </div>
-                <div className="flex items-center mt-2">
-                  <Activity className="h-4 w-4 text-cyan-600 mr-1" />
-                  <span className="text-sm text-cyan-700 dark:text-cyan-300">Live Trading Active</span>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center space-x-2 mb-1">
+                      <Zap className="h-4 w-4 text-cyan-600" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Live Balance</span>
+                    </div>
+                    <div className="text-3xl font-bold text-gray-900 dark:text-white">
+                      ${(tradingData as any)?.metrics?.accountBalance?.toLocaleString() || '756.95'}
+                    </div>
+                    <div className="flex items-center text-sm text-green-600 mt-1">
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                      <span>+2.4% today</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></div>
+                      Active
+                    </Badge>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* AI Prediction Accuracy */}
-          <Card className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200 dark:border-emerald-700">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-emerald-800 dark:text-emerald-300 text-lg flex items-center">
-                <Brain className="h-5 w-5 mr-2" />
-                AI Accuracy
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">
+          {/* AI Performance */}
+          <Card className="bg-gradient-to-r from-emerald-500/5 to-green-500/5 dark:from-emerald-500/10 dark:to-green-500/10 border-emerald-200/30 dark:border-emerald-700/30">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <Brain className="h-4 w-4 text-emerald-600" />
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">AI Accuracy</span>
+              </div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                 {qnis.metrics?.aiAccuracy?.toFixed(1) || "94.7"}%
               </div>
               <Progress 
                 value={qnis.metrics?.aiAccuracy || 94.7} 
-                className="mt-2"
+                className="h-2"
               />
             </CardContent>
           </Card>
 
-          {/* Intelligence Operations */}
-          <Card className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border-violet-200 dark:border-violet-700">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-violet-800 dark:text-violet-300 text-lg flex items-center">
-                <Bot className="h-5 w-5 mr-2" />
-                Intelligence Ops
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-violet-900 dark:text-violet-100">
-                7
+          {/* System Health */}
+          <Card className="bg-gradient-to-r from-amber-500/5 to-orange-500/5 dark:from-amber-500/10 dark:to-orange-500/10 border-amber-200/30 dark:border-amber-700/30">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <Shield className="h-4 w-4 text-amber-600" />
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">System Health</span>
               </div>
-              <div className="text-sm text-violet-700 dark:text-violet-300 mt-2">
-                Active Agents
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* System Integrity */}
-          <Card className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200 dark:border-amber-700">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-amber-800 dark:text-amber-300 text-lg flex items-center">
-                <Shield className="h-5 w-5 mr-2" />
-                System Integrity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-amber-900 dark:text-amber-100">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                 {qnis.metrics?.systemHealth?.toFixed(1) || "98.7"}%
               </div>
-              <div className="flex items-center mt-2">
-                <CheckCircle className="h-4 w-4 text-green-600 mr-1" />
-                <span className="text-sm text-amber-700 dark:text-amber-300">Quantum Operations Stable</span>
+              <div className="flex items-center text-sm text-green-600">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                <span>Optimal</span>
               </div>
             </CardContent>
           </Card>
