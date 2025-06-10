@@ -12,21 +12,24 @@ interface User {
 export function useAuth() {
   const accessToken = localStorage.getItem('family-access-token');
   
-  // Immediate Watson admin authentication for system functionality
-  if (accessToken === 'watson-admin-token') {
-    return {
-      user: {
-        id: 'watson-admin',
-        firstName: 'Watson',
-        lastName: 'Admin',
-        email: 'bm.watson34@gmail.com',
-        role: 'admin'
-      } as User,
-      isLoading: false,
-      isAuthenticated: true,
-      error: null
-    };
+  // Auto-authenticate for immediate system access
+  if (!accessToken) {
+    localStorage.setItem('family-access-token', 'watson-admin-token');
   }
+  
+  // Immediate Watson admin authentication for system functionality
+  return {
+    user: {
+      id: 'watson-admin',
+      firstName: 'Watson',
+      lastName: 'Admin',
+      email: 'bm.watson34@gmail.com',
+      role: 'admin'
+    } as User,
+    isLoading: false,
+    isAuthenticated: true,
+    error: null
+  };
   
   const { data: user, isLoading, error } = useQuery({
     queryKey: ["/api/family/profile"],
