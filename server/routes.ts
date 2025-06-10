@@ -537,7 +537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isActive: liveTradingEngine.isRealModeActive(),
         metrics: {
           realMoneyMode: true,
-          accountBalance: liveTradingEngine.getSessionStatus().accountBalance || 756.95,
+          accountBalance: nexusOverrideEngine.getCurrentBalance(),
           totalTrades: metrics.totalTrades || 0,
           successfulTrades: metrics.successfulTrades || 0,
           successRate: metrics.successRate || 0,

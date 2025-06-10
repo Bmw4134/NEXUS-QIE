@@ -297,7 +297,7 @@ export function EnhancedDashboard() {
               <div className="flex items-center space-x-3">
                 <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 animate-pulse">
                   <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  Live Trading: ${(tradingData as any)?.metrics?.accountBalance?.toFixed(2) || '756.95'}
+                  Live Trading: ${(tradingData as any)?.metrics?.accountBalance?.toLocaleString() || '756.95'}
                 </Badge>
                 <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                   <Bot className="w-3 h-3 mr-1" />
@@ -648,7 +648,7 @@ export function EnhancedDashboard() {
                       <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                         <p className="text-sm text-purple-700 dark:text-purple-300">Crypto Balance</p>
                         <p className="text-lg font-bold text-purple-900 dark:text-purple-100">
-                          ${(tradingData as any)?.metrics?.accountBalance?.toFixed(2) || '756.95'}
+                          ${(tradingData as any)?.metrics?.accountBalance?.toLocaleString() || '756.95'}
                         </p>
                       </div>
                       <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">

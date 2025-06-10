@@ -188,6 +188,10 @@ export class NEXUSOverrideEngine {
     return { ...this.accountState };
   }
 
+  getCurrentBalance(): number {
+    return this.accountState.balance;
+  }
+
   async refreshAccountData(): Promise<void> {
     console.log('🔄 NEXUS Override: Refreshing account data...');
     this.accountState.lastUpdate = new Date();
