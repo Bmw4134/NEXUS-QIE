@@ -26,7 +26,9 @@
     "scroll_optimization": "COMPLETED",
     "onboarding_flow": "COMPLETED",
     "collapsible_modules": "COMPLETED",
-    "bottom_panel_optimization": "COMPLETED"
+    "bottom_panel_optimization": "COMPLETED",
+    "production_deployment": "IN_PROGRESS",
+    "system_validation": "ACTIVE"
   },
   "known_good_patterns": {
     "hero_metrics": "2x2 grid with primary balance spanning 2 cols",
