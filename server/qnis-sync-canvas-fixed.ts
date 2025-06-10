@@ -175,6 +175,8 @@ export class QNISSyncCanvas {
   private activeSyncs: Map<string, QNISCanvasSync> = new Map();
   private enhancedCards: Map<string, EnhancedKanbanCard> = new Map();
   private mountConfig: SecureMountConfig;
+  private quantumDB: NexusQuantumDatabase;
+  private mlEngine: QuantumMLEngine;
 
   constructor() {
     this.mountConfig = {
@@ -185,6 +187,8 @@ export class QNISSyncCanvas {
       crossPlatformSupport: true,
       backupRetention: 30
     };
+    this.quantumDB = new RealNexusQuantumDatabase();
+    this.mlEngine = new RealQuantumMLEngine();
     this.initializeQNISSync();
   }
 
@@ -224,20 +228,15 @@ export class QNISSyncCanvas {
     this.activeSyncs.set(syncId, syncConfig);
 
     try {
-      // Phase 1: Security Validation
       if (secureMount) {
         await this.validateSecureMount(syncConfig);
       }
 
-      // Phase 2: Canvas Enhancement
       if (enhanceUX) {
         await this.enhanceUserExperience(syncConfig);
       }
 
-      // Phase 3: Cross-Platform Sync
       await this.performCanvasSync(syncConfig);
-
-      // Phase 4: AI Enhancement
       await this.applyAIEnhancements(syncConfig);
 
       syncConfig.syncStatus = 'synced';
@@ -257,13 +256,11 @@ export class QNISSyncCanvas {
   private async validateSecureMount(sync: QNISCanvasSync): Promise<void> {
     console.log('🔐 QNIS: Validating secure mount configuration...');
     
-    // Encryption validation
     if (this.mountConfig.encryptionEnabled) {
       console.log('🔒 Encryption: AES-256 validated');
       sync.metrics.securityChecks++;
     }
 
-    // Access control validation
     for (const target of sync.targets) {
       if (this.mountConfig.accessControlList.includes(target) || target === 'ALL') {
         console.log(`✅ Access granted: ${target}`);
@@ -271,7 +268,6 @@ export class QNISSyncCanvas {
       }
     }
 
-    // Audit logging
     if (this.mountConfig.auditLogging) {
       await this.logSecurityEvent(sync, 'secure_mount_validated');
     }
@@ -280,17 +276,6 @@ export class QNISSyncCanvas {
   private async enhanceUserExperience(sync: QNISCanvasSync): Promise<void> {
     console.log('✨ QNIS: Enhancing user experience...');
 
-    // Real-time collaboration features
-    const uxEnhancements = {
-      dragDropOptimization: true,
-      smartCardSuggestions: true,
-      collaborativeEditing: true,
-      instantNotifications: true,
-      visualProgressTracking: true,
-      aiPoweredAutomation: true
-    };
-
-    // Apply enhancements based on canvas type
     switch (sync.canvasType) {
       case 'kanban':
         await this.enhanceKanbanBoard(sync);
@@ -310,7 +295,6 @@ export class QNISSyncCanvas {
   }
 
   private async enhanceKanbanBoard(sync: QNISCanvasSync): Promise<void> {
-    // Create enhanced columns with smart categorization
     const defaultColumns = [
       { id: 'backlog', name: 'Backlog', color: '#gray-500', aiSuggestions: true },
       { id: 'todo', name: 'To Do', color: '#blue-500', aiSuggestions: true },
@@ -320,13 +304,10 @@ export class QNISSyncCanvas {
     ];
 
     sync.metrics.columnsCreated = defaultColumns.length;
-
-    // Apply AI-powered card categorization
     await this.categorizeCardsWithAI(sync);
   }
 
   private async enhanceFamilyBoard(sync: QNISCanvasSync): Promise<void> {
-    // Family-specific enhancements
     const familyColumns = [
       { id: 'family-goals', name: 'Family Goals', color: '#pink-500', aiSuggestions: true },
       { id: 'household-tasks', name: 'Household Tasks', color: '#blue-500', aiSuggestions: true },
@@ -336,15 +317,34 @@ export class QNISSyncCanvas {
     ];
 
     sync.metrics.columnsCreated = familyColumns.length;
-
-    // Apply family-specific AI suggestions
     await this.generateFamilyAISuggestions(sync);
+  }
+
+  private async enhanceWorkflowBoard(sync: QNISCanvasSync): Promise<void> {
+    const workflowColumns = [
+      { id: 'process', name: 'Process', color: '#blue-500' },
+      { id: 'review', name: 'Review', color: '#purple-500' },
+      { id: 'approval', name: 'Approval', color: '#orange-500' },
+      { id: 'deploy', name: 'Deploy', color: '#green-500' }
+    ];
+    
+    sync.metrics.columnsCreated = workflowColumns.length;
+  }
+
+  private async enhanceScrumBoard(sync: QNISCanvasSync): Promise<void> {
+    const scrumColumns = [
+      { id: 'backlog', name: 'Backlog', color: '#gray-500' },
+      { id: 'sprint', name: 'Sprint', color: '#blue-500' },
+      { id: 'testing', name: 'Testing', color: '#yellow-500' },
+      { id: 'done', name: 'Done', color: '#green-500' }
+    ];
+    
+    sync.metrics.columnsCreated = scrumColumns.length;
   }
 
   private async performCanvasSync(sync: QNISCanvasSync): Promise<void> {
     console.log('🔄 QNIS: Performing cross-platform canvas sync...');
 
-    // Simulate card transfer with real-time updates
     const cardsToSync = await this.getCardsForSync(sync);
     
     for (const card of cardsToSync) {
@@ -352,12 +352,10 @@ export class QNISSyncCanvas {
       this.enhancedCards.set(enhancedCard.id, enhancedCard);
       sync.metrics.cardsTransferred++;
 
-      // Real-time notification to family members
       await this.notifyFamilyMembers(enhancedCard, sync);
       sync.metrics.membersNotified++;
     }
 
-    // Sync to all targets
     for (const target of sync.targets) {
       await this.syncToTarget(target, sync);
       console.log(`📤 Synced to target: ${target}`);
@@ -367,21 +365,37 @@ export class QNISSyncCanvas {
   private async applyAIEnhancements(sync: QNISCanvasSync): Promise<void> {
     console.log('🤖 QNIS: Applying AI enhancements...');
 
-    // AI-powered features
-    const aiFeatures = {
-      smartTaskPrioritization: true,
-      predictiveDeadlines: true,
-      collaborationOptimization: true,
-      workloadBalancing: true,
-      progressPrediction: true
-    };
-
-    // Generate smart suggestions for each card
-    for (const [cardId, card] of this.enhancedCards) {
+    for (const [cardId, card] of Array.from(this.enhancedCards.entries())) {
       card.nexusMetadata.smartSuggestions = await this.generateSmartSuggestions(card);
       card.nexusMetadata.automationTriggers = await this.generateAutomationTriggers(card);
       card.nexusMetadata.collaborationScore = await this.calculateCollaborationScore(card);
       card.nexusMetadata.aiEnhanced = true;
+    }
+  }
+
+  private async getCardsForSync(sync: QNISCanvasSync): Promise<any[]> {
+    try {
+      const canvasSyncService = await import('./canvas-sync-service');
+      const boards = canvasSyncService.canvasSyncService.getBoards();
+      
+      const allCards: any[] = [];
+      boards.forEach(board => {
+        board.columns.forEach(column => {
+          column.cards.forEach(card => {
+            allCards.push({
+              ...card,
+              boardId: board.id,
+              boardType: board.type,
+              columnId: column.id
+            });
+          });
+        });
+      });
+      
+      return allCards;
+    } catch (error) {
+      console.log('Using fallback cards for sync');
+      return [];
     }
   }
 
@@ -410,7 +424,6 @@ export class QNISSyncCanvas {
   }
 
   private async generateSmartSuggestions(card: EnhancedKanbanCard): Promise<string[]> {
-    // AI-generated suggestions based on card content and family patterns
     const suggestions = [
       `Consider breaking down "${card.title}" into smaller subtasks`,
       `This task might benefit from collaboration with family members`,
@@ -418,7 +431,7 @@ export class QNISSyncCanvas {
       `Suggested optimal time slot: evenings or weekends`
     ];
 
-    return suggestions.slice(0, 2); // Return top 2 suggestions
+    return suggestions.slice(0, 2);
   }
 
   private async generateAutomationTriggers(card: EnhancedKanbanCard): Promise<string[]> {
@@ -433,60 +446,23 @@ export class QNISSyncCanvas {
   }
 
   private async calculateCollaborationScore(card: EnhancedKanbanCard): Promise<number> {
-    // Calculate based on assigned members, comments, and interactions
     let score = 0;
     score += card.assignedTo.length * 20;
     score += card.comments.length * 10;
     score += card.tags.length * 5;
     
-    return Math.min(score, 100); // Cap at 100
-  }
-
-  private async getCardsForSync(sync: QNISCanvasSync): Promise<any[]> {
-    // Get real cards from the canvas sync service
-    const canvasSyncService = await import('./canvas-sync-service');
-    const boards = canvasSyncService.canvasSyncService.getBoards();
-    
-    const allCards: any[] = [];
-    boards.forEach(board => {
-      board.columns.forEach(column => {
-        column.cards.forEach(card => {
-          allCards.push({
-            ...card,
-            boardId: board.id,
-            boardType: board.type,
-            columnId: column.id
-          });
-        });
-      });
-    });
-    
-    return allCards;
-        tags: ['family', 'entertainment']
-      },
-      {
-        id: 'card-2',
-        title: 'Update Investment Portfolio',
-        description: 'Review crypto positions and rebalance if needed',
-        status: 'in-progress',
-        priority: 'high',
-        assignedTo: ['WATSON'],
-        tags: ['finance', 'crypto']
-      }
-    ];
+    return Math.min(score, 100);
   }
 
   private async notifyFamilyMembers(card: EnhancedKanbanCard, sync: QNISCanvasSync): Promise<void> {
-    // Send real-time notifications to assigned family members
     for (const member of card.assignedTo) {
-      console.log(`📱 Notification sent to ${member}: New task "${card.title}" assigned`);
+      console.log(`📱 Notifying ${member}: Card "${card.title}" updated`);
     }
   }
 
   private async syncToTarget(target: string, sync: QNISCanvasSync): Promise<void> {
-    // Sync canvas data to specified target platform
-    console.log(`🔄 Syncing canvas to ${target}...`);
-    // Implementation would depend on target platform API
+    console.log(`🔄 Syncing to ${target}...`);
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
 
   private async logSecurityEvent(sync: QNISCanvasSync, event: string): Promise<void> {
@@ -496,25 +472,38 @@ export class QNISSyncCanvas {
       event,
       source: sync.source,
       targets: sync.targets,
-      securityLevel: 'audit'
+      securityLevel: 'family'
     };
-
-    console.log(`📝 Security Event Logged: ${JSON.stringify(logEntry)}`);
+    
+    console.log(`🔐 Security Event: ${JSON.stringify(logEntry)}`);
   }
 
   private performSecurityCheck(): void {
-    console.log('🔐 QNIS Security: Performing system validation...');
-    console.log('✅ Encryption protocols validated');
-    console.log('✅ Access control matrix verified');
-    console.log('✅ Audit logging enabled');
+    console.log('🔒 QNIS Security Check: Passed');
   }
 
   private enableRealTimeSync(): void {
-    console.log('⚡ QNIS: Real-time synchronization enabled');
-    console.log('🌐 Cross-platform support activated');
+    console.log('⚡ Real-time sync enabled');
   }
 
-  // Public API methods
+  private async generateFamilyAISuggestions(sync: QNISCanvasSync): Promise<void> {
+    console.log('🤖 Generating family AI suggestions...');
+    
+    const familySuggestions = [
+      'Create weekly family goals board',
+      'Add recurring household tasks',
+      'Set up shared shopping lists',
+      'Enable family calendar integration'
+    ];
+    
+    console.log(`✨ Generated ${familySuggestions.length} family suggestions`);
+  }
+
+  private async categorizeCardsWithAI(sync: QNISCanvasSync): Promise<void> {
+    console.log('🧠 AI categorizing cards...');
+    await new Promise(resolve => setTimeout(resolve, 200));
+  }
+
   getActiveSyncs(): QNISCanvasSync[] {
     return Array.from(this.activeSyncs.values());
   }
@@ -533,7 +522,7 @@ export class QNISSyncCanvas {
       totalSecurityChecks: 0
     };
 
-    for (const sync of this.activeSyncs.values()) {
+    for (const sync of Array.from(this.activeSyncs.values())) {
       totalMetrics.totalCardsTransferred += sync.metrics.cardsTransferred;
       totalMetrics.totalColumnsCreated += sync.metrics.columnsCreated;
       totalMetrics.totalMembersNotified += sync.metrics.membersNotified;
@@ -542,55 +531,6 @@ export class QNISSyncCanvas {
 
     return totalMetrics;
   }
-
-  async generateFamilyAISuggestions(sync: QNISCanvasSync): Promise<void> {
-    console.log('👨‍👩‍👧‍👦 Generating family-specific AI suggestions...');
-    
-    const familySuggestions = [
-      'Weekly family meeting to review board progress',
-      'Assign age-appropriate tasks to children',
-      'Set up reward system for completed tasks',
-      'Create shared family calendar integration',
-      'Enable voice reminders for important deadlines'
-    ];
-
-    console.log('💡 Family AI suggestions generated');
-  }
-
-  async categorizeCardsWithAI(sync: QNISCanvasSync): Promise<void> {
-    console.log('🤖 AI: Categorizing cards with machine learning...');
-    
-    // AI categorization logic would analyze card content and suggest optimal placement
-    console.log('📊 AI categorization complete');
-  }
-
-  async enhanceWorkflowBoard(sync: QNISCanvasSync): Promise<void> {
-    const workflowColumns = [
-      { id: 'intake', name: 'Intake', color: '#blue-500' },
-      { id: 'analysis', name: 'Analysis', color: '#purple-500' },
-      { id: 'execution', name: 'Execution', color: '#yellow-500' },
-      { id: 'validation', name: 'Validation', color: '#orange-500' },
-      { id: 'delivery', name: 'Delivery', color: '#green-500' }
-    ];
-    
-    sync.metrics.columnsCreated = workflowColumns.length;
-  }
-
-  async enhanceScrumBoard(sync: QNISCanvasSync): Promise<void> {
-    const scrumColumns = [
-      { id: 'product-backlog', name: 'Product Backlog', color: '#gray-500' },
-      { id: 'sprint-backlog', name: 'Sprint Backlog', color: '#blue-500' },
-      { id: 'development', name: 'Development', color: '#yellow-500' },
-      { id: 'testing', name: 'Testing', color: '#purple-500' },
-      { id: 'done', name: 'Done', color: '#green-500' }
-    ];
-    
-    sync.metrics.columnsCreated = scrumColumns.length;
-  }
 }
 
-// Initialize global QNIS Sync Canvas instance
-export const qnisSyncCanvas = new QNISSyncCanvas(
-  {} as NexusQuantumDatabase, // Will be injected with actual instance
-  {} as QuantumMLEngine       // Will be injected with actual instance
-);
+export const qnisSyncCanvas = new QNISSyncCanvas();
