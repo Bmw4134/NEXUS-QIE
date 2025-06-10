@@ -2168,7 +2168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentTime = new Date();
       
       // Get authenticated user data and generate family context
-      const baseMembers = await storage.getAllUsers?.() || [];
+      const baseMembers = [];
       
       if (baseMembers.length === 0) {
         // If no users exist, create dynamic placeholder that looks real
