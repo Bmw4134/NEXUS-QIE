@@ -32,6 +32,9 @@ import { robinhoodBalanceSync } from "./robinhood-balance-sync";
 import { nexusDeploymentValidator } from "./nexus-deployment-validator";
 import { monitoringService } from "./monitoring-service";
 import { backupService } from "./backup-service";
+import { nexusDOMExceptionResolver } from "./nexus-dom-exception-resolver";
+import { nexusQuantumOptimizer } from "./nexus-quantum-optimizer";
+import { nexusIntelligentDataService } from "./nexus-intelligent-data-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -3185,6 +3188,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Backup history error:', error);
       res.status(500).json({ error: 'Failed to get backup history' });
+    }
+  });
+
+  // NEXUS Quantum Optimization API Routes
+  app.post('/api/quantum/optimize', async (req, res) => {
+    try {
+      const optimization = await nexusQuantumOptimizer.performQuantumOptimization();
+      res.json({
+        success: true,
+        optimization,
+        message: 'Quantum optimization completed'
+      });
+    } catch (error) {
+      console.error('Quantum optimization error:', error);
+      res.status(500).json({ error: 'Failed to perform quantum optimization' });
+    }
+  });
+
+  app.post('/api/quantum/emergency-optimize', async (req, res) => {
+    try {
+      const success = await nexusQuantumOptimizer.emergencyOptimization();
+      res.json({
+        success,
+        message: success ? 'Emergency optimization completed' : 'Emergency optimization failed'
+      });
+    } catch (error) {
+      console.error('Emergency optimization error:', error);
+      res.status(500).json({ error: 'Failed to perform emergency optimization' });
+    }
+  });
+
+  app.get('/api/quantum/metrics', async (req, res) => {
+    try {
+      const metrics = await nexusQuantumOptimizer.getSystemMetrics();
+      const status = nexusQuantumOptimizer.getOptimizationStatus();
+      res.json({
+        success: true,
+        metrics,
+        status
+      });
+    } catch (error) {
+      console.error('Quantum metrics error:', error);
+      res.status(500).json({ error: 'Failed to get quantum metrics' });
+    }
+  });
+
+  // DOM Exception Resolution API Routes
+  app.get('/api/dom-exceptions/stats', async (req, res) => {
+    try {
+      const stats = nexusDOMExceptionResolver.getExceptionStats();
+      res.json({
+        success: true,
+        stats
+      });
+    } catch (error) {
+      console.error('DOM exception stats error:', error);
+      res.status(500).json({ error: 'Failed to get exception stats' });
+    }
+  });
+
+  app.get('/api/dom-exceptions/recent', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const exceptions = nexusDOMExceptionResolver.getRecentExceptions(limit);
+      res.json({
+        success: true,
+        exceptions
+      });
+    } catch (error) {
+      console.error('Recent exceptions error:', error);
+      res.status(500).json({ error: 'Failed to get recent exceptions' });
+    }
+  });
+
+  app.post('/api/dom-exceptions/resolve', async (req, res) => {
+    try {
+      const optimizations = nexusDOMExceptionResolver.applySystemOptimizations();
+      res.json({
+        success: true,
+        optimizations,
+        message: 'DOM exception resolution applied'
+      });
+    } catch (error) {
+      console.error('DOM exception resolution error:', error);
+      res.status(500).json({ error: 'Failed to resolve DOM exceptions' });
+    }
+  });
+
+  // Intelligent Data Service API Routes
+  app.get('/api/intelligent-data/status', async (req, res) => {
+    try {
+      const status = nexusIntelligentDataService.getServiceStatus();
+      res.json({
+        success: true,
+        status
+      });
+    } catch (error) {
+      console.error('Intelligent data status error:', error);
+      res.status(500).json({ error: 'Failed to get intelligent data status' });
+    }
+  });
+
+  app.get('/api/intelligent-data/market/:symbols', async (req, res) => {
+    try {
+      const symbols = req.params.symbols.split(',');
+      const data = await nexusIntelligentDataService.getMarketData(symbols);
+      res.json({
+        success: true,
+        data
+      });
+    } catch (error) {
+      console.error('Intelligent market data error:', error);
+      res.status(500).json({ error: 'Failed to get intelligent market data' });
     }
   });
 
