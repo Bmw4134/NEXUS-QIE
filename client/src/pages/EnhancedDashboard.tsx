@@ -342,8 +342,13 @@ export function EnhancedDashboard() {
                     key={mode}
                     variant={layoutMode === mode ? "default" : "ghost"}
                     size="sm"
-                    onClick={() => setLayoutMode(mode)}
-                    className="h-8 px-3 text-xs"
+                    onClick={() => {
+                      console.log(`Switching to ${mode} layout mode`);
+                      setLayoutMode(mode);
+                      celebrate('system', `Layout switched to ${mode} mode!`, 'top-right');
+                    }}
+                    className="h-8 px-3 text-xs capitalize transition-all duration-200 hover:scale-105"
+                    data-testid={`layout-${mode}`}
                   >
                     {mode}
                   </Button>
@@ -496,7 +501,11 @@ export function EnhancedDashboard() {
                   <AnimatedButton
                     glowEffect={true}
                     className="bg-green-600 hover:bg-green-700 text-sm py-2"
-                    onClick={() => celebrate('trade', 'Trade executed successfully! +$127.53', 'center')}
+                    onClick={() => {
+                      console.log('Execute Trade button clicked');
+                      celebrate('trade', 'Trade executed successfully! +$127.53', 'center');
+                    }}
+                    data-testid="execute-trade"
                   >
                     <TrendingUp className="h-4 w-4 mr-1" />
                     Execute Trade
@@ -505,7 +514,11 @@ export function EnhancedDashboard() {
                   <AnimatedButton
                     glowEffect={true}
                     className="bg-blue-600 hover:bg-blue-700 text-sm py-2"
-                    onClick={() => celebrate('prediction', 'AI prediction accuracy: 94.7%', 'center')}
+                    onClick={() => {
+                      console.log('AI Prediction button clicked');
+                      celebrate('prediction', 'AI prediction accuracy: 94.7%', 'center');
+                    }}
+                    data-testid="ai-prediction"
                   >
                     <Target className="h-4 w-4 mr-1" />
                     AI Prediction
@@ -514,7 +527,11 @@ export function EnhancedDashboard() {
                   <AnimatedButton
                     glowEffect={true}
                     className="bg-purple-600 hover:bg-purple-700 text-sm py-2"
-                    onClick={() => celebrate('system', 'Quantum algorithms optimized!', 'center')}
+                    onClick={() => {
+                      console.log('System Boost button clicked');
+                      celebrate('system', 'Quantum algorithms optimized!', 'center');
+                    }}
+                    data-testid="system-boost"
                   >
                     <Zap className="h-4 w-4 mr-1" />
                     System Boost
@@ -523,7 +540,11 @@ export function EnhancedDashboard() {
                   <AnimatedButton
                     glowEffect={true}
                     className="bg-yellow-600 hover:bg-yellow-700 text-sm py-2"
-                    onClick={() => celebrate('achievement', 'Trading milestone achieved!', 'center')}
+                    onClick={() => {
+                      console.log('Achievement button clicked');
+                      celebrate('achievement', 'Trading milestone achieved!', 'center');
+                    }}
+                    data-testid="achievement"
                   >
                     <Sparkles className="h-4 w-4 mr-1" />
                     Achievement
@@ -1165,6 +1186,22 @@ export function EnhancedDashboard() {
                 </CollapsibleContent>
               </Collapsible>
             )}
+
+            {/* Button Testing Interface */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Settings className="h-5 w-5 mr-2" />
+                  System Testing & Validation
+                </CardTitle>
+                <CardDescription>
+                  Comprehensive UI button testing and validation system
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ButtonTester />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 
