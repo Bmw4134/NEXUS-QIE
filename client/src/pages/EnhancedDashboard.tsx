@@ -42,6 +42,7 @@ import { SuccessCelebration, useSuccessCelebration } from '@/components/SuccessC
 import { AnimatedButton } from '@/components/AnimatedButton';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { OnboardingOverlay } from '@/components/OnboardingOverlay';
+import { ButtonTester } from '@/components/ButtonTester';
 
 interface DashboardMetrics {
   totalValue: number;

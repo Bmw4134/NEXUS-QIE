@@ -36,6 +36,7 @@ import { nexusDOMExceptionResolver } from "./nexus-dom-exception-resolver";
 import { nexusQuantumOptimizer } from "./nexus-quantum-optimizer";
 import { nexusIntelligentDataService } from "./nexus-intelligent-data-service";
 import { nexusProductionOptimizer } from "./nexus-production-optimizer";
+import { nexusButtonValidator } from "./nexus-button-validator";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -3330,6 +3331,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Production status error:', error);
       res.status(500).json({ error: 'Failed to get production status' });
+    }
+  });
+
+  // NEXUS Button Validation API Routes
+  app.post('/api/buttons/validate', async (req, res) => {
+    try {
+      const report = await nexusButtonValidator.validateAllButtons();
+      res.json({
+        success: true,
+        report,
+        message: `Button validation complete: ${report.workingButtons}/${report.totalButtons} working (${report.systemHealth.toFixed(1)}%)`
+      });
+    } catch (error) {
+      console.error('Button validation error:', error);
+      res.status(500).json({ error: 'Failed to validate buttons' });
+    }
+  });
+
+  app.get('/api/buttons/status', async (req, res) => {
+    try {
+      const results = await nexusButtonValidator.getTestResults();
+      const stats = nexusButtonValidator.getValidationStats();
+      res.json({
+        success: true,
+        results,
+        stats
+      });
+    } catch (error) {
+      console.error('Button status error:', error);
+      res.status(500).json({ error: 'Failed to get button status' });
+    }
+  });
+
+  app.get('/api/buttons/:buttonId/status', async (req, res) => {
+    try {
+      const buttonId = req.params.buttonId;
+      const status = await nexusButtonValidator.getButtonStatus(buttonId);
+      if (!status) {
+        return res.status(404).json({ error: 'Button not found' });
+      }
+      res.json({
+        success: true,
+        status
+      });
+    } catch (error) {
+      console.error('Individual button status error:', error);
+      res.status(500).json({ error: 'Failed to get button status' });
+    }
+  });
+
+  app.post('/api/buttons/repair', async (req, res) => {
+    try {
+      const repairedButtons = await nexusButtonValidator.repairBrokenButtons();
+      res.json({
+        success: true,
+        repairedButtons,
+        message: `Repaired ${repairedButtons.length} buttons`
+      });
+    } catch (error) {
+      console.error('Button repair error:', error);
+      res.status(500).json({ error: 'Failed to repair buttons' });
     }
   });
 
