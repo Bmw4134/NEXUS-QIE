@@ -2867,6 +2867,147 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Trello Integration API Routes
+  app.get('/api/trello/boards', async (req, res) => {
+    try {
+      const boards = trelloIntegration.getBoards();
+      const status = trelloIntegration.getConnectionStatus();
+      res.json({
+        success: true,
+        boards,
+        connectionStatus: status
+      });
+    } catch (error) {
+      console.error('Trello boards fetch error:', error);
+      res.status(500).json({ error: 'Failed to fetch Trello boards' });
+    }
+  });
+
+  app.post('/api/trello/sync', async (req, res) => {
+    try {
+      const syncResult = await trelloIntegration.syncAllBoards();
+      const metrics = trelloIntegration.getSyncMetrics();
+      res.json({
+        success: syncResult,
+        metrics,
+        message: syncResult ? 'Trello boards synced successfully' : 'Sync failed - check credentials'
+      });
+    } catch (error) {
+      console.error('Trello sync error:', error);
+      res.status(500).json({ error: 'Failed to sync Trello boards' });
+    }
+  });
+
+  // Twilio SMS Integration API Routes
+  app.get('/api/twilio/status', async (req, res) => {
+    try {
+      const status = twilioIntegration.getConnectionStatus();
+      const metrics = twilioIntegration.getMetrics();
+      res.json({
+        success: true,
+        status,
+        metrics
+      });
+    } catch (error) {
+      console.error('Twilio status error:', error);
+      res.status(500).json({ error: 'Failed to get Twilio status' });
+    }
+  });
+
+  app.post('/api/twilio/send', async (req, res) => {
+    try {
+      const { to, message, type } = req.body;
+      const notification = await twilioIntegration.sendSMS(to, message, type);
+      res.json({
+        success: notification.status !== 'failed',
+        notification,
+        message: notification.status === 'sent' ? 'SMS sent successfully' : 'SMS failed to send'
+      });
+    } catch (error) {
+      console.error('Twilio send error:', error);
+      res.status(500).json({ error: 'Failed to send SMS' });
+    }
+  });
+
+  app.get('/api/twilio/alerts', async (req, res) => {
+    try {
+      const alerts = twilioIntegration.getPriceAlerts();
+      const activeAlerts = twilioIntegration.getActiveAlerts();
+      res.json({
+        success: true,
+        alerts,
+        activeAlerts,
+        totalAlerts: alerts.length,
+        activeCount: activeAlerts.length
+      });
+    } catch (error) {
+      console.error('Twilio alerts error:', error);
+      res.status(500).json({ error: 'Failed to get price alerts' });
+    }
+  });
+
+  app.post('/api/twilio/alerts', async (req, res) => {
+    try {
+      const { symbol, targetPrice, condition, phoneNumber } = req.body;
+      const alert = twilioIntegration.createPriceAlert(symbol, targetPrice, condition, phoneNumber);
+      res.json({
+        success: true,
+        alert,
+        message: 'Price alert created successfully'
+      });
+    } catch (error) {
+      console.error('Twilio alert creation error:', error);
+      res.status(500).json({ error: 'Failed to create price alert' });
+    }
+  });
+
+  // Robinhood Balance Sync API Routes
+  app.get('/api/robinhood/balance', async (req, res) => {
+    try {
+      const balance = robinhoodBalanceSync.getCurrentBalance();
+      const account = robinhoodBalanceSync.getAccount();
+      const status = robinhoodBalanceSync.getSyncStatus();
+      res.json({
+        success: true,
+        balance,
+        account,
+        status
+      });
+    } catch (error) {
+      console.error('Robinhood balance error:', error);
+      res.status(500).json({ error: 'Failed to get Robinhood balance' });
+    }
+  });
+
+  app.post('/api/robinhood/balance/refresh', async (req, res) => {
+    try {
+      const balance = await robinhoodBalanceSync.refreshBalance();
+      res.json({
+        success: true,
+        balance,
+        message: 'Balance refreshed successfully'
+      });
+    } catch (error) {
+      console.error('Robinhood balance refresh error:', error);
+      res.status(500).json({ error: 'Failed to refresh balance' });
+    }
+  });
+
+  app.post('/api/robinhood/balance/update', async (req, res) => {
+    try {
+      const { balance } = req.body;
+      const success = await robinhoodBalanceSync.manualBalanceUpdate(balance);
+      res.json({
+        success,
+        balance: robinhoodBalanceSync.getCurrentBalance(),
+        message: success ? 'Balance updated successfully' : 'Failed to update balance'
+      });
+    } catch (error) {
+      console.error('Robinhood balance update error:', error);
+      res.status(500).json({ error: 'Failed to update balance' });
+    }
+  });
+
   // Intelligence Hub Module
   app.get('/api/intelligence-hub/overview', async (req, res) => {
     try {
