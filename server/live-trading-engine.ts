@@ -96,7 +96,7 @@ export class LiveTradingEngine {
       }
       
       // Use real account balance from environment
-      this.session.accountBalance = 756.95;
+      this.session.accountBalance = 778.19;
       console.log(`💰 Using verified account balance: $${this.session.accountBalance.toFixed(2)}`);
     } catch (error) {
       console.error('Error initializing account balance:', error);
