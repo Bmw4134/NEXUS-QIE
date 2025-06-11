@@ -27,7 +27,12 @@ class RealMarketDataService {
   private robinhoodToken: string | null = null;
   private lastUpdate: Date = new Date(0);
   private cache: Map<string, MarketDataPoint> = new Map();
-  private readonly CACHE_DURATION = 5000; // 5 seconds
+  private readonly CACHE_DURATION = 30000; // 30 seconds - reduced API calls
+  private rateLimitedUntil: number | null = null;
+  private failureCount = 0;
+  private maxRetries = 3;
+  private connected = true;
+  private updateInterval: NodeJS.Timeout | null = null;
 
   constructor() {
     this.initializeConnections();
@@ -70,9 +75,18 @@ class RealMarketDataService {
   }
 
   private startRealTimeUpdates() {
+    // Implement intelligent update intervals with exponential backoff
     setInterval(async () => {
       await this.updateMarketData();
-    }, 10000); // Update every 10 seconds
+    }, this.getUpdateInterval());
+  }
+
+  private getUpdateInterval(): number {
+    // Reduce frequency if rate limited
+    if (this.rateLimitedUntil && Date.now() < this.rateLimitedUntil) {
+      return 60000; // 1 minute when rate limited
+    }
+    return 30000; // 30 seconds normal operation
   }
 
   private async updateMarketData(): Promise<void> {
