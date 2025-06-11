@@ -26,6 +26,9 @@ import { qnisDeploymentEngine } from "./qnis-deployment-engine";
 import { qieSystemCore } from "./qie-system-core";
 import { qieUnifiedMode } from "./qie-unified-mode";
 import { deploymentController } from "./deployment-controller";
+import { trelloIntegration } from "./trello-integration";
+import { twilioIntegration } from "./twilio-integration";
+import { robinhoodBalanceSync } from "./robinhood-balance-sync";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -1481,7 +1484,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const tradingEngine = {
         connected: true,
-        balance: 834.97,
+        balance: robinhoodBalanceSync.getCurrentBalance(),
         activePositions: 0,
         legendStatus: 'enabled',
         quantumMode: true
