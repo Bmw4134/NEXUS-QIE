@@ -35,6 +35,7 @@ import { backupService } from "./backup-service";
 import { nexusDOMExceptionResolver } from "./nexus-dom-exception-resolver";
 import { nexusQuantumOptimizer } from "./nexus-quantum-optimizer";
 import { nexusIntelligentDataService } from "./nexus-intelligent-data-service";
+import { nexusProductionOptimizer } from "./nexus-production-optimizer";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -3301,6 +3302,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Intelligent market data error:', error);
       res.status(500).json({ error: 'Failed to get intelligent market data' });
+    }
+  });
+
+  // NEXUS Production Optimization API Routes
+  app.post('/api/production/optimize', async (req, res) => {
+    try {
+      const optimization = await nexusProductionOptimizer.performProductionOptimization();
+      res.json({
+        success: true,
+        optimization,
+        message: 'Production optimization completed successfully'
+      });
+    } catch (error) {
+      console.error('Production optimization error:', error);
+      res.status(500).json({ error: 'Failed to perform production optimization' });
+    }
+  });
+
+  app.get('/api/production/status', async (req, res) => {
+    try {
+      const status = nexusProductionOptimizer.getOptimizationStatus();
+      res.json({
+        success: true,
+        status
+      });
+    } catch (error) {
+      console.error('Production status error:', error);
+      res.status(500).json({ error: 'Failed to get production status' });
     }
   });
 
