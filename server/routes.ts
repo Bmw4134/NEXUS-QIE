@@ -29,6 +29,9 @@ import { deploymentController } from "./deployment-controller";
 import { trelloIntegration } from "./trello-integration";
 import { twilioIntegration } from "./twilio-integration";
 import { robinhoodBalanceSync } from "./robinhood-balance-sync";
+import { nexusDeploymentValidator } from "./nexus-deployment-validator";
+import { monitoringService } from "./monitoring-service";
+import { backupService } from "./backup-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -3005,6 +3008,183 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Robinhood balance update error:', error);
       res.status(500).json({ error: 'Failed to update balance' });
+    }
+  });
+
+  // NEXUS Deployment Validation API Routes
+  app.get('/api/deployment/validate', async (req, res) => {
+    try {
+      const report = await nexusDeploymentValidator.performComprehensiveValidation();
+      res.json({
+        success: true,
+        report,
+        timestamp: new Date()
+      });
+    } catch (error) {
+      console.error('Deployment validation error:', error);
+      res.status(500).json({ error: 'Failed to validate deployment' });
+    }
+  });
+
+  app.get('/api/deployment/components', async (req, res) => {
+    try {
+      const components = nexusDeploymentValidator.getComponents();
+      const gaps = nexusDeploymentValidator.getGaps();
+      res.json({
+        success: true,
+        components,
+        gaps,
+        lastValidation: nexusDeploymentValidator.getLastValidation()
+      });
+    } catch (error) {
+      console.error('Components fetch error:', error);
+      res.status(500).json({ error: 'Failed to fetch components' });
+    }
+  });
+
+  // System Monitoring API Routes
+  app.get('/api/monitoring/overview', async (req, res) => {
+    try {
+      const overview = monitoringService.getSystemOverview();
+      res.json({
+        success: true,
+        overview
+      });
+    } catch (error) {
+      console.error('Monitoring overview error:', error);
+      res.status(500).json({ error: 'Failed to get monitoring overview' });
+    }
+  });
+
+  app.get('/api/monitoring/health', async (req, res) => {
+    try {
+      const healthChecks = monitoringService.getHealthChecks();
+      res.json({
+        success: true,
+        healthChecks
+      });
+    } catch (error) {
+      console.error('Health checks error:', error);
+      res.status(500).json({ error: 'Failed to get health checks' });
+    }
+  });
+
+  app.get('/api/monitoring/alerts', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const alerts = monitoringService.getAlerts(limit);
+      res.json({
+        success: true,
+        alerts
+      });
+    } catch (error) {
+      console.error('Alerts fetch error:', error);
+      res.status(500).json({ error: 'Failed to get alerts' });
+    }
+  });
+
+  app.post('/api/monitoring/alerts/:alertId/acknowledge', async (req, res) => {
+    try {
+      const { alertId } = req.params;
+      const { acknowledgedBy } = req.body;
+      const success = monitoringService.acknowledgeAlert(alertId, acknowledgedBy);
+      res.json({
+        success,
+        message: success ? 'Alert acknowledged' : 'Alert not found'
+      });
+    } catch (error) {
+      console.error('Alert acknowledge error:', error);
+      res.status(500).json({ error: 'Failed to acknowledge alert' });
+    }
+  });
+
+  app.get('/api/monitoring/metrics', async (req, res) => {
+    try {
+      const service = req.query.service as string;
+      const metric = req.query.metric as string;
+      const hours = parseInt(req.query.hours as string) || 24;
+      const metrics = monitoringService.getMetrics(service, metric, hours);
+      res.json({
+        success: true,
+        metrics
+      });
+    } catch (error) {
+      console.error('Metrics fetch error:', error);
+      res.status(500).json({ error: 'Failed to get metrics' });
+    }
+  });
+
+  // Backup Service API Routes
+  app.get('/api/backup/status', async (req, res) => {
+    try {
+      const metrics = backupService.getBackupMetrics();
+      const history = backupService.getBackupHistory(10);
+      const restorePoints = backupService.getRestorePoints();
+      res.json({
+        success: true,
+        metrics,
+        recentBackups: history,
+        restorePoints
+      });
+    } catch (error) {
+      console.error('Backup status error:', error);
+      res.status(500).json({ error: 'Failed to get backup status' });
+    }
+  });
+
+  app.post('/api/backup/create', async (req, res) => {
+    try {
+      const success = await backupService.performAutomatedBackup();
+      res.json({
+        success,
+        message: success ? 'Backup completed successfully' : 'Backup failed'
+      });
+    } catch (error) {
+      console.error('Manual backup error:', error);
+      res.status(500).json({ error: 'Failed to create backup' });
+    }
+  });
+
+  app.post('/api/backup/restore-point', async (req, res) => {
+    try {
+      const { name, description } = req.body;
+      const restorePoint = await backupService.createRestorePoint(name, description);
+      res.json({
+        success: true,
+        restorePoint,
+        message: 'Restore point created successfully'
+      });
+    } catch (error) {
+      console.error('Restore point creation error:', error);
+      res.status(500).json({ error: 'Failed to create restore point' });
+    }
+  });
+
+  app.post('/api/backup/restore/:restorePointId', async (req, res) => {
+    try {
+      const { restorePointId } = req.params;
+      const success = await backupService.restoreFromPoint(restorePointId);
+      res.json({
+        success,
+        message: success ? 'Restore completed successfully' : 'Restore failed'
+      });
+    } catch (error) {
+      console.error('Restore error:', error);
+      res.status(500).json({ error: 'Failed to restore from point' });
+    }
+  });
+
+  app.get('/api/backup/history', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const history = backupService.getBackupHistory(limit);
+      res.json({
+        success: true,
+        history
+      });
+    } catch (error) {
+      console.error('Backup history error:', error);
+      res.status(500).json({ error: 'Failed to get backup history' });
     }
   });
 
