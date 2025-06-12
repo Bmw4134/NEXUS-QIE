@@ -244,17 +244,22 @@ export class NexusDOMExceptionResolver {
         this.exceptionHistory = this.exceptionHistory.slice(-50);
       }
 
-      // Clear Node.js internal caches
-      if (require.cache) {
-        const cacheKeys = Object.keys(require.cache);
-        if (cacheKeys.length > 1000) {
-          // Clear some old cached modules
-          cacheKeys.slice(0, 100).forEach(key => {
-            if (!key.includes('node_modules')) {
-              delete require.cache[key];
-            }
-          });
+      // Clear Node.js internal caches (ES module compatible)
+      try {
+        if (typeof require !== 'undefined' && require.cache) {
+          const cacheKeys = Object.keys(require.cache);
+          if (cacheKeys.length > 1000) {
+            // Clear some old cached modules
+            cacheKeys.slice(0, 100).forEach(key => {
+              if (!key.includes('node_modules')) {
+                delete require.cache[key];
+              }
+            });
+          }
         }
+      } catch (error) {
+        // ES modules don't have require.cache - skip cache cleanup
+        console.log('Cache cleanup skipped for ES modules');
       }
 
       return true;

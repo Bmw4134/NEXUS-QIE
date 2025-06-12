@@ -69,7 +69,8 @@ export function LoginPage() {
           title: "Login Successful",
           description: `Welcome back, ${data.user?.username}!`,
         });
-        setLocation('/dashboard');
+        // Force page refresh to ensure authentication state updates
+        window.location.href = '/';
       } else {
         toast({
           title: "Login Failed",
