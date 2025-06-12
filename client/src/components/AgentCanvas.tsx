@@ -74,7 +74,27 @@ export function AgentCanvas() {
       method: 'POST'
     }),
     onSuccess: (data) => {
-      setTerminalOutput(prev => [...prev, `✅ User simulation completed: ${data.message}`]);
+      setTerminalOutput(prev => [...prev, `✅ User simulation completed: ${data.message || 'Success'}`]);
+      queryClient.invalidateQueries({ queryKey: ['/api/agent/system-status'] });
+    }
+  });
+
+  const runFullSystemTest = useMutation({
+    mutationFn: () => apiRequest('/api/agent/full-system-test', {
+      method: 'POST'
+    }),
+    onSuccess: (data) => {
+      setTerminalOutput(prev => [...prev, `🔍 Full system test completed: ${data.message || 'All systems checked'}`]);
+      queryClient.invalidateQueries({ queryKey: ['/api/agent/system-status'] });
+    }
+  });
+
+  const autoFixIssues = useMutation({
+    mutationFn: () => apiRequest('/api/agent/auto-fix-issues', {
+      method: 'POST'
+    }),
+    onSuccess: (data) => {
+      setTerminalOutput(prev => [...prev, `🔧 Auto-fix completed: ${data.message || 'Issues resolved'}`]);
       queryClient.invalidateQueries({ queryKey: ['/api/agent/system-status'] });
     }
   });
@@ -306,21 +326,68 @@ export function AgentCanvas() {
             </TabsContent>
 
             <TabsContent value="terminal" className="space-y-4">
-              <div className="flex space-x-2 mb-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+                <Button
+                  onClick={() => runFullSystemTest.mutate()}
+                  disabled={runFullSystemTest.isPending}
+                  size="sm"
+                  className="w-full"
+                >
+                  <Eye className="h-3 w-3 mr-1" />
+                  Full System Test
+                </Button>
+                <Button
+                  onClick={() => autoFixIssues.mutate()}
+                  disabled={autoFixIssues.isPending}
+                  size="sm"
+                  className="w-full"
+                  variant="outline"
+                >
+                  <Zap className="h-3 w-3 mr-1" />
+                  Auto-Fix Issues
+                </Button>
+                <Button
+                  onClick={() => simulateUserMutation.mutate('watson-admin')}
+                  disabled={simulateUserMutation.isPending}
+                  size="sm"
+                  className="w-full"
+                  variant="outline"
+                >
+                  <Users className="h-3 w-3 mr-1" />
+                  Simulate User
+                </Button>
                 <Button
                   onClick={() => generateSnapshotMutation.mutate()}
                   disabled={generateSnapshotMutation.isPending}
                   size="sm"
+                  className="w-full"
+                  variant="outline"
                 >
                   <Camera className="h-3 w-3 mr-1" />
-                  Generate Snapshot
+                  Snapshot
                 </Button>
+              </div>
+
+              <div className="flex space-x-2 mb-4">
                 <Button
                   onClick={() => setTerminalOutput([])}
-                  variant="outline"
+                  variant="destructive"
                   size="sm"
                 >
                   Clear Terminal
+                </Button>
+                <Button
+                  onClick={() => {
+                    setTerminalOutput(prev => [...prev, '🚀 Starting comprehensive system validation...']);
+                    runFullSystemTest.mutate();
+                    setTimeout(() => autoFixIssues.mutate(), 2000);
+                    setTimeout(() => simulateUserMutation.mutate('watson-admin'), 4000);
+                  }}
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                >
+                  <Terminal className="h-3 w-3 mr-1" />
+                  Run All Tests & Fix
                 </Button>
               </div>
 
