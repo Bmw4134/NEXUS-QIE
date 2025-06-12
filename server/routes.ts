@@ -38,6 +38,7 @@ import { nexusIntelligentDataService } from "./nexus-intelligent-data-service";
 import { nexusProductionOptimizer } from "./nexus-production-optimizer";
 import { nexusButtonValidator } from "./nexus-button-validator";
 import { nexusFinalizationEngine } from "./nexus-finalization-engine";
+import { agentMasterSync } from "./agent-master-sync";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -3723,6 +3724,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         error: 'Failed to complete finalization'
+      });
+    }
+  });
+
+  // Agent Master Sync Routes
+  app.get('/api/agent/system-status', (req, res) => {
+    try {
+      const modules = agentMasterSync.getAllModules();
+      const users = agentMasterSync.getAllUsers();
+      const qpiMetrics = agentMasterSync.getQPIMetrics();
+
+      res.json({
+        success: true,
+        data: {
+          modules,
+          users: users.map(u => ({
+            id: u.id,
+            username: u.username,
+            role: u.role,
+            lastActive: u.lastActive,
+            preferences: u.preferences
+          })),
+          qpiMetrics,
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('System status error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get system status'
+      });
+    }
+  });
+
+  app.get('/api/agent/modules/:category', (req, res) => {
+    try {
+      const { category } = req.params;
+      const modules = agentMasterSync.getModulesByCategory(category as any);
+      
+      res.json({
+        success: true,
+        modules,
+        category
+      });
+    } catch (error) {
+      console.error('Module category error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get modules by category'
+      });
+    }
+  });
+
+  app.post('/api/agent/simulate-user/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      await agentMasterSync.simulateUserBehavior(userId);
+      
+      res.json({
+        success: true,
+        message: `User simulation completed for ${userId}`
+      });
+    } catch (error) {
+      console.error('User simulation error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to simulate user behavior'
+      });
+    }
+  });
+
+  app.post('/api/agent/generate-snapshot', async (req, res) => {
+    try {
+      const snapshot = await agentMasterSync.generateSystemSnapshot();
+      
+      res.json({
+        success: true,
+        snapshot,
+        message: 'System snapshot generated successfully'
+      });
+    } catch (error) {
+      console.error('Snapshot generation error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate system snapshot'
+      });
+    }
+  });
+
+  app.get('/api/agent/qpi-metrics', (req, res) => {
+    try {
+      const qpiMetrics = agentMasterSync.getQPIMetrics();
+      
+      res.json({
+        success: true,
+        qpiMetrics
+      });
+    } catch (error) {
+      console.error('QPI metrics error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get QPI metrics'
       });
     }
   });

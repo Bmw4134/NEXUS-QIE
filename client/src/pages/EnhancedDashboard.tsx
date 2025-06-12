@@ -43,6 +43,7 @@ import { AnimatedButton } from '@/components/AnimatedButton';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { OnboardingOverlay } from '@/components/OnboardingOverlay';
 import { ButtonTester } from '@/components/ButtonTester';
+import { AgentCanvas } from '@/components/AgentCanvas';
 
 interface DashboardMetrics {
   totalValue: number;
@@ -1188,6 +1189,7 @@ export function EnhancedDashboard() {
             )}
 
             {/* Button Testing Interface */}
+            {/* System Testing Interface */}
             <Card className="mt-6">
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -1200,6 +1202,22 @@ export function EnhancedDashboard() {
               </CardHeader>
               <CardContent>
                 <ButtonTester />
+              </CardContent>
+            </Card>
+
+            {/* Agent Master Control Canvas */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Shield className="h-5 w-5 mr-2" />
+                  Agent Master Control
+                </CardTitle>
+                <CardDescription>
+                  Real-time system monitoring, module management, and user simulation
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AgentCanvas />
               </CardContent>
             </Card>
           </TabsContent>
