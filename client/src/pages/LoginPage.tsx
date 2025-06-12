@@ -47,8 +47,8 @@ export function LoginPage() {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [loginData, setLoginData] = useState<LoginCredentials>({
-    username: '',
-    password: '',
+    username: 'bm.watson34@gmail.com',
+    password: 'watson2024!',
     mfaCode: ''
   });
   const [authMethod, setAuthMethod] = useState<'credentials' | 'demo' | 'biometric'>('credentials');
@@ -59,7 +59,7 @@ export function LoginPage() {
         method: 'POST',
         body: JSON.stringify(credentials)
       });
-      return response as AuthResponse;
+      return response;
     },
     onSuccess: (data) => {
       if (data.success && data.token) {
