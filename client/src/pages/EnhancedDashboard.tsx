@@ -231,15 +231,21 @@ export function EnhancedDashboard() {
   }, [aiInsights]);
 
   const handleLogout = () => {
-    // Clear all authentication data
-    localStorage.removeItem('family-access-token');
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_data');
-    localStorage.removeItem('demo_mode');
+    // Clear all authentication data completely
+    localStorage.clear();
     sessionStorage.clear();
     
-    // Force reload and redirect to landing page
-    window.location.href = '/';
+    // Clear any cached data
+    if ('caches' in window) {
+      caches.keys().then((names) => {
+        names.forEach(name => {
+          caches.delete(name);
+        });
+      });
+    }
+    
+    // Force complete reload and redirect to landing page
+    window.location.replace('/');
   };
 
   const modules = [

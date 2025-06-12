@@ -11,9 +11,23 @@ interface User {
 
 export function useAuth() {
   const accessToken = localStorage.getItem('family-access-token');
+  const demoMode = localStorage.getItem('demo_mode');
+  const authToken = localStorage.getItem('auth_token');
   
-  // Auto-authenticate for immediate system access
-  if (!accessToken) {
+  // Check if user is logged out (all tokens cleared)
+  const isLoggedOut = !accessToken && !demoMode && !authToken;
+  
+  if (isLoggedOut) {
+    return {
+      user: null,
+      isLoading: false,
+      isAuthenticated: false,
+      error: null
+    };
+  }
+  
+  // Auto-authenticate for immediate system access if tokens exist
+  if (!accessToken && (demoMode || authToken)) {
     localStorage.setItem('family-access-token', 'watson-admin-token');
   }
   
