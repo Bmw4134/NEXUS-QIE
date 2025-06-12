@@ -3836,25 +3836,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { username, password, mfaCode } = req.body;
       
-      // Demo authentication for testing
-      if (username && password) {
-        const user = {
-          id: `user_${Date.now()}`,
-          username: username,
-          role: username.includes('admin') ? 'admin' : 'trader'
-        };
+      console.log(`🔐 Login attempt for: ${username}`);
+      
+      // Valid user credentials
+      const validCredentials = [
+        { 
+          username: 'bm.watson34@gmail.com', 
+          password: 'watson2024!', 
+          role: 'admin',
+          displayName: 'Watson Admin'
+        },
+        { 
+          username: 'admin', 
+          password: 'admin123', 
+          role: 'admin',
+          displayName: 'System Admin'
+        },
+        { 
+          username: 'trader', 
+          password: 'trader123', 
+          role: 'trader',
+          displayName: 'Live Trader'
+        },
+        { 
+          username: 'demo_admin', 
+          password: 'demo_access_2024', 
+          role: 'admin',
+          displayName: 'Demo Admin'
+        },
+        { 
+          username: 'demo_trader', 
+          password: 'demo_access_2024', 
+          role: 'trader',
+          displayName: 'Demo Trader'
+        }
+      ];
+      
+      const user = validCredentials.find(u => u.username === username && u.password === password);
+      
+      if (user) {
+        const token = `token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         
-        const token = `token_${Date.now()}`;
+        console.log(`✅ Successful login for: ${user.displayName}`);
         
         res.json({
           success: true,
           token,
-          user
+          user: {
+            id: user.username,
+            username: user.displayName,
+            email: user.username,
+            role: user.role
+          }
         });
       } else {
+        console.log(`❌ Failed login attempt for: ${username}`);
         res.status(401).json({
           success: false,
-          error: 'Invalid credentials'
+          error: 'Invalid username or password'
         });
       }
     } catch (error) {
