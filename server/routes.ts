@@ -3831,6 +3831,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Authentication Routes
+  app.post('/api/auth/login', (req, res) => {
+    try {
+      const { username, password, mfaCode } = req.body;
+      
+      // Demo authentication for testing
+      if (username && password) {
+        const user = {
+          id: `user_${Date.now()}`,
+          username: username,
+          role: username.includes('admin') ? 'admin' : 'trader'
+        };
+        
+        const token = `token_${Date.now()}`;
+        
+        res.json({
+          success: true,
+          token,
+          user
+        });
+      } else {
+        res.status(401).json({
+          success: false,
+          error: 'Invalid credentials'
+        });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Authentication service error'
+      });
+    }
+  });
+
+  app.get('/api/auth/user', (req, res) => {
+    try {
+      // Demo user data for testing
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      
+      if (token) {
+        res.json({
+          id: 'demo_user',
+          username: 'Demo User',
+          role: 'trader'
+        });
+      } else {
+        res.status(401).json({
+          error: 'Unauthorized'
+        });
+      }
+    } catch (error) {
+      console.error('User fetch error:', error);
+      res.status(500).json({
+        error: 'Failed to fetch user'
+      });
+    }
+  });
+
   // Finalize deployment mode
   setTimeout(async () => {
     try {

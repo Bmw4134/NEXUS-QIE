@@ -3,6 +3,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "./components/theme-provider";
 import { Toaster } from "./components/ui/toaster";
 import { Landing } from "./pages/Landing";
+import { LandingPage } from "./pages/LandingPage";
+import { LoginPage } from "./pages/LoginPage";
 import { Dashboard } from "./pages/Dashboard";
 import { EnhancedDashboard } from "./pages/EnhancedDashboard";
 import { JoinFamily } from "./pages/JoinFamily";
@@ -75,7 +77,8 @@ function Router() {
       <Switch>
         {!isAuthenticated ? (
           <>
-            <Route path="/" component={Landing} />
+            <Route path="/" component={LandingPage} />
+            <Route path="/login" component={LoginPage} />
             <Route path="/join/:token" component={JoinFamily} />
           </>
         ) : (
