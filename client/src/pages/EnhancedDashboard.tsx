@@ -44,6 +44,7 @@ import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { OnboardingOverlay } from '@/components/OnboardingOverlay';
 import { ButtonTester } from '@/components/ButtonTester';
 import { AgentCanvas } from '@/components/AgentCanvas';
+import { Trifecta } from '@/components/Trifecta';
 
 interface DashboardMetrics {
   totalValue: number;
@@ -230,8 +231,15 @@ export function EnhancedDashboard() {
   }, [aiInsights]);
 
   const handleLogout = () => {
+    // Clear all authentication data
     localStorage.removeItem('family-access-token');
-    window.location.reload();
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_data');
+    localStorage.removeItem('demo_mode');
+    sessionStorage.clear();
+    
+    // Force reload and redirect to landing page
+    window.location.href = '/';
   };
 
   const modules = [
@@ -1210,6 +1218,22 @@ export function EnhancedDashboard() {
               </CardHeader>
               <CardContent>
                 <ButtonTester />
+              </CardContent>
+            </Card>
+
+            {/* Trifecta Core System */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Target className="h-5 w-5 mr-2" />
+                  Trifecta Core System
+                </CardTitle>
+                <CardDescription>
+                  Synchronized tri-module intelligence architecture
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Trifecta />
               </CardContent>
             </Card>
 
