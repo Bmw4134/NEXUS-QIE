@@ -45,6 +45,7 @@ import { OnboardingOverlay } from '@/components/OnboardingOverlay';
 import { ButtonTester } from '@/components/ButtonTester';
 import { AgentCanvas } from '@/components/AgentCanvas';
 import { Trifecta } from '@/components/Trifecta';
+import { QIEEngine } from '@/components/QIEEngine';
 
 interface DashboardMetrics {
   totalValue: number;
@@ -1240,6 +1241,22 @@ export function EnhancedDashboard() {
               </CardHeader>
               <CardContent>
                 <Trifecta />
+              </CardContent>
+            </Card>
+
+            {/* QIE Quantum Intelligence Engine */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Brain className="h-5 w-5 mr-2" />
+                  QIE Quantum Intelligence Engine
+                </CardTitle>
+                <CardDescription>
+                  Autonomous decision repair, browser bypass, and PiP automation intelligence
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <QIEEngine />
               </CardContent>
             </Card>
 
