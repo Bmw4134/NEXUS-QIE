@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "name": "nexus-quantum-intelligence",
+  "builds": [
+    {
+      "src": "server/index.ts",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["server/**", "shared/**"]
+      }
+    },
+    {
+      "src": "client/dist/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/server/index.ts"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/client/dist/$1"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "server/index.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/nexus/(.*)",
+      "destination": "/server/index.ts"
+    },
+    {
+      "source": "/api/crypto/(.*)",
+      "destination": "/server/index.ts"
+    },
+    {
+      "source": "/api/trading/(.*)",
+      "destination": "/server/index.ts"
+    },
+    {
+      "source": "/api/dashboard/(.*)",
+      "destination": "/server/index.ts"
+    }
+  ]
+}

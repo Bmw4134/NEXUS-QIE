@@ -37,6 +37,7 @@ import { nexusQuantumOptimizer } from "./nexus-quantum-optimizer";
 import { nexusIntelligentDataService } from "./nexus-intelligent-data-service";
 import { nexusProductionOptimizer } from "./nexus-production-optimizer";
 import { nexusButtonValidator } from "./nexus-button-validator";
+import { nexusFinalizationEngine } from "./nexus-finalization-engine";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -3630,6 +3631,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('❌ QIE Unified Mode activation failed:', error);
     }
   }, 7000); // Start unified mode 7 seconds after server startup
+
+  // NEXUS Finalization Routes
+  app.post('/api/nexus/activate-dashboards', async (req, res) => {
+    try {
+      const dashboards = await nexusFinalizationEngine.activateAllDashboards();
+      res.json({
+        success: true,
+        dashboards,
+        message: 'All NEXUS dashboards activated successfully'
+      });
+    } catch (error) {
+      console.error('Dashboard activation error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to activate dashboards'
+      });
+    }
+  });
+
+  app.post('/api/nexus/consolidate-files', async (req, res) => {
+    try {
+      const report = await nexusFinalizationEngine.consolidateFileStructure();
+      res.json({
+        success: true,
+        report,
+        message: 'File consolidation completed'
+      });
+    } catch (error) {
+      console.error('File consolidation error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to consolidate files'
+      });
+    }
+  });
+
+  app.post('/api/nexus/generate-vercel-build', async (req, res) => {
+    try {
+      await nexusFinalizationEngine.generateVercelBuild();
+      res.json({
+        success: true,
+        message: 'Vercel build configuration generated'
+      });
+    } catch (error) {
+      console.error('Vercel build generation error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate Vercel build'
+      });
+    }
+  });
+
+  app.get('/api/nexus/dashboard-status', (req, res) => {
+    try {
+      const dashboards = nexusFinalizationEngine.getDashboardStatus();
+      res.json({
+        success: true,
+        dashboards
+      });
+    } catch (error) {
+      console.error('Dashboard status error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get dashboard status'
+      });
+    }
+  });
+
+  app.post('/api/nexus/complete-finalization', async (req, res) => {
+    try {
+      // Execute all finalization steps
+      const dashboards = await nexusFinalizationEngine.activateAllDashboards();
+      const consolidationReport = await nexusFinalizationEngine.consolidateFileStructure();
+      await nexusFinalizationEngine.generateVercelBuild();
+      await nexusFinalizationEngine.generateFinalizationReport();
+
+      res.json({
+        success: true,
+        results: {
+          dashboards: dashboards.length,
+          activeDashboards: dashboards.filter(d => d.status === 'active').length,
+          consolidationReport,
+          vercelReady: true,
+          reportGenerated: true
+        },
+        message: 'NEXUS finalization completed successfully'
+      });
+    } catch (error) {
+      console.error('Complete finalization error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to complete finalization'
+      });
+    }
+  });
 
   // Finalize deployment mode
   setTimeout(async () => {
