@@ -365,7 +365,11 @@ export function EnhancedDashboard() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className={`mx-auto px-4 sm:px-6 lg:px-8 py-6 transition-all duration-300 ${
+        layoutMode === 'compact' ? 'max-w-5xl' : 
+        layoutMode === 'expanded' ? 'max-w-8xl' : 
+        'max-w-6xl'
+      }`}>
         {/* Autonomous Alert System */}
         {alertsVisible && automatedAlerts.filter(a => !a.resolved).length > 0 && (
           <div className="mb-6 space-y-3">
@@ -404,8 +408,12 @@ export function EnhancedDashboard() {
           </div>
         )}
 
-        {/* Hero Metrics - Streamlined Above-the-Fold */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {/* Hero Metrics - Responsive Grid Based on Layout Mode */}
+        <div className={`grid gap-4 mb-6 transition-all duration-300 ${
+          layoutMode === 'compact' ? 'grid-cols-1 lg:grid-cols-2' :
+          layoutMode === 'expanded' ? 'grid-cols-2 lg:grid-cols-4 xl:grid-cols-6' :
+          'grid-cols-2 lg:grid-cols-4'
+        }`}>
           {/* Primary Trading Balance */}
           <motion.div
             whileHover={{ scale: 1.02, y: -1 }}
