@@ -183,6 +183,97 @@ export const nexusNoteVersions = pgTable("nexus_note_versions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// User roles and access control
+export const userRoles = pgTable("user_roles", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull(),
+  roleType: varchar("role_type").notNull(), // "admin" | "watson" | "nexus" | "trader" | "developer"
+  permissions: text("permissions").array(),
+  accessLevel: integer("access_level").notNull().default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const userSessions = pgTable("user_sessions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull(),
+  sessionToken: varchar("session_token").notNull().unique(),
+  deviceInfo: jsonb("device_info"),
+  ipAddress: varchar("ip_address"),
+  lastActivity: timestamp("last_activity").defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const moduleAccessLogs = pgTable("module_access_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull(),
+  moduleId: varchar("module_id").notNull(),
+  actionType: varchar("action_type").notNull(), // "access" | "modify" | "create" | "delete"
+  success: boolean("success").notNull().default(true),
+  metadata: jsonb("metadata"),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+// Quantum Knowledge Nodes - AI knowledge storage
+export const quantumKnowledgeNodes = pgTable("quantum_knowledge_nodes", {
+  id: integer("id").primaryKey(),
+  nodeId: varchar("node_id").notNull().unique(),
+  content: text("content").notNull(),
+  context: varchar("context"),
+  confidence: decimal("confidence", { precision: 3, scale: 2 }).notNull(),
+  quantumState: varchar("quantum_state").notNull(), // "entangled" | "coherent" | "superposition"
+  learnedFrom: varchar("learned_from").notNull(),
+  timestamp: timestamp("timestamp").defaultNow(),
+  connections: text("connections").array(),
+  asiEnhancementLevel: decimal("asi_enhancement_level", { precision: 5, scale: 3 }).notNull(),
+  retrievalCount: integer("retrieval_count").notNull().default(0),
+  successRate: decimal("success_rate", { precision: 3, scale: 2 }).notNull(),
+  quantumSignature: varchar("quantum_signature").notNull(),
+});
+
+// LLM Interactions - AI conversation tracking
+export const llmInteractions = pgTable("llm_interactions", {
+  id: integer("id").primaryKey(),
+  interactionId: varchar("interaction_id").notNull().unique(),
+  query: text("query").notNull(),
+  response: text("response").notNull(),
+  confidence: decimal("confidence", { precision: 3, scale: 2 }).notNull(),
+  model: varchar("model").notNull(),
+  sourceNodes: text("source_nodes").array(),
+  reasoningChain: text("reasoning_chain").array(),
+  executionTime: integer("execution_time"), // milliseconds
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+// Quantum Learning - AI self-improvement tracking
+export const quantumLearning = pgTable("quantum_learning", {
+  id: integer("id").primaryKey(),
+  learningId: varchar("learning_id").notNull().unique(),
+  learningType: varchar("learning_type").notNull(), // "pattern_recognition" | "optimization" | "prediction"
+  inputData: jsonb("input_data").notNull(),
+  outputData: jsonb("output_data").notNull(),
+  quantumImprovement: decimal("quantum_improvement", { precision: 5, scale: 3 }).notNull(),
+  confidenceBefore: decimal("confidence_before", { precision: 3, scale: 2 }).notNull(),
+  confidenceAfter: decimal("confidence_after", { precision: 3, scale: 2 }).notNull(),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+// ASI Decisions - Advanced AI decision tracking
+export const asiDecisions = pgTable("asi_decisions", {
+  id: integer("id").primaryKey(),
+  decisionId: varchar("decision_id").notNull().unique(),
+  decisionType: varchar("decision_type").notNull(), // "optimization" | "prediction" | "analysis" | "recommendation"
+  context: jsonb("context").notNull(),
+  options: jsonb("options").notNull(),
+  selectedOption: jsonb("selected_option").notNull(),
+  confidence: decimal("confidence", { precision: 3, scale: 2 }).notNull(),
+  reasoning: text("reasoning").notNull(),
+  outcome: jsonb("outcome"),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
 // FamilySync module - real-time family coordination
 export const familySyncLocations = pgTable("family_sync_locations", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -279,6 +370,42 @@ export const insertFamilySyncMessageSchema = createInsertSchema(familySyncMessag
   sentAt: true,
 });
 
+export const insertUserRoleSchema = createInsertSchema(userRoles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserSessionSchema = createInsertSchema(userSessions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertModuleAccessLogSchema = createInsertSchema(moduleAccessLogs).omit({
+  id: true,
+  timestamp: true,
+});
+
+export const insertQuantumKnowledgeNodeSchema = createInsertSchema(quantumKnowledgeNodes).omit({
+  id: true,
+  timestamp: true,
+});
+
+export const insertLlmInteractionSchema = createInsertSchema(llmInteractions).omit({
+  id: true,
+  timestamp: true,
+});
+
+export const insertQuantumLearningSchema = createInsertSchema(quantumLearning).omit({
+  id: true,
+  timestamp: true,
+});
+
+export const insertAsiDecisionSchema = createInsertSchema(asiDecisions).omit({
+  id: true,
+  timestamp: true,
+});
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
@@ -318,3 +445,51 @@ export type InsertFamilySyncStatus = z.infer<typeof insertFamilySyncStatusSchema
 
 export type FamilySyncMessage = typeof familySyncMessages.$inferSelect;
 export type InsertFamilySyncMessage = z.infer<typeof insertFamilySyncMessageSchema>;
+
+export type UserRole = typeof userRoles.$inferSelect;
+export type InsertUserRole = z.infer<typeof insertUserRoleSchema>;
+
+export type UserSession = typeof userSessions.$inferSelect;
+export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;
+
+export type ModuleAccessLog = typeof moduleAccessLogs.$inferSelect;
+export type InsertModuleAccessLog = z.infer<typeof insertModuleAccessLogSchema>;
+
+export type QuantumKnowledgeNode = typeof quantumKnowledgeNodes.$inferSelect;
+export type InsertQuantumKnowledgeNode = z.infer<typeof insertQuantumKnowledgeNodeSchema>;
+
+export type LlmInteraction = typeof llmInteractions.$inferSelect;
+export type InsertLlmInteraction = z.infer<typeof insertLlmInteractionSchema>;
+
+export type QuantumLearning = typeof quantumLearning.$inferSelect;
+export type InsertQuantumLearning = z.infer<typeof insertQuantumLearningSchema>;
+
+export type AsiDecision = typeof asiDecisions.$inferSelect;
+export type InsertAsiDecision = z.infer<typeof insertAsiDecisionSchema>;
+
+// Dashboard and utility types
+export interface DatabaseStats {
+  quantumNodes: number;
+  asiFactor: number;
+  successRate: number;
+  connections: number;
+  queriesPerHour: number;
+  avgQueryTime: number;
+}
+
+export interface ActivityItem {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  timestamp: string;
+  icon: string;
+  iconColor: string;
+}
+
+export interface LearningProgress {
+  knowledgeAbsorption: number;
+  patternRecognition: number;
+  quantumCoherence: number;
+  nextCycle: string;
+}
