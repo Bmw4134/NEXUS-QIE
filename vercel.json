@@ -6,7 +6,10 @@
       "src": "server/index.ts",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["server/**", "shared/**"]
+        "includeFiles": [
+          "server/**",
+          "shared/**"
+        ]
       }
     },
     {
@@ -25,30 +28,17 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "DATABASE_URL": "@database_url",
+    "ROBINHOOD_USERNAME": "@robinhood_username",
+    "ROBINHOOD_PASSWORD": "@robinhood_password",
+    "ROBINHOOD_MFA_CODE": "@robinhood_mfa_code",
+    "PERPLEXITY_API_KEY": "@perplexity_api_key"
   },
   "functions": {
     "server/index.ts": {
       "memory": 1024,
       "maxDuration": 30
     }
-  },
-  "rewrites": [
-    {
-      "source": "/api/nexus/(.*)",
-      "destination": "/server/index.ts"
-    },
-    {
-      "source": "/api/crypto/(.*)",
-      "destination": "/server/index.ts"
-    },
-    {
-      "source": "/api/trading/(.*)",
-      "destination": "/server/index.ts"
-    },
-    {
-      "source": "/api/dashboard/(.*)",
-      "destination": "/server/index.ts"
-    }
-  ]
+  }
 }
