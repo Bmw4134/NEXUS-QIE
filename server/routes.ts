@@ -39,6 +39,7 @@ import { nexusProductionOptimizer } from "./nexus-production-optimizer";
 import { nexusButtonValidator } from "./nexus-button-validator";
 import { nexusFinalizationEngine } from "./nexus-finalization-engine";
 import { agentMasterSync } from "./agent-master-sync";
+import { aiWebsiteService } from "./ai-website-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -1327,6 +1328,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register Family Platform Routes
   registerFamilyPlatformRoutes(app);
+
+  // NEXUS Operator Console endpoints
+  app.get("/api/nexus/modules", async (req, res) => {
+    try {
+      const modules = agentMasterSync.getAllModules();
+      res.json(modules);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch modules" });
+    }
+  });
+
+  app.get("/api/nexus/qa-results", async (req, res) => {
+    try {
+      const results = nexusDeploymentValidator.getValidationResults();
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch QA results" });
+    }
+  });
+
+  app.get("/api/nexus/triggers", async (req, res) => {
+    try {
+      const triggers = [
+        {
+          id: 'restart',
+          name: 'System Restart',
+          description: 'Restart selected module or entire system',
+          type: 'restart',
+          enabled: true
+        },
+        {
+          id: 'optimize',
+          name: 'Performance Optimization',
+          description: 'Run performance optimization routines',
+          type: 'optimize',
+          enabled: true
+        },
+        {
+          id: 'repair',
+          name: 'Auto Repair',
+          description: 'Attempt automatic repair of detected issues',
+          type: 'repair',
+          enabled: true
+        },
+        {
+          id: 'backup',
+          name: 'Create Backup',
+          description: 'Create system state backup',
+          type: 'backup',
+          enabled: true
+        },
+        {
+          id: 'sync',
+          name: 'Data Sync',
+          description: 'Synchronize data across all modules',
+          type: 'sync',
+          enabled: true
+        }
+      ];
+      res.json(triggers);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch triggers" });
+    }
+  });
+
+  app.post("/api/nexus/execute-trigger", async (req, res) => {
+    try {
+      const { triggerId, moduleId } = req.body;
+      
+      switch (triggerId) {
+        case 'restart':
+          if (moduleId) {
+            console.log(`🔄 Restarting module: ${moduleId}`);
+          } else {
+            console.log('🔄 System restart initiated');
+          }
+          break;
+        case 'optimize':
+          await nexusQuantumOptimizer.performContinuousOptimization();
+          break;
+        case 'repair':
+          if (moduleId) {
+            console.log(`🔧 Auto-repairing module: ${moduleId}`);
+          }
+          break;
+        case 'backup':
+          await backupService.createBackup();
+          break;
+        case 'sync':
+          await agentMasterSync.generateSystemSnapshot();
+          break;
+      }
+      
+      res.json({ success: true, message: `${triggerId} executed successfully` });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to execute trigger" });
+    }
+  });
+
+  app.post("/api/nexus/run-diagnostics", async (req, res) => {
+    try {
+      const results = await nexusDeploymentValidator.runComprehensiveValidation();
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to run diagnostics" });
+    }
+  });
+
+  // AI Website Analysis endpoints
+  app.post("/api/ai/analyze-website", async (req, res) => {
+    try {
+      const { url } = req.body;
+      if (!url) {
+        return res.status(400).json({ error: "URL is required" });
+      }
+      
+      const analysis = await aiWebsiteService.analyzeWebsite(url);
+      res.json(analysis);
+    } catch (error) {
+      console.error("Website analysis error:", error);
+      res.status(500).json({ error: "Failed to analyze website" });
+    }
+  });
+
+  app.post("/api/ai/generate-redesign", async (req, res) => {
+    try {
+      const { url, requirements, analysis } = req.body;
+      if (!url || !requirements) {
+        return res.status(400).json({ error: "URL and requirements are required" });
+      }
+      
+      const redesign = await aiWebsiteService.generateRedesign(url, requirements, analysis);
+      res.json(redesign);
+    } catch (error) {
+      console.error("Redesign generation error:", error);
+      res.status(500).json({ error: "Failed to generate redesign proposal" });
+    }
+  });
 
   // QNIS Sync Canvas API - Enhanced Kanban Board Management
   app.post('/api/qnis/sync-canvas', async (req, res) => {

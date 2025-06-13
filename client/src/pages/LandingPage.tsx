@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AIWebsiteDemo from '@/components/AIWebsiteDemo';
+import InvestorMode from '@/components/InvestorMode';
 import { 
   Zap, 
   Shield, 
@@ -101,6 +103,7 @@ export function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700">
+      <InvestorMode />
       {/* Navigation Header */}
       <nav className="border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -183,10 +186,11 @@ export function LandingPage() {
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-8">
+            <TabsList className="grid w-full grid-cols-5 mb-8">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="features">Features</TabsTrigger>
               <TabsTrigger value="dashboards">Dashboards</TabsTrigger>
+              <TabsTrigger value="ai-demo">AI Demo</TabsTrigger>
               <TabsTrigger value="security">Security</TabsTrigger>
             </TabsList>
 
@@ -200,6 +204,31 @@ export function LandingPage() {
                   autonomous trading capabilities, comprehensive analytics, and enterprise-grade security.
                 </p>
               </div>
+
+              {/* AI Website Demo Integration */}
+              <Card className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border-0 shadow-lg mb-8">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-center">
+                    <Zap className="h-6 w-6 mr-2 text-purple-600" />
+                    AI-Powered Website Redesign Demo
+                  </CardTitle>
+                  <CardDescription className="text-center">
+                    Experience our AI website analysis and redesign generation capabilities
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <p className="text-slate-600 dark:text-slate-300 mb-4">
+                    Our AI can analyze any website and generate comprehensive redesign proposals with technology recommendations.
+                  </p>
+                  <Button 
+                    onClick={() => setActiveTab('ai-demo')} 
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  >
+                    <Zap className="h-4 w-4 mr-2" />
+                    Try AI Website Analysis
+                  </Button>
+                </CardContent>
+              </Card>
 
               <div className="grid md:grid-cols-2 gap-8">
                 <Card className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border-0 shadow-lg">
@@ -330,6 +359,10 @@ export function LandingPage() {
                   </Card>
                 ))}
               </div>
+            </TabsContent>
+
+            <TabsContent value="ai-demo" className="space-y-8">
+              <AIWebsiteDemo />
             </TabsContent>
 
             <TabsContent value="security" className="space-y-8">

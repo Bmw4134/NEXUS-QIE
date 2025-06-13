@@ -199,7 +199,7 @@ export default function InvestorMode() {
                 <p className="text-gray-600 dark:text-gray-400 mt-2">
                   Welcome to the executive overview. All metrics are now displaying real-time investor-grade analytics.
                 </p>
-              </div>
+              </motion.div>
 
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
