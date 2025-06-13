@@ -5,8 +5,7 @@ import {
   Users, 
   DollarSign, 
   BarChart3, 
-  Eye, 
-  EyeOff,
+  Eye,
   Sparkles,
   Target,
   Zap,
@@ -109,7 +108,6 @@ export default function InvestorMode() {
     if (isInvestorMode) {
       setShowWelcome(true);
       
-      // Animate KPI values
       const animations = investorKPIs.reduce((acc, kpi) => {
         acc[kpi.id] = 0;
         return acc;
@@ -117,7 +115,6 @@ export default function InvestorMode() {
       
       setAnimatedValues(animations);
       
-      // Stagger the animations
       investorKPIs.forEach((kpi, index) => {
         setTimeout(() => {
           setAnimatedValues(prev => ({
@@ -317,82 +314,6 @@ export default function InvestorMode() {
                 </motion.div>
               ))}
             </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle>Investment Highlights</CardTitle>
-                  <CardDescription>Key value propositions for potential investors</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                          <TrendingUp className="w-4 h-4 text-green-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium">Exponential Growth</h3>
-                          <p className="text-sm text-gray-600">34.2% revenue growth with expanding enterprise client base</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <Zap className="w-4 h-4 text-blue-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium">AI Technology Edge</h3>
-                          <p className="text-sm text-gray-600">847% efficiency improvement through proprietary AI systems</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                          <Award className="w-4 h-4 text-purple-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium">Market Leadership</h3>
-                          <p className="text-sm text-gray-600">94.5% client retention rate demonstrates product-market fit</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg">
-                        <h3 className="font-medium mb-2">Funding Target</h3>
-                        <div className="text-2xl font-bold text-purple-600">$15M Series A</div>
-                        <p className="text-sm text-gray-600 mt-1">
-                          To accelerate enterprise expansion and AI development
-                        </p>
-                      </div>
-
-                      <div className="p-4 border rounded-lg">
-                        <h3 className="font-medium mb-2">Use of Funds</h3>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span>Product Development</span>
-                            <span className="font-medium">40%</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Sales & Marketing</span>
-                            <span className="font-medium">35%</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Team Expansion</span>
-                            <span className="font-medium">25%</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
