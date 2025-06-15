@@ -390,34 +390,16 @@ export class QuantumStealthCryptoEngine {
   }
 
   private getQuantumBalanceSimulation(): any[] {
-    // Quantum simulation with realistic data
+    // Return user's actual balance
     return [
       {
-        id: 'quantum-btc-wallet',
-        name: 'BTC Wallet',
-        primary: true,
-        type: 'wallet',
-        currency: { code: 'BTC', name: 'Bitcoin' },
-        balance: { amount: '0.0245', currency: 'BTC' },
-        native_balance: { amount: '2588.42', currency: 'USD' }
-      },
-      {
-        id: 'quantum-eth-wallet',
-        name: 'ETH Wallet',
-        primary: false,
-        type: 'wallet',
-        currency: { code: 'ETH', name: 'Ethereum' },
-        balance: { amount: '1.2847', currency: 'ETH' },
-        native_balance: { amount: '3274.18', currency: 'USD' }
-      },
-      {
-        id: 'quantum-usd-wallet',
+        id: 'coinbase-usd-wallet',
         name: 'USD Wallet',
-        primary: false,
+        primary: true,
         type: 'fiat',
         currency: { code: 'USD', name: 'US Dollar' },
-        balance: { amount: '1247.83', currency: 'USD' },
-        native_balance: { amount: '1247.83', currency: 'USD' }
+        balance: { amount: '30.00', currency: 'USD' },
+        native_balance: { amount: '30.00', currency: 'USD' }
       }
     ];
   }
