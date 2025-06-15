@@ -42,6 +42,7 @@ import { agentMasterSync } from "./agent-master-sync";
 import { aiWebsiteService } from "./ai-website-service";
 import { evolutionEngine } from "./recursive-evolution-engine";
 import { accountBalanceService } from "./account-balance-service";
+import { quantumIntelligentOrchestration } from "./quantum-intelligent-orchestration";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   

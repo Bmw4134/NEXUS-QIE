@@ -56,29 +56,31 @@ export class CoinbaseStealthScraper {
 
   async extractRealAccountData(): Promise<RealAccountData> {
     try {
-      console.log('🔍 Attempting quantum stealth extraction from Coinbase...');
+      console.log('🔍 Detecting open Coinbase session in Edge browser...');
       
-      // Navigate to Coinbase portfolio page
+      // First attempt: Check for existing browser session
+      const existingSessionData = await this.detectEdgeBrowserSession();
+      if (existingSessionData) {
+        console.log('✅ Found active Coinbase session, extracting real balance');
+        return existingSessionData;
+      }
+
+      // Second attempt: Direct navigation
       await this.page.goto('https://www.coinbase.com/portfolio', {
         waitUntil: 'networkidle2',
-        timeout: 30000
+        timeout: 15000
       });
 
-      // Wait for page to load
-      await this.page.waitForTimeout(3000);
+      await this.page.waitForTimeout(2000);
 
-      // Check if already logged in by looking for portfolio elements
-      const isLoggedIn = await this.page.evaluate(() => {
-        return document.querySelector('[data-testid="portfolio"]') !== null ||
-               document.querySelector('.portfolio') !== null ||
-               document.querySelector('[class*="portfolio"]') !== null ||
-               document.querySelector('h1:contains("Portfolio")') !== null;
-      });
-
-      if (!isLoggedIn) {
-        console.log('🔄 Not logged in, attempting stealth login detection...');
-        return await this.attemptSessionExtraction();
+      // Check if logged in and extract real data
+      const realData = await this.extractFromActivePage();
+      if (realData) {
+        return realData;
       }
+
+      console.log('🔄 Direct extraction failed, attempting session detection...');
+      return await this.attemptSessionExtraction();
 
       // Extract account balances
       const accountData = await this.page.evaluate(() => {
