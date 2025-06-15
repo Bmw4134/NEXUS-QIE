@@ -220,13 +220,15 @@ export class QuantumIntelligentOrchestration {
 
       if (validResults.length > 0) {
         console.log('✅ Real balance extraction successful via orchestration');
+        return validResults[0];
       }
 
     } catch (error) {
       console.error('Orchestration error:', error);
+      return null;
     }
-      return validResults[0];
-    }
+    
+    return null;
   }
 
   private async orchestrateMarketDataBypass() {
@@ -237,7 +239,7 @@ export class QuantumIntelligentOrchestration {
     
     // Apply intelligent rate limit bypass
     await quantumBypass.rotateProxy();
-    await quantumBypass.updateHeaders();
+    await quantumBypass.updateHeaders('quantum-mode');
     
     // Coordinate market data requests across multiple sources
     const dataPromises = [
@@ -259,7 +261,7 @@ export class QuantumIntelligentOrchestration {
       console.log('🔍 Extracting real Coinbase balance via quantum stealth...');
       
       // Use quantum bypass for stealth extraction
-      const balanceData = await coinbaseStealthScraper.extractRealAccountData();
+      const balanceData = await coinbaseStealthScraper.extractBalanceFromSession();
       
       // Update module success rate
       module.successRate = Math.min(1.0, module.successRate + 0.01);
@@ -284,7 +286,7 @@ export class QuantumIntelligentOrchestration {
       // Apply quantum bypass for Robinhood requests
       await quantumBypass.rotateProxy();
       
-      const accountData = await robinhoodRealClient.getAccountInfo();
+      const accountData = await robinhoodRealClient.getAccount();
       
       // Update module metrics
       module.successRate = Math.min(1.0, module.successRate + 0.01);
