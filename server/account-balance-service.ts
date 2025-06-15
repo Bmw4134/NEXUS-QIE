@@ -153,7 +153,7 @@ export class AccountBalanceService {
   }
 
   private async fetchCoinbaseAccounts(): Promise<CoinbaseAccount[]> {
-    const apiKeyId = process.env.CB_API_KEY_ID_NAME;
+    const apiKeyId = process.env.CB_API_KEY_NAME;
     const privateKey = process.env.CB_API_PRIVATE_KEY;
     
     if (!apiKeyId || !privateKey) {

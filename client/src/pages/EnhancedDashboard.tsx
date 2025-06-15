@@ -86,6 +86,7 @@ export function EnhancedDashboard() {
   const { user } = useAuth();
   const qnis = useQNIS();
   const { celebration, celebrate, hideCelebration } = useSuccessCelebration();
+  const queryClient = useQueryClient();
   const [layoutMode, setLayoutMode] = useState<'compact' | 'expanded' | 'focus'>('expanded');
   const [alertsVisible, setAlertsVisible] = useState(true);
   const [realTimeData, setRealTimeData] = useState<DashboardMetrics | null>(null);
@@ -99,10 +100,19 @@ export function EnhancedDashboard() {
     refetchInterval: 3000
   });
 
-  // Real-time trading data
+  // Real-time trading data from Coinbase
   const { data: tradingData } = useQuery({
-    queryKey: ['/api/robinhood/live-trading-metrics'],
-    refetchInterval: 2000
+    queryKey: ['/api/trading/positions'],
+    refetchInterval: 5000
+  });
+
+  // Coinbase balance refresh mutation
+  const refreshBalanceMutation = useMutation({
+    mutationFn: () => apiRequest('/api/trading/refresh-balance', { method: 'POST' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/trading/positions'] });
+      celebrate();
+    }
   });
 
   // Real-time market data
