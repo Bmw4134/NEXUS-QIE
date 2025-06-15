@@ -4,6 +4,7 @@
  */
 
 import { createHmac } from 'crypto';
+import jwt from 'jsonwebtoken';
 import { accountBalanceService } from './account-balance-service';
 
 interface CoinbaseAccount {
@@ -63,7 +64,34 @@ export class CoinbaseAPIClient {
     }
   }
 
+  private generateJWTToken(): string {
+    const header = {
+      "alg": "ES256",
+      "kid": this.apiKey,
+      "typ": "JWT"
+    };
+
+    const payload = {
+      "sub": this.apiKey,
+      "iss": "cdp",
+      "nbf": Math.floor(Date.now() / 1000),
+      "exp": Math.floor(Date.now() / 1000) + 120, // 2 minutes
+      "aud": ["cdp_service"]
+    };
+
+    // Clean the private key format
+    const cleanPrivateKey = this.apiSecret
+      .replace(/\\n/g, '\n')
+      .trim();
+
+    return jwt.sign(payload, cleanPrivateKey, { 
+      algorithm: 'ES256',
+      header: header
+    });
+  }
+
   private generateSignature(method: string, path: string, body: string, timestamp: string): string {
+    // Legacy fallback - not used for Cloud Trading API
     const message = timestamp + method + path + body;
     return createHmac('sha256', this.apiSecret).update(message).digest('hex');
   }
@@ -73,36 +101,35 @@ export class CoinbaseAPIClient {
       throw new Error('Coinbase API credentials not available');
     }
 
-    const timestamp = Math.floor(Date.now() / 1000).toString();
-    const path = `/api/v3/brokerage${endpoint}`;
-    const bodyString = body ? JSON.stringify(body) : '';
-    
-    const signature = this.generateSignature(method, path, bodyString, timestamp);
+    try {
+      const jwtToken = this.generateJWTToken();
+      const bodyString = body ? JSON.stringify(body) : '';
 
-    const headers = {
-      'CB-ACCESS-KEY': this.apiKey,
-      'CB-ACCESS-SIGN': signature,
-      'CB-ACCESS-TIMESTAMP': timestamp,
-      'CB-ACCESS-PASSPHRASE': '', // Leave empty for API keys created after Sept 2021
-      'Content-Type': 'application/json',
-      'User-Agent': 'nexus-trading-platform/1.0'
-    };
+      const headers = {
+        'Authorization': `Bearer ${jwtToken}`,
+        'Content-Type': 'application/json',
+        'User-Agent': 'nexus-quantum-trader/2.0'
+      };
 
-    console.log('Making Coinbase API request to:', `${this.baseUrl}${endpoint}`);
+      console.log('Making Coinbase Cloud API request to:', `${this.baseUrl}${endpoint}`);
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      method,
-      headers,
-      body: body ? bodyString : undefined
-    });
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        method,
+        headers,
+        body: body ? bodyString : undefined
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Coinbase API error: ${response.status} - ${errorText}`);
-      throw new Error(`Coinbase API error: ${response.status} - ${errorText}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Coinbase API error: ${response.status} - ${errorText}`);
+        throw new Error(`Coinbase API error: ${response.status} - ${errorText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('JWT generation or request failed:', error);
+      throw error;
     }
-
-    return await response.json();
   }
 
   async getPortfolios(): Promise<CoinbasePortfolio[]> {
