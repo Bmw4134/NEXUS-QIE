@@ -49,6 +49,7 @@ import { realAccountExtractor } from "./real-account-extractor";
 import { coinbaseStealthScraper } from "./coinbase-stealth-scraper";
 import { browserSessionDetector } from "./browser-session-detector";
 import { coinbaseAPIClient } from "./coinbase-api-client";
+import { quantumNexusBypass } from "./quantum-nexus-bypass";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   

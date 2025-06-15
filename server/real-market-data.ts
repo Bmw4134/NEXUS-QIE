@@ -3,7 +3,7 @@
  * Connects to live cryptocurrency exchanges and financial APIs
  */
 
-import { quantumBypass } from './quantum-rate-limit-bypass';
+import { quantumNexusBypass } from './quantum-nexus-bypass';
 
 interface MarketDataPoint {
   symbol: string;

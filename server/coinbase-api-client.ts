@@ -83,8 +83,12 @@ export class CoinbaseAPIClient {
       'CB-ACCESS-KEY': this.apiKey,
       'CB-ACCESS-SIGN': signature,
       'CB-ACCESS-TIMESTAMP': timestamp,
-      'Content-Type': 'application/json'
+      'CB-ACCESS-PASSPHRASE': '', // Leave empty for API keys created after Sept 2021
+      'Content-Type': 'application/json',
+      'User-Agent': 'nexus-trading-platform/1.0'
     };
+
+    console.log('Making Coinbase API request to:', `${this.baseUrl}${endpoint}`);
 
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       method,
@@ -94,6 +98,7 @@ export class CoinbaseAPIClient {
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.error(`Coinbase API error: ${response.status} - ${errorText}`);
       throw new Error(`Coinbase API error: ${response.status} - ${errorText}`);
     }
 
