@@ -5,9 +5,9 @@
 
 export class AccountBalanceService {
   private static instance: AccountBalanceService;
-  private accountBalance: number = 834.97; // Authoritative balance
-  private buyingPower: number = 778.19;
-  private totalEquity: number = 834.97;
+  private accountBalance: number = 0.00; // Authoritative balance - user has no money
+  private buyingPower: number = 0.00;
+  private totalEquity: number = 0.00;
   private lastUpdate: Date = new Date();
   
   private constructor() {}
