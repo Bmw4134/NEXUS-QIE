@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import CanvasWidget from "@/components/CanvasWidget";
-import { Calendar, DollarSign, Brain, FileText, Users, Settings, LogOut, Bot, Kanban } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Calendar, DollarSign, Brain, FileText, Users, Settings, LogOut, Bot, Kanban, TrendingUp, Zap } from "lucide-react";
 
 export function Dashboard() {
   const { user } = useAuth();

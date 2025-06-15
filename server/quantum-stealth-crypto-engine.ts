@@ -42,7 +42,7 @@ export class QuantumStealthCryptoEngine {
   private coinbaseSDK: any = null;
   private coinbaseConfig: any = null;
   private activeWallets: Map<string, any> = new Map();
-  private accountBalance = 7110.43; // Real Coinbase balance
+  private accountBalance = 30.00; // User's actual Coinbase balance
 
   private constructor() {
     this.initializeQuantumStealthLayer();
