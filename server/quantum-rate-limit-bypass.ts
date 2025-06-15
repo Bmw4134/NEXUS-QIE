@@ -41,6 +41,7 @@ export class QuantumRateLimitBypass {
   private requestHistory: RequestPattern[] = [];
   private distributedNodes: string[] = [];
   private lastRotation = new Date();
+  private quantumModeActive = false;
   private bypassMetrics = {
     totalRequests: 0,
     bypassedLimits: 0,
@@ -525,6 +526,32 @@ export class QuantumRateLimitBypass {
     this.bypassMetrics.detectionsAvoided++;
     
     console.log('✅ All quantum proxies rotated successfully');
+  }
+
+  async activateQuantumMode(): Promise<void> {
+    this.quantumModeActive = true;
+    console.log('⚡ Quantum mode activated for stealth operations');
+    
+    // Enhanced stealth configuration
+    this.activeStrategies.set('browser_session_stealth', {
+      name: 'Browser Session Stealth',
+      description: 'Direct browser session extraction',
+      active: true,
+      effectiveness: 95,
+      riskLevel: 'low'
+    });
+    
+    // Rotate all proxies for fresh stealth signatures
+    await this.forceRotateAll();
+  }
+
+  rotateProxy(): void {
+    this.rotateQuantumProxies();
+  }
+
+  updateHeaders(service: string): Record<string, string> {
+    const region = ['us-east-1', 'us-west-2', 'eu-west-1'][Math.floor(Math.random() * 3)];
+    return this.generateQuantumHeaders(service, region);
   }
 }
 
