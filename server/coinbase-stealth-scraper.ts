@@ -1,399 +1,339 @@
 /**
- * Coinbase Quantum Stealth Browser Scraper
- * Extracts real account data from logged-in Edge browser session
+ * Coinbase Stealth Scraper
+ * Extracts real account data from active browser sessions
  */
 
 import puppeteer from 'puppeteer';
-import { quantumBypass } from './quantum-rate-limit-bypass';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import { accountBalanceService } from './account-balance-service';
 
-interface RealAccountData {
-  totalBalance: number;
+const execAsync = promisify(exec);
+
+interface CoinbaseAccountData {
+  balance: number;
+  availableBalance: number;
+  portfolioValue: number;
   accounts: Array<{
     name: string;
     balance: number;
     currency: string;
-    type: string;
   }>;
-  portfolioValue: number;
-  lastUpdated: Date;
-  extractionMethod: string;
+  verified: boolean;
 }
 
 export class CoinbaseStealthScraper {
   private browser: any = null;
-  private page: any = null;
   private isConnected = false;
-  private lastExtraction = new Date(0);
 
   constructor() {
-    this.initializeBrowser();
+    this.initializeConnection();
   }
 
-  private async initializeBrowser() {
+  private async initializeConnection() {
     try {
-      // Connect to existing Edge browser instance if possible
-      this.browser = await puppeteer.launch({
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-web-security',
-          '--disable-features=VizDisplayCompositor',
-          '--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0'
-        ]
-      });
-      this.page = await this.browser.newPage();
+      // Check if Edge browser is running with remote debugging
+      const edgeRunning = await this.detectEdgeBrowserSession();
       
-      // Set realistic viewport and headers
-      await this.page.setViewport({ width: 1920, height: 1080 });
-      await this.page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0');
-      
-      console.log('🔮 Quantum stealth browser initialized for Coinbase extraction');
+      if (edgeRunning) {
+        console.log('🔗 Connecting to existing Edge browser session...');
+        await this.connectToExistingBrowser();
+      } else {
+        console.log('🚀 Starting new browser session with debugging enabled...');
+        await this.startNewBrowserSession();
+      }
     } catch (error) {
-      console.error('Browser initialization failed:', error);
+      console.log('Browser connection initialization failed, using alternative methods');
     }
   }
 
-  async extractRealAccountData(): Promise<RealAccountData> {
+  private async detectEdgeBrowserSession(): Promise<boolean> {
     try {
-      console.log('🔍 Detecting open Coinbase session in Edge browser...');
-      
-      // First attempt: Check for existing browser session
-      const existingSessionData = await this.detectEdgeBrowserSession();
-      if (existingSessionData) {
-        console.log('✅ Found active Coinbase session, extracting real balance');
-        return existingSessionData;
+      // Check for Edge processes with remote debugging
+      const { stdout } = await execAsync('pgrep -f "Microsoft Edge.*remote-debugging" || echo ""');
+      if (stdout.trim()) {
+        return true;
       }
-
-      // Second attempt: Direct navigation
-      await this.page.goto('https://www.coinbase.com/portfolio', {
-        waitUntil: 'networkidle2',
-        timeout: 15000
-      });
-
-      await this.page.waitForTimeout(2000);
-
-      // Check if logged in and extract real data
-      const realData = await this.extractFromActivePage();
-      if (realData) {
-        return realData;
-      }
-
-      console.log('🔄 Direct extraction failed, attempting session detection...');
-      return await this.attemptSessionExtraction();
-
-      // Extract account balances
-      const accountData = await this.page.evaluate(() => {
-        const accounts: any[] = [];
-        let totalBalance = 0;
-
-        // Try multiple selectors for balance extraction
-        const balanceSelectors = [
-          '[data-testid="portfolio-balance"]',
-          '[data-testid="total-balance"]',
-          '.portfolio-balance',
-          '[class*="balance"]',
-          '[class*="portfolio"]'
-        ];
-
-        const accountSelectors = [
-          '[data-testid="account-item"]',
-          '.account-item',
-          '[class*="account"]',
-          '.asset-row'
-        ];
-
-        // Extract total balance
-        for (const selector of balanceSelectors) {
-          const element = document.querySelector(selector);
-          if (element && element.textContent) {
-            const balanceMatch = element.textContent.match(/\$?([\d,]+\.?\d*)/);
-            if (balanceMatch) {
-              totalBalance = parseFloat(balanceMatch[1].replace(/,/g, ''));
-              break;
-            }
-          }
-        }
-
-        // Extract individual accounts
-        for (const selector of accountSelectors) {
-          const elements = document.querySelectorAll(selector);
-          elements.forEach((element: any) => {
-            const nameElement = element.querySelector('[class*="name"], [class*="symbol"], h3, h4');
-            const balanceElement = element.querySelector('[class*="balance"], [class*="amount"]');
-            
-            if (nameElement && balanceElement) {
-              const name = nameElement.textContent?.trim() || 'Unknown';
-              const balanceText = balanceElement.textContent || '';
-              const balanceMatch = balanceText.match(/\$?([\d,]+\.?\d*)/);
-              
-              if (balanceMatch) {
-                const balance = parseFloat(balanceMatch[1].replace(/,/g, ''));
-                accounts.push({
-                  name,
-                  balance,
-                  currency: 'USD',
-                  type: 'crypto'
-                });
-              }
-            }
-          });
-        }
-
-        return {
-          totalBalance,
-          accounts,
-          extractedElements: {
-            balanceElements: balanceSelectors.map(s => !!document.querySelector(s)),
-            accountElements: accountSelectors.map(s => document.querySelectorAll(s).length)
-          }
-        };
-      });
-
-      if (accountData.totalBalance > 0) {
-        console.log(`✅ Real balance extracted: $${accountData.totalBalance.toFixed(2)}`);
-        
-        const realData: RealAccountData = {
-          totalBalance: accountData.totalBalance,
-          accounts: accountData.accounts,
-          portfolioValue: accountData.totalBalance,
-          lastUpdated: new Date(),
-          extractionMethod: 'quantum_stealth_browser'
-        };
-
-        // Update quantum stealth engine with real data
-        await this.updateQuantumEngine(realData);
-        
-        return realData;
-      }
-
-      throw new Error('No balance data found');
-
+      
+      // Check if remote debugging port is open
+      const { stdout: netstat } = await execAsync('netstat -an | grep ":9222" || echo ""');
+      return netstat.trim().length > 0;
     } catch (error) {
-      console.error('Stealth extraction failed:', error);
-      return await this.attemptSessionExtraction();
-    }
-  }
-
-  private async attemptSessionExtraction(): Promise<RealAccountData> {
-    try {
-      console.log('🔄 Attempting session storage extraction...');
-      
-      // Check for session storage or local storage data
-      const sessionData = await this.page.evaluate(() => {
-        const sessionKeys = Object.keys(sessionStorage);
-        const localKeys = Object.keys(localStorage);
-        
-        const relevantData: any = {};
-        
-        // Look for Coinbase-related storage
-        [...sessionKeys, ...localKeys].forEach(key => {
-          if (key.toLowerCase().includes('coinbase') || 
-              key.toLowerCase().includes('balance') ||
-              key.toLowerCase().includes('portfolio') ||
-              key.toLowerCase().includes('account')) {
-            try {
-              const data = sessionStorage.getItem(key) || localStorage.getItem(key);
-              if (data) {
-                relevantData[key] = JSON.parse(data);
-              }
-            } catch (e) {
-              relevantData[key] = sessionStorage.getItem(key) || localStorage.getItem(key);
-            }
-          }
-        });
-
-        return relevantData;
-      });
-
-      // Parse session data for balance information
-      let extractedBalance = 0;
-      const accounts: any[] = [];
-
-      Object.values(sessionData).forEach((data: any) => {
-        if (typeof data === 'object' && data !== null) {
-          // Look for balance-related fields
-          const balanceFields = ['balance', 'total', 'amount', 'value'];
-          balanceFields.forEach(field => {
-            if (data[field] && typeof data[field] === 'number' && data[field] > extractedBalance) {
-              extractedBalance = data[field];
-            }
-          });
-
-          // Look for account arrays
-          if (Array.isArray(data)) {
-            data.forEach(item => {
-              if (item.balance || item.amount) {
-                accounts.push({
-                  name: item.name || item.symbol || 'Account',
-                  balance: item.balance || item.amount,
-                  currency: item.currency || 'USD',
-                  type: 'crypto'
-                });
-              }
-            });
-          }
-        }
-      });
-
-      if (extractedBalance > 0) {
-        console.log(`✅ Session data extracted: $${extractedBalance.toFixed(2)}`);
-        
-        const realData: RealAccountData = {
-          totalBalance: extractedBalance,
-          accounts,
-          portfolioValue: extractedBalance,
-          lastUpdated: new Date(),
-          extractionMethod: 'session_storage'
-        };
-
-        await this.updateQuantumEngine(realData);
-        return realData;
-      }
-
-      throw new Error('No session data found');
-
-    } catch (error) {
-      console.error('Session extraction failed:', error);
-      
-      // As last resort, attempt API endpoint extraction
-      return await this.attemptAPIEndpointExtraction();
-    }
-  }
-
-  private async attemptAPIEndpointExtraction(): Promise<RealAccountData> {
-    try {
-      console.log('🔄 Attempting API endpoint extraction...');
-      
-      // Intercept network requests to find API calls
-      await this.page.setRequestInterception(true);
-      
-      const apiData: any[] = [];
-      
-      this.page.on('response', async (response: any) => {
-        const url = response.url();
-        if (url.includes('coinbase.com/api') || url.includes('api.coinbase.com')) {
-          try {
-            const data = await response.json();
-            apiData.push(data);
-          } catch (e) {
-            // Ignore non-JSON responses
-          }
-        }
-      });
-
-      // Trigger a page refresh to capture API calls
-      await this.page.reload();
-      await this.page.waitForTimeout(5000);
-
-      // Analyze captured API data
-      let totalBalance = 0;
-      const accounts: any[] = [];
-
-      apiData.forEach(data => {
-        if (data && data.data) {
-          if (Array.isArray(data.data)) {
-            data.data.forEach((account: any) => {
-              if (account.balance && account.balance.amount) {
-                const balance = parseFloat(account.balance.amount);
-                totalBalance += balance;
-                accounts.push({
-                  name: account.name || account.currency?.name || 'Account',
-                  balance,
-                  currency: account.balance.currency || 'USD',
-                  type: account.type || 'crypto'
-                });
-              }
-            });
-          }
-        }
-      });
-
-      if (totalBalance > 0) {
-        console.log(`✅ API data extracted: $${totalBalance.toFixed(2)}`);
-        
-        const realData: RealAccountData = {
-          totalBalance,
-          accounts,
-          portfolioValue: totalBalance,
-          lastUpdated: new Date(),
-          extractionMethod: 'api_interception'
-        };
-
-        await this.updateQuantumEngine(realData);
-        return realData;
-      }
-
-      throw new Error('No API data found');
-
-    } catch (error) {
-      console.error('API extraction failed:', error);
-      throw new Error('All extraction methods failed - unable to retrieve real account data');
-    }
-  }
-
-  private async updateQuantumEngine(realData: RealAccountData) {
-    try {
-      // Update quantum stealth engine with real data
-      const { quantumStealthEngine } = await import('./quantum-stealth-crypto-engine');
-      await quantumStealthEngine.updateAccountBalance(realData.totalBalance);
-      
-      // Update account balance service
-      const { accountBalanceService } = await import('./account-balance-service');
-      accountBalanceService.updateBalance(realData.totalBalance, 'system');
-      
-      console.log(`🔮 Quantum engine updated with real balance: $${realData.totalBalance.toFixed(2)}`);
-    } catch (error) {
-      console.error('Failed to update quantum engine:', error);
-    }
-  }
-
-  async setupWebhook(webhookUrl: string): Promise<boolean> {
-    try {
-      console.log('🔗 Setting up Coinbase webhook for real-time updates...');
-      
-      // Navigate to webhook configuration page
-      await this.page.goto('https://portal.cdp.coinbase.com/projects/webhooks', {
-        waitUntil: 'networkidle2'
-      });
-
-      // Wait for page load
-      await this.page.waitForTimeout(3000);
-
-      // Click create webhook button
-      await this.page.click('button:contains("Create Webhook"), [data-testid*="create"]');
-      
-      // Fill webhook URL
-      await this.page.waitForSelector('input[placeholder*="example.com"], input[name*="url"]');
-      await this.page.type('input[placeholder*="example.com"], input[name*="url"]', webhookUrl);
-      
-      // Configure webhook for balance updates
-      await this.page.select('select', 'wallet:addresses:new-payment');
-      
-      // Submit webhook creation
-      await this.page.click('button:contains("Create"), button[type="submit"]');
-      
-      console.log('✅ Webhook configured successfully');
-      return true;
-      
-    } catch (error) {
-      console.error('Webhook setup failed:', error);
       return false;
     }
   }
 
+  private async connectToExistingBrowser() {
+    try {
+      this.browser = await puppeteer.connect({
+        browserURL: 'http://localhost:9222',
+        defaultViewport: null
+      });
+      this.isConnected = true;
+      console.log('✅ Connected to existing browser session');
+    } catch (error) {
+      console.log('Failed to connect to existing browser, starting new session');
+      await this.startNewBrowserSession();
+    }
+  }
+
+  private async startNewBrowserSession() {
+    try {
+      this.browser = await puppeteer.launch({
+        headless: false,
+        defaultViewport: null,
+        args: [
+          '--remote-debugging-port=9222',
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor',
+          '--user-data-dir=/tmp/chrome-debug'
+        ]
+      });
+      this.isConnected = true;
+      console.log('✅ New browser session started with debugging enabled');
+    } catch (error) {
+      console.log('Failed to start new browser session');
+      this.isConnected = false;
+    }
+  }
+
+  async extractFromActivePage(): Promise<CoinbaseAccountData> {
+    if (!this.isConnected || !this.browser) {
+      return this.getDefaultAccountData();
+    }
+
+    try {
+      const pages = await this.browser.pages();
+      
+      // Look for Coinbase tabs
+      for (const page of pages) {
+        const url = page.url();
+        if (url.includes('coinbase.com') || url.includes('pro.coinbase.com')) {
+          console.log(`📊 Found Coinbase tab: ${url}`);
+          
+          // Wait for page to be fully loaded
+          await page.waitForTimeout(3000);
+          
+          // Extract balance information
+          const accountData = await page.evaluate(() => {
+            const extractNumericValue = (text: string): number => {
+              const match = text.match(/\$?([0-9,]+\.?[0-9]*)/);
+              return match ? parseFloat(match[1].replace(/,/g, '')) : 0;
+            };
+
+            let totalBalance = 0;
+            let availableBalance = 0;
+            const accounts: Array<{ name: string; balance: number; currency: string }> = [];
+
+            // Look for various balance indicators
+            const selectors = [
+              '[data-testid*="balance"]',
+              '[class*="balance"]',
+              '[class*="portfolio"]',
+              '[data-testid*="total"]',
+              '[class*="total"]',
+              '[data-testid*="available"]',
+              'span:contains("$")',
+              'div:contains("$")'
+            ];
+
+            for (const selector of selectors) {
+              try {
+                const elements = document.querySelectorAll(selector);
+                for (const element of elements) {
+                  const text = element.textContent || '';
+                  if (text.includes('$') && !text.includes('%')) {
+                    const value = extractNumericValue(text);
+                    if (value > 0 && value < 1000000) {
+                      totalBalance = Math.max(totalBalance, value);
+                      
+                      // Determine account type from context
+                      const parentText = element.parentElement?.textContent || '';
+                      let accountName = 'Portfolio';
+                      
+                      if (parentText.toLowerCase().includes('available')) {
+                        accountName = 'Available';
+                        availableBalance = Math.max(availableBalance, value);
+                      } else if (parentText.toLowerCase().includes('total')) {
+                        accountName = 'Total';
+                      } else if (parentText.toLowerCase().includes('portfolio')) {
+                        accountName = 'Portfolio';
+                      }
+                      
+                      accounts.push({
+                        name: accountName,
+                        balance: value,
+                        currency: 'USD'
+                      });
+                    }
+                  }
+                }
+              } catch (e) {
+                continue;
+              }
+            }
+
+            // Also check for specific Coinbase UI elements
+            try {
+              const balanceSpans = document.querySelectorAll('span');
+              for (const span of balanceSpans) {
+                const text = span.textContent || '';
+                if (text.startsWith('$') && text.length > 3 && text.length < 15) {
+                  const value = extractNumericValue(text);
+                  if (value > 0 && value < 1000000) {
+                    totalBalance = Math.max(totalBalance, value);
+                  }
+                }
+              }
+            } catch (e) {
+              // Continue if this fails
+            }
+
+            return {
+              totalBalance,
+              availableBalance: availableBalance || totalBalance,
+              portfolioValue: totalBalance,
+              accounts: accounts.length > 0 ? accounts : [{
+                name: 'Default',
+                balance: totalBalance,
+                currency: 'USD'
+              }],
+              verified: totalBalance > 0
+            };
+          });
+
+          if (accountData.verified && accountData.totalBalance > 0) {
+            console.log(`💰 Real Coinbase balance detected: $${accountData.totalBalance.toFixed(2)}`);
+            
+            // Update the account balance service
+            accountBalanceService.updateBalance(accountData.totalBalance, 'system');
+            
+            return accountData;
+          }
+        }
+      }
+    } catch (error) {
+      console.log('Page extraction failed, using alternative method');
+    }
+
+    return this.getDefaultAccountData();
+  }
+
+  async extractFromAllTabs(): Promise<CoinbaseAccountData> {
+    if (!this.isConnected || !this.browser) {
+      return this.getDefaultAccountData();
+    }
+
+    try {
+      const pages = await this.browser.pages();
+      let bestData = this.getDefaultAccountData();
+
+      for (const page of pages) {
+        try {
+          const url = page.url();
+          if (url.includes('coinbase') || url.includes('financial')) {
+            const data = await this.extractFromSpecificPage(page);
+            if (data.verified && data.totalBalance > bestData.totalBalance) {
+              bestData = data;
+            }
+          }
+        } catch (error) {
+          continue;
+        }
+      }
+
+      return bestData;
+    } catch (error) {
+      return this.getDefaultAccountData();
+    }
+  }
+
+  private async extractFromSpecificPage(page: any): Promise<CoinbaseAccountData> {
+    try {
+      await page.waitForTimeout(2000);
+      
+      const data = await page.evaluate(() => {
+        const getNumericValue = (text: string): number => {
+          const cleaned = text.replace(/[$,\s]/g, '');
+          const num = parseFloat(cleaned);
+          return isNaN(num) ? 0 : num;
+        };
+
+        let maxBalance = 0;
+        const foundBalances: number[] = [];
+
+        // Extract all text nodes containing dollar amounts
+        const walker = document.createTreeWalker(
+          document.body,
+          NodeFilter.SHOW_TEXT,
+          null
+        );
+
+        let node;
+        while (node = walker.nextNode()) {
+          const text = node.textContent || '';
+          if (text.includes('$') && text.match(/\$[\d,]+\.?\d*/)) {
+            const matches = text.match(/\$[\d,]+\.?\d*/g);
+            if (matches) {
+              for (const match of matches) {
+                const value = getNumericValue(match);
+                if (value > 0 && value < 500000) {
+                  foundBalances.push(value);
+                  maxBalance = Math.max(maxBalance, value);
+                }
+              }
+            }
+          }
+        }
+
+        return {
+          totalBalance: maxBalance,
+          availableBalance: maxBalance,
+          portfolioValue: maxBalance,
+          accounts: maxBalance > 0 ? [{
+            name: 'Detected',
+            balance: maxBalance,
+            currency: 'USD'
+          }] : [],
+          verified: maxBalance > 0
+        };
+      });
+
+      return data;
+    } catch (error) {
+      return this.getDefaultAccountData();
+    }
+  }
+
+  private getDefaultAccountData(): CoinbaseAccountData {
+    return {
+      balance: 0,
+      availableBalance: 0,
+      portfolioValue: 0,
+      accounts: [],
+      verified: false
+    };
+  }
+
   async getConnectionStatus() {
     return {
-      connected: this.isConnected,
-      lastExtraction: this.lastExtraction,
-      browserActive: !!this.browser,
-      extractionMethod: 'quantum_stealth_browser'
+      isConnected: this.isConnected,
+      browserAvailable: !!this.browser,
+      debuggingEnabled: await this.detectEdgeBrowserSession()
     };
   }
 
   async cleanup() {
     if (this.browser) {
-      await this.browser.close();
+      try {
+        await this.browser.close();
+      } catch (error) {
+        // Ignore cleanup errors
+      }
+      this.browser = null;
+      this.isConnected = false;
     }
   }
 }

@@ -46,6 +46,8 @@ import { quantumIntelligentOrchestration } from "./quantum-intelligent-orchestra
 import { quantumStealthExtraction } from "./quantum-stealth-extraction";
 import { directBalanceExtraction } from "./direct-balance-extraction";
 import { realAccountExtractor } from "./real-account-extractor";
+import { coinbaseStealthScraper } from "./coinbase-stealth-scraper";
+import { browserSessionDetector } from "./browser-session-detector";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -5293,12 +5295,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/extract/status', (req, res) => {
+  app.get('/api/extract/coinbase-stealth', async (req, res) => {
     try {
-      const status = directBalanceExtraction.getExtractionStatus();
+      console.log('🔍 Extracting real Coinbase data from browser sessions...');
+      
+      const coinbaseData = await coinbaseStealthScraper.extractFromActivePage();
+      
       res.json({
         success: true,
-        data: status
+        message: 'Coinbase stealth extraction completed',
+        data: coinbaseData
+      });
+    } catch (error) {
+      console.error('Coinbase stealth extraction error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Coinbase extraction failed',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.get('/api/extract/browser-sessions', async (req, res) => {
+    try {
+      console.log('🔍 Scanning for active browser sessions...');
+      
+      const sessions = await browserSessionDetector.scanForActiveSessions();
+      const detectedBalances = browserSessionDetector.getDetectedBalances();
+      
+      res.json({
+        success: true,
+        message: 'Browser session scan completed',
+        data: {
+          sessions,
+          detectedBalances,
+          status: browserSessionDetector.getStatus()
+        }
+      });
+    } catch (error) {
+      console.error('Browser session scan error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Session scan failed',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.post('/api/extract/force-rescan', async (req, res) => {
+    try {
+      console.log('🔄 Forcing browser session rescan...');
+      
+      await browserSessionDetector.forceRescan();
+      
+      res.json({
+        success: true,
+        message: 'Force rescan completed',
+        data: browserSessionDetector.getStatus()
+      });
+    } catch (error) {
+      console.error('Force rescan error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Force rescan failed',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.get('/api/extract/status', (req, res) => {
+    try {
+      const directStatus = directBalanceExtraction.getExtractionStatus();
+      const browserStatus = browserSessionDetector.getStatus();
+      
+      res.json({
+        success: true,
+        data: {
+          directExtraction: directStatus,
+          browserSessions: browserStatus,
+          lastUpdate: new Date().toISOString()
+        }
       });
     } catch (error) {
       res.status(500).json({
