@@ -43,6 +43,7 @@ import { aiWebsiteService } from "./ai-website-service";
 import { evolutionEngine } from "./recursive-evolution-engine";
 import { accountBalanceService } from "./account-balance-service";
 import { quantumIntelligentOrchestration } from "./quantum-intelligent-orchestration";
+import { quantumStealthExtraction } from "./quantum-stealth-extraction";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
