@@ -71,13 +71,11 @@ export class AccountBalanceService {
     this.lastUpdate = new Date();
   }
   
-  // Sync with Robinhood Legend client
+  // Sync with Robinhood Legend client (DISABLED FOR PRODUCTION)
   syncWithRobinhoodLegend(balance: number, buyingPower?: number): void {
-    this.accountBalance = balance;
-    this.buyingPower = buyingPower || balance * 0.95;
-    this.totalEquity = balance;
-    this.lastUpdate = new Date();
-    console.log(`🔄 Synced with Robinhood Legend: $${balance.toFixed(2)}`);
+    // PRODUCTION MODE: Only use real Coinbase balance, ignore Robinhood overrides
+    console.log(`🚫 Robinhood sync disabled in production mode. Keeping real Coinbase balance: $${this.accountBalance.toFixed(2)}`);
+    return;
   }
   
   // Get comprehensive account info

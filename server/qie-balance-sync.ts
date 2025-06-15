@@ -257,16 +257,15 @@ export class QIEBalanceSyncEngine extends EventEmitter {
   }
 
   private extractRobinhoodBalance(): any {
-    // Real Robinhood balance extraction logic would go here
-    // For now, using environment-based realistic data
-    const baseBalance = 778.19;
-    const fluctuation = (Math.random() - 0.5) * 10; // ±$5 fluctuation
+    // PRODUCTION MODE: Use real Coinbase balance instead of mock data
+    const realBalance = accountBalanceService.getAccountBalance();
+    console.log(`🚫 Robinhood balance disabled in production. Using real Coinbase balance: $${realBalance}`);
     
     return {
-      cash: baseBalance + fluctuation,
-      equity: baseBalance + fluctuation,
-      buyingPower: baseBalance + fluctuation,
-      totalValue: baseBalance + fluctuation
+      cash: realBalance,
+      equity: realBalance,
+      buyingPower: realBalance * 0.95,
+      totalValue: realBalance
     };
   }
 

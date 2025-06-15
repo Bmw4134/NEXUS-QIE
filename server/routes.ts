@@ -42,6 +42,7 @@ import { agentMasterSync } from "./agent-master-sync";
 import { aiWebsiteService } from "./ai-website-service";
 import { evolutionEngine } from "./recursive-evolution-engine";
 import { accountBalanceService } from "./account-balance-service";
+import { productionTradingEngine } from "./production-trading-engine";
 import { quantumIntelligentOrchestration } from "./quantum-intelligent-orchestration";
 import { quantumStealthExtraction } from "./quantum-stealth-extraction";
 import { directBalanceExtraction } from "./direct-balance-extraction";

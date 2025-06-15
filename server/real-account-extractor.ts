@@ -113,13 +113,9 @@ export class RealAccountExtractor {
         console.log(`💰 Real Coinbase balance detected: $${coinbaseData.totalBalance.toFixed(2)}`);
       }
 
-      if (robinhoodData.buyingPower > 0) {
-        accountBalanceService.syncWithRobinhoodLegend(
-          robinhoodData.totalEquity,
-          robinhoodData.buyingPower
-        );
-        console.log(`💰 Real Robinhood balance detected: $${robinhoodData.buyingPower.toFixed(2)}`);
-      }
+      // PRODUCTION MODE: Disable Robinhood override, use real Coinbase balance only
+      console.log(`🚫 Robinhood sync disabled in production. Maintaining real Coinbase balance: $${accountBalanceService.getAccountBalance()}`);
+      console.log(`Account synced: $${accountBalanceService.getAccountBalance().toFixed(2)} buying power`);
 
       return result;
     } finally {
