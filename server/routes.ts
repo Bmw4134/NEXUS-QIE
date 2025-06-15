@@ -4110,6 +4110,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Live Trading Routes
+  app.post('/api/coinbase/activate-trading', async (req, res) => {
+    try {
+      const { coinbaseLiveTradingEngine } = await import('./coinbase-live-trading-engine');
+      await coinbaseLiveTradingEngine.activateTrading();
+      
+      const status = coinbaseLiveTradingEngine.getTradingStatus();
+      res.json({
+        success: true,
+        ...status,
+        message: `Live trading activated with $${status.balance.toFixed(2)} balance`
+      });
+    } catch (error) {
+      console.error('Trading activation failed:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to activate live trading',
+        details: error.message
+      });
+    }
+  });
+
+  app.post('/api/coinbase/execute-trade', async (req, res) => {
+    try {
+      const { symbol, side, amount, type, price } = req.body;
+      
+      if (!symbol || !side || !amount) {
+        return res.status(400).json({
+          success: false,
+          error: 'Missing required fields: symbol, side, amount'
+        });
+      }
+
+      const { coinbaseLiveTradingEngine } = await import('./coinbase-live-trading-engine');
+      const result = await coinbaseLiveTradingEngine.executeTrade({
+        symbol,
+        side,
+        amount: parseFloat(amount),
+        type: type || 'market',
+        price: price ? parseFloat(price) : undefined
+      });
+      
+      res.json({
+        success: true,
+        trade: result,
+        message: `${side} order executed: ${amount} ${symbol}`
+      });
+    } catch (error) {
+      console.error('Trade execution failed:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Trade execution failed',
+        details: error.message
+      });
+    }
+  });
+
+  app.get('/api/coinbase/account-snapshot', async (req, res) => {
+    try {
+      const { coinbaseLiveTradingEngine } = await import('./coinbase-live-trading-engine');
+      const snapshot = await coinbaseLiveTradingEngine.getAccountSnapshot();
+      
+      res.json({
+        success: true,
+        ...snapshot
+      });
+    } catch (error) {
+      console.error('Account snapshot failed:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get account snapshot',
+        details: error.message
+      });
+    }
+  });
+
+  app.get('/api/coinbase/trading-status', async (req, res) => {
+    try {
+      const { coinbaseLiveTradingEngine } = await import('./coinbase-live-trading-engine');
+      const status = coinbaseLiveTradingEngine.getTradingStatus();
+      
+      res.json({
+        success: true,
+        ...status
+      });
+    } catch (error) {
+      console.error('Trading status check failed:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to check trading status'
+      });
+    }
+  });
+
+  app.post('/api/coinbase/refresh-balance', async (req, res) => {
+    try {
+      const { coinbaseLiveTradingEngine } = await import('./coinbase-live-trading-engine');
+      const balance = await coinbaseLiveTradingEngine.refreshBalance();
+      
+      res.json({
+        success: true,
+        balance,
+        message: `Balance refreshed: $${balance.toFixed(2)}`
+      });
+    } catch (error) {
+      console.error('Balance refresh failed:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to refresh balance',
+        details: error.message
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Initialize QNIS Core Engine with WebSocket support
