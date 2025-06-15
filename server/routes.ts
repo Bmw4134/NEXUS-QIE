@@ -1917,6 +1917,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Quantum Stealth Wallet Creation API
+  app.post('/api/wallet/create-stealth', async (req, res) => {
+    try {
+      const { quantumStealthEngine } = await import('./quantum-stealth-crypto-engine');
+      const result = await quantumStealthEngine.createStealthWallet();
+      res.json(result);
+    } catch (error) {
+      console.error('Stealth wallet creation error:', error);
+      res.status(500).json({ error: 'Stealth wallet creation failed' });
+    }
+  });
+
+  // Quantum Stealth Transfer API
+  app.post('/api/wallet/stealth-transfer', async (req, res) => {
+    try {
+      const { quantumStealthEngine } = await import('./quantum-stealth-crypto-engine');
+      const { walletId, destinationAddress, amount, assetId } = req.body;
+      
+      const result = await quantumStealthEngine.executeStealthTransfer(
+        walletId,
+        destinationAddress,
+        amount,
+        assetId
+      );
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Stealth transfer error:', error);
+      res.status(500).json({ error: 'Stealth transfer failed' });
+    }
+  });
+
+  // Quantum Stealth Metrics API
+  app.get('/api/stealth/metrics', async (req, res) => {
+    try {
+      const { quantumStealthEngine } = await import('./quantum-stealth-crypto-engine');
+      const metrics = quantumStealthEngine.getStealthMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error('Stealth metrics error:', error);
+      res.status(500).json({ error: 'Stealth metrics unavailable' });
+    }
+  });
+
   // Trading Status API for QNIS Admin
   app.get('/api/trading/status', async (req, res) => {
     try {

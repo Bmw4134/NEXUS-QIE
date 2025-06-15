@@ -7,7 +7,6 @@ import axios from 'axios';
 import crypto from 'crypto';
 import { accountBalanceService } from './account-balance-service';
 // CDP SDK integration for advanced wallet operations
-const CDP = require('@coinbase/cdp-sdk');
 
 interface StealthTradingRequest {
   symbol: string;
@@ -134,8 +133,9 @@ export class QuantumStealthCryptoEngine {
 
   private async initializeCoinbaseSDK() {
     try {
-      // Initialize Coinbase CDP SDK with quantum stealth capabilities
+      // Dynamic import of CDP SDK with quantum stealth capabilities
       if (process.env.COINBASE_API_KEY && process.env.COINBASE_API_SECRET) {
+        const CDP = await import('@coinbase/cdp-sdk');
         this.coinbaseSDK = new CDP.Coinbase({
           apiKeyName: process.env.COINBASE_API_KEY,
           privateKey: process.env.COINBASE_API_SECRET
