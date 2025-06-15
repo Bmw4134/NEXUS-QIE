@@ -332,6 +332,12 @@ export function EnhancedDashboard() {
                   <Sparkles className="w-3 h-3 mr-1" />
                   AI Enhanced
                 </Badge>
+                <Link href="/recursive-evolution">
+                  <Button variant="outline" size="sm" className="bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100">
+                    <Activity className="w-3 h-3 mr-1" />
+                    Evolution Mode
+                  </Button>
+                </Link>
               </div>
             </div>
 
