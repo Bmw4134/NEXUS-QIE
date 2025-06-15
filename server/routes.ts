@@ -4316,6 +4316,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Production Trading Routes
+  app.post('/api/trading/execute', async (req, res) => {
+    try {
+      const { symbol, side, amount, orderType, limitPrice } = req.body;
+      
+      const result = await productionTradingEngine.executeLiveTrade({
+        symbol,
+        side,
+        amount: parseFloat(amount),
+        orderType,
+        limitPrice: limitPrice ? parseFloat(limitPrice) : undefined
+      });
+      
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Trade execution failed' 
+      });
+    }
+  });
+
+  app.get('/api/trading/status', async (req, res) => {
+    try {
+      const status = await productionTradingEngine.getAccountStatus();
+      res.json(status);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get trading status' });
+    }
+  });
+
+  app.post('/api/trading/start-automation', async (req, res) => {
+    try {
+      await productionTradingEngine.startAutomatedTrading();
+      res.json({ success: true, message: 'Automated trading started' });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Failed to start automation' 
+      });
+    }
+  });
+
+  app.get('/api/production/balance', (req, res) => {
+    try {
+      const balance = accountBalanceService.getAccountBalance();
+      const buyingPower = accountBalanceService.getBuyingPower();
+      
+      res.json({
+        success: true,
+        balance,
+        buyingPower,
+        realBalance: balance,
+        productionMode: true,
+        lastUpdate: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to get production balance' 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Initialize QNIS Core Engine with WebSocket support
