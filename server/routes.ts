@@ -41,6 +41,7 @@ import { nexusFinalizationEngine } from "./nexus-finalization-engine";
 import { agentMasterSync } from "./agent-master-sync";
 import { aiWebsiteService } from "./ai-website-service";
 import { evolutionEngine } from "./recursive-evolution-engine";
+import { accountBalanceService } from "./account-balance-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
