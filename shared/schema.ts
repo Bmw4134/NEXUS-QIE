@@ -274,6 +274,80 @@ export const asiDecisions = pgTable("asi_decisions", {
   timestamp: timestamp("timestamp").defaultNow(),
 });
 
+// Recursive Evolution Mode - KPI Monitoring & System Intelligence
+export const evolutionKpiMetrics = pgTable("evolution_kpi_metrics", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  dashboardName: varchar("dashboard_name").notNull(),
+  metricType: varchar("metric_type").notNull(), // "data_integrity" | "sync_latency" | "enrichment_state" | "performance"
+  metricValue: decimal("metric_value", { precision: 10, scale: 4 }).notNull(),
+  threshold: decimal("threshold", { precision: 10, scale: 4 }),
+  status: varchar("status").notNull(), // "healthy" | "warning" | "critical"
+  metadata: jsonb("metadata"),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+export const evolutionSystemState = pgTable("evolution_system_state", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  dashboardName: varchar("dashboard_name").notNull(),
+  moduleId: varchar("module_id").notNull(),
+  status: varchar("status").notNull(), // "active" | "degraded" | "failed" | "healing"
+  lastAccessed: timestamp("last_accessed"),
+  errorCount: integer("error_count").notNull().default(0),
+  healingAttempts: integer("healing_attempts").notNull().default(0),
+  configuration: jsonb("configuration"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const evolutionApiKeyVault = pgTable("evolution_api_key_vault", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  service: varchar("service").notNull(), // "openai" | "perplexity" | "google_places" | etc
+  keyStatus: varchar("key_status").notNull(), // "active" | "rate_limited" | "expired" | "invalid"
+  lastUsed: timestamp("last_used"),
+  usageCount: integer("usage_count").notNull().default(0),
+  errorCount: integer("error_count").notNull().default(0),
+  fallbackEnabled: boolean("fallback_enabled").notNull().default(true),
+  metadata: jsonb("metadata"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const evolutionErrorTracing = pgTable("evolution_error_tracing", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  dashboardName: varchar("dashboard_name").notNull(),
+  errorType: varchar("error_type").notNull(), // "api_failure" | "nan_value" | "undefined_data" | "auth_error"
+  errorMessage: text("error_message").notNull(),
+  stackTrace: text("stack_trace"),
+  context: jsonb("context"),
+  resolved: boolean("resolved").notNull().default(false),
+  resolutionMethod: varchar("resolution_method"), // "api_retry" | "fallback" | "scraping" | "manual"
+  resolutionTime: integer("resolution_time"), // milliseconds
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+export const evolutionUserPreferences = pgTable("evolution_user_preferences", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull(),
+  dashboardName: varchar("dashboard_name").notNull(),
+  lastModuleOpened: varchar("last_module_opened"),
+  layoutPreference: varchar("layout_preference").notNull().default("adaptive"), // "mobile" | "desktop" | "adaptive"
+  cognitiveLoadLevel: varchar("cognitive_load_level").notNull().default("medium"), // "low" | "medium" | "high"
+  uiPreferences: jsonb("ui_preferences"),
+  notificationSettings: jsonb("notification_settings"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const evolutionPlatformHeartbeat = pgTable("evolution_platform_heartbeat", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  dashboardName: varchar("dashboard_name").notNull(),
+  systemStatus: varchar("system_status").notNull(), // "online" | "degraded" | "offline"
+  activeUsers: integer("active_users").notNull().default(0),
+  cpuUsage: decimal("cpu_usage", { precision: 5, scale: 2 }),
+  memoryUsage: decimal("memory_usage", { precision: 5, scale: 2 }),
+  apiLatency: integer("api_latency"), // milliseconds
+  alerts: jsonb("alerts"),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
 // FamilySync module - real-time family coordination
 export const familySyncLocations = pgTable("family_sync_locations", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -405,6 +479,53 @@ export const insertAsiDecisionSchema = createInsertSchema(asiDecisions).omit({
   id: true,
   timestamp: true,
 });
+
+// Evolution Mode Schema Exports
+export const insertEvolutionKpiMetricSchema = createInsertSchema(evolutionKpiMetrics).omit({
+  id: true,
+  timestamp: true,
+});
+
+export const insertEvolutionSystemStateSchema = createInsertSchema(evolutionSystemState).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertEvolutionApiKeyVaultSchema = createInsertSchema(evolutionApiKeyVault).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export const insertEvolutionErrorTracingSchema = createInsertSchema(evolutionErrorTracing).omit({
+  id: true,
+  timestamp: true,
+});
+
+export const insertEvolutionUserPreferencesSchema = createInsertSchema(evolutionUserPreferences).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export const insertEvolutionPlatformHeartbeatSchema = createInsertSchema(evolutionPlatformHeartbeat).omit({
+  id: true,
+  timestamp: true,
+});
+
+// Type exports for all evolution tables
+export type EvolutionKpiMetric = typeof evolutionKpiMetrics.$inferSelect;
+export type EvolutionSystemState = typeof evolutionSystemState.$inferSelect;
+export type EvolutionApiKeyVault = typeof evolutionApiKeyVault.$inferSelect;
+export type EvolutionErrorTracing = typeof evolutionErrorTracing.$inferSelect;
+export type EvolutionUserPreferences = typeof evolutionUserPreferences.$inferSelect;
+export type EvolutionPlatformHeartbeat = typeof evolutionPlatformHeartbeat.$inferSelect;
+
+export type InsertEvolutionKpiMetric = z.infer<typeof insertEvolutionKpiMetricSchema>;
+export type InsertEvolutionSystemState = z.infer<typeof insertEvolutionSystemStateSchema>;
+export type InsertEvolutionApiKeyVault = z.infer<typeof insertEvolutionApiKeyVaultSchema>;
+export type InsertEvolutionErrorTracing = z.infer<typeof insertEvolutionErrorTracingSchema>;
+export type InsertEvolutionUserPreferences = z.infer<typeof insertEvolutionUserPreferencesSchema>;
+export type InsertEvolutionPlatformHeartbeat = z.infer<typeof insertEvolutionPlatformHeartbeatSchema>;
 
 // Type exports
 export type User = typeof users.$inferSelect;

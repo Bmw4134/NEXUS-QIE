@@ -40,6 +40,7 @@ import { nexusButtonValidator } from "./nexus-button-validator";
 import { nexusFinalizationEngine } from "./nexus-finalization-engine";
 import { agentMasterSync } from "./agent-master-sync";
 import { aiWebsiteService } from "./ai-website-service";
+import { evolutionEngine } from "./recursive-evolution-engine";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
