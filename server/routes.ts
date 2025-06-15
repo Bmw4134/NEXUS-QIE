@@ -4040,6 +4040,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Coinbase Stealth Extraction Routes
+  app.post('/api/coinbase/extract-real-balance', async (req, res) => {
+    try {
+      const { coinbaseStealthScraper } = await import('./coinbase-stealth-scraper');
+      const realData = await coinbaseStealthScraper.extractRealAccountData();
+      
+      res.json({
+        success: true,
+        balance: realData.totalBalance,
+        accounts: realData.accounts,
+        extractionMethod: realData.extractionMethod,
+        lastUpdated: realData.lastUpdated,
+        message: `Real balance extracted: $${realData.totalBalance.toFixed(2)}`
+      });
+    } catch (error) {
+      console.error('Real balance extraction failed:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to extract real account balance',
+        details: error.message
+      });
+    }
+  });
+
+  app.post('/api/coinbase/setup-webhook', async (req, res) => {
+    try {
+      const { webhookUrl } = req.body;
+      if (!webhookUrl) {
+        return res.status(400).json({
+          success: false,
+          error: 'Webhook URL is required'
+        });
+      }
+
+      const { coinbaseStealthScraper } = await import('./coinbase-stealth-scraper');
+      const success = await coinbaseStealthScraper.setupWebhook(webhookUrl);
+      
+      res.json({
+        success,
+        webhookUrl,
+        message: success ? 'Webhook configured successfully' : 'Webhook setup failed'
+      });
+    } catch (error) {
+      console.error('Webhook setup failed:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to setup webhook',
+        details: error.message
+      });
+    }
+  });
+
+  app.get('/api/coinbase/connection-status', async (req, res) => {
+    try {
+      const { coinbaseStealthScraper } = await import('./coinbase-stealth-scraper');
+      const status = await coinbaseStealthScraper.getConnectionStatus();
+      
+      res.json({
+        success: true,
+        ...status
+      });
+    } catch (error) {
+      console.error('Connection status check failed:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to check connection status'
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Initialize QNIS Core Engine with WebSocket support

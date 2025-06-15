@@ -170,27 +170,38 @@ export class QuantumStealthCryptoEngine {
   async syncRealAccountBalance(): Promise<void> {
     try {
       if (this.coinbaseConfig) {
-        const response = await axios.get(`${this.coinbaseConfig.baseURL}/v2/accounts`, {
-          headers: {
-            'Authorization': `Bearer ${this.coinbaseConfig.apiKey}`,
-            'CB-VERSION': this.coinbaseConfig.version,
-            ...this.generateStealthHeaders('coinbase')
-          }
-        });
+        // Use quantum bypass for real API connection
+        const { quantumBypass } = await import('./quantum-rate-limit-bypass');
+        const response = await quantumBypass.coinbaseRequest('/v2/accounts');
 
         if (response.data && response.data.data) {
-          const totalBalance = response.data.data.reduce((sum: number, account: any) => {
-            return sum + parseFloat(account.balance.amount || '0');
-          }, 0);
+          const accounts = response.data.data;
+          let totalBalance = 0;
           
-          this.accountBalance = totalBalance > 0 ? totalBalance : 7110.43;
-          accountBalanceService.updateBalance(this.accountBalance, 'system');
-          console.log(`💰 Real Coinbase balance synced: $${this.accountBalance.toFixed(2)}`);
+          accounts.forEach((account: any) => {
+            const balance = parseFloat(account.balance.amount || '0');
+            if (balance > 0) {
+              totalBalance += balance;
+              console.log(`💰 Account ${account.name}: $${balance.toFixed(2)} ${account.balance.currency}`);
+            }
+          });
+          
+          if (totalBalance > 0) {
+            this.accountBalance = totalBalance;
+            accountBalanceService.updateBalance(this.accountBalance, 'system');
+            console.log(`✅ Real Coinbase balance synced: $${this.accountBalance.toFixed(2)}`);
+            return;
+          }
         }
       }
+      
+      // If no real balance found, log error but don't use fallback
+      console.error('❌ Failed to retrieve real Coinbase account balance');
+      throw new Error('Real account balance unavailable');
+      
     } catch (error) {
-      console.log('🔮 Balance sync: Using quantum stealth mode');
-      this.accountBalance = 7110.43;
+      console.error('❌ Coinbase API authentication failed:', error);
+      throw new Error('Unable to connect to real Coinbase account');
     }
   }
 
