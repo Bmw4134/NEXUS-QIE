@@ -4379,6 +4379,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Quantum NEXUS Autonomous Trading Routes
+  app.post('/api/nexus/activate-autonomous', async (req, res) => {
+    try {
+      const { quantumNexusTrader } = await import('./quantum-nexus-autonomous-trader');
+      await quantumNexusTrader.activateAutonomousTrading();
+      
+      res.json({
+        success: true,
+        message: 'Quantum NEXUS autonomous trading activated',
+        status: quantumNexusTrader.getStatus()
+      });
+    } catch (error) {
+      console.error('Autonomous trading activation failed:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to activate autonomous trading'
+      });
+    }
+  });
+
+  app.get('/api/nexus/status', async (req, res) => {
+    try {
+      const { quantumNexusTrader } = await import('./quantum-nexus-autonomous-trader');
+      const status = quantumNexusTrader.getStatus();
+      
+      res.json({
+        success: true,
+        status
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get trading status'
+      });
+    }
+  });
+
+  app.post('/api/nexus/deactivate', async (req, res) => {
+    try {
+      const { quantumNexusTrader } = await import('./quantum-nexus-autonomous-trader');
+      await quantumNexusTrader.deactivate();
+      
+      res.json({
+        success: true,
+        message: 'Autonomous trading deactivated'
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to deactivate trading'
+      });
+    }
+  });
+
   // Production Trading Routes
   app.post('/api/trading/execute', async (req, res) => {
     try {
