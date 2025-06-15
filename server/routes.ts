@@ -1835,7 +1835,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Refresh Coinbase Balance API
+  // Quantum Stealth Balance Refresh API
   app.post('/api/trading/refresh-balance', async (req, res) => {
     try {
       await accountBalanceService.refreshBalance();
@@ -1843,13 +1843,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         success: true,
-        message: 'Balance refreshed successfully',
+        message: 'Quantum stealth balance sync completed',
         balance: accountInfo.balance,
-        lastUpdate: accountInfo.lastUpdate
+        lastUpdate: accountInfo.lastUpdate,
+        stealthMode: true
       });
     } catch (error) {
-      console.error('Balance refresh error:', error);
-      res.status(500).json({ error: 'Failed to refresh balance' });
+      console.error('Quantum stealth balance sync error:', error);
+      res.status(500).json({ error: 'Stealth balance sync failed' });
+    }
+  });
+
+  // Quantum Stealth Trading API
+  app.post('/api/trading/stealth-execute', async (req, res) => {
+    try {
+      const { quantumStealthEngine } = await import('./quantum-stealth-crypto-engine');
+      const { symbol, side, amount, platform = 'coinbase' } = req.body;
+      
+      const result = await quantumStealthEngine.executeCoinbaseStealthTrade({
+        symbol,
+        side,
+        amount: parseFloat(amount),
+        platform,
+        stealthMode: true
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Stealth trading error:', error);
+      res.status(500).json({ error: 'Stealth trading execution failed' });
+    }
+  });
+
+  // AI Market Intelligence API with Perplexity Integration
+  app.get('/api/market/intelligence/:symbol', async (req, res) => {
+    try {
+      const { symbol } = req.params;
+      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-sonar-small-128k-online',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a crypto market analyst. Provide concise, actionable market intelligence.'
+            },
+            {
+              role: 'user',
+              content: `Analyze ${symbol} cryptocurrency: current trends, price predictions, trading signals, and market sentiment. Include technical analysis and recent news impact.`
+            }
+          ],
+          temperature: 0.2,
+          max_tokens: 500
+        })
+      });
+
+      const data = await response.json();
+      
+      res.json({
+        success: true,
+        symbol,
+        analysis: data.choices[0]?.message?.content || 'Analysis unavailable',
+        citations: data.citations || [],
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Market intelligence error:', error);
+      res.status(500).json({ error: 'Market intelligence failed' });
     }
   });
 

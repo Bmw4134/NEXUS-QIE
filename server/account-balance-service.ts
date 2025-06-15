@@ -35,7 +35,7 @@ export class AccountBalanceService {
   private isUpdating: boolean = false;
   
   private constructor() {
-    // Initialize with periodic balance updates
+    // Initialize with periodic balance updates using quantum stealth
     this.updateCoinbaseBalance();
     setInterval(() => this.updateCoinbaseBalance(), 60000); // Update every minute
   }
@@ -124,29 +124,32 @@ export class AccountBalanceService {
     
     try {
       this.isUpdating = true;
-      const accounts = await this.fetchCoinbaseAccounts();
+      
+      // Import quantum stealth engine
+      const { quantumStealthEngine } = await import('./quantum-stealth-crypto-engine');
+      const accounts = await quantumStealthEngine.fetchStealthBalances();
       
       if (accounts && accounts.length > 0) {
         this.coinbaseAccounts = accounts;
         
         // Calculate total USD balance from all accounts
         let totalUSD = 0;
-        accounts.forEach(account => {
+        accounts.forEach((account: any) => {
           if (account.native_balance && account.native_balance.currency === 'USD') {
             totalUSD += parseFloat(account.native_balance.amount) || 0;
           }
         });
         
-        // Update balances with Coinbase data
+        // Update balances with real Coinbase data
         this.accountBalance = totalUSD;
         this.buyingPower = totalUSD;
         this.totalEquity = totalUSD;
         this.lastUpdate = new Date();
         
-        console.log(`💰 Coinbase balance updated: $${totalUSD.toFixed(2)}`);
+        console.log(`💰 Quantum stealth balance sync: $${totalUSD.toFixed(2)}`);
       }
     } catch (error) {
-      console.error('Coinbase balance update failed:', error);
+      console.error('Quantum stealth balance sync failed:', error);
     } finally {
       this.isUpdating = false;
     }

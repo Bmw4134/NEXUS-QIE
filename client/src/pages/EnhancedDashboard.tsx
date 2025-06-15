@@ -111,7 +111,7 @@ export function EnhancedDashboard() {
     mutationFn: () => apiRequest('/api/trading/refresh-balance', { method: 'POST' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/trading/positions'] });
-      celebrate();
+      celebrate('system');
     }
   });
 
@@ -474,10 +474,22 @@ export function EnhancedDashboard() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></div>
-                      Active
-                    </Badge>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => refreshBalanceMutation.mutate()}
+                        disabled={refreshBalanceMutation.isPending}
+                        className="h-8 px-3"
+                      >
+                        <RefreshCw className={`h-3 w-3 mr-1 ${refreshBalanceMutation.isPending ? 'animate-spin' : ''}`} />
+                        Sync
+                      </Button>
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></div>
+                        {(tradingData as any)?.source === 'coinbase' ? 'Coinbase' : 'Active'}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -807,39 +819,70 @@ export function EnhancedDashboard() {
                     </div>
 
                     <div className="border-t pt-4">
-                      <h4 className="font-medium mb-3">Live Crypto Prices</h4>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium">Your Portfolio Positions</h4>
+                        <Badge variant="outline" className="text-xs">
+                          Quantum Stealth Active
+                        </Badge>
+                      </div>
                       <div className="space-y-3">
-                        {marketData && Array.isArray(marketData) && marketData.slice(0, 5).map((asset: any) => (
-                          <div key={asset.symbol} className="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-purple-50 dark:from-gray-800 dark:to-purple-900/20 rounded-lg border border-gray-200 dark:border-gray-700">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                                <span className="text-xs font-bold text-white">
-                                  {asset.symbol.substring(0, 3)}
-                                </span>
+                        {(tradingData as any)?.positions && (tradingData as any).positions.length > 0 ? (
+                          (tradingData as any).positions.map((position: any) => (
+                            <div key={position.symbol} className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-700">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+                                  <span className="text-xs font-bold text-white">
+                                    {position.symbol.substring(0, 3)}
+                                  </span>
+                                </div>
+                                <div>
+                                  <div className="font-semibold text-gray-900 dark:text-white">{position.symbol}</div>
+                                  <div className="text-xs text-gray-500 dark:text-gray-400">{position.balance} {position.symbol}</div>
+                                </div>
                               </div>
-                              <div>
-                                <div className="font-semibold text-gray-900 dark:text-white">{asset.symbol}</div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400">{asset.name}</div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="font-bold text-lg text-gray-900 dark:text-white">
-                                ${typeof asset.price === 'number' ? asset.price.toLocaleString('en-US', { 
-                                  minimumFractionDigits: 2, 
-                                  maximumFractionDigits: asset.price < 1 ? 6 : 2 
-                                }) : asset.price}
-                              </div>
-                              <div className={`text-sm font-medium flex items-center justify-end ${asset.change24h >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {asset.change24h >= 0 ? (
-                                  <TrendingUp className="w-3 h-3 mr-1" />
-                                ) : (
-                                  <TrendingDown className="w-3 h-3 mr-1" />
-                                )}
-                                {asset.change24h >= 0 ? '+' : ''}{asset.change24h?.toFixed(2)}%
+                              <div className="text-right">
+                                <div className="font-bold text-lg text-gray-900 dark:text-white">
+                                  ${position.usdValue?.toLocaleString() || '0.00'}
+                                </div>
+                                <div className="text-xs text-green-600">
+                                  {position.type || 'Wallet'}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          ))
+                        ) : (
+                          marketData && Array.isArray(marketData) && marketData.slice(0, 5).map((asset: any) => (
+                            <div key={asset.symbol} className="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-purple-50 dark:from-gray-800 dark:to-purple-900/20 rounded-lg border border-gray-200 dark:border-gray-700">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                                  <span className="text-xs font-bold text-white">
+                                    {asset.symbol.substring(0, 3)}
+                                  </span>
+                                </div>
+                                <div>
+                                  <div className="font-semibold text-gray-900 dark:text-white">{asset.symbol}</div>
+                                  <div className="text-xs text-gray-500 dark:text-gray-400">{asset.name}</div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-bold text-lg text-gray-900 dark:text-white">
+                                  ${typeof asset.price === 'number' ? asset.price.toLocaleString('en-US', { 
+                                    minimumFractionDigits: 2, 
+                                    maximumFractionDigits: asset.price < 1 ? 6 : 2 
+                                  }) : asset.price}
+                                </div>
+                                <div className={`text-sm font-medium flex items-center justify-end ${asset.change24h >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {asset.change24h >= 0 ? (
+                                    <TrendingUp className="w-3 h-3 mr-1" />
+                                  ) : (
+                                    <TrendingDown className="w-3 h-3 mr-1" />
+                                  )}
+                                  {asset.change24h >= 0 ? '+' : ''}{asset.change24h?.toFixed(2)}%
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        )}
                       </div>
                     </div>
                   </div>
