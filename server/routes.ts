@@ -48,6 +48,7 @@ import { directBalanceExtraction } from "./direct-balance-extraction";
 import { realAccountExtractor } from "./real-account-extractor";
 import { coinbaseStealthScraper } from "./coinbase-stealth-scraper";
 import { browserSessionDetector } from "./browser-session-detector";
+import { coinbaseAPIClient } from "./coinbase-api-client";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -5363,16 +5364,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/coinbase/accounts', async (req, res) => {
+    try {
+      console.log('🔗 Fetching real Coinbase account data...');
+      
+      const accountSummary = await coinbaseAPIClient.getAccountSummary();
+      
+      res.json({
+        success: true,
+        message: 'Real Coinbase account data retrieved',
+        data: accountSummary
+      });
+    } catch (error) {
+      console.error('Coinbase API error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch Coinbase account data',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.post('/api/coinbase/refresh', async (req, res) => {
+    try {
+      console.log('🔄 Refreshing Coinbase connection...');
+      
+      const isConnected = await coinbaseAPIClient.refreshConnection();
+      
+      if (isConnected) {
+        await coinbaseAPIClient.updateRealBalance();
+      }
+      
+      res.json({
+        success: true,
+        message: 'Coinbase connection refreshed',
+        data: coinbaseAPIClient.getConnectionStatus()
+      });
+    } catch (error) {
+      console.error('Coinbase refresh error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to refresh Coinbase connection',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   app.get('/api/extract/status', (req, res) => {
     try {
       const directStatus = directBalanceExtraction.getExtractionStatus();
       const browserStatus = browserSessionDetector.getStatus();
+      const coinbaseStatus = coinbaseAPIClient.getConnectionStatus();
       
       res.json({
         success: true,
         data: {
           directExtraction: directStatus,
           browserSessions: browserStatus,
+          coinbaseAPI: coinbaseStatus,
           lastUpdate: new Date().toISOString()
         }
       });
