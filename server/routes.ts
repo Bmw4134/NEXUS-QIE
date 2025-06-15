@@ -4400,6 +4400,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/xlm/balance', async (req, res) => {
+    try {
+      console.log('🔍 Direct XLM balance extraction requested...');
+      
+      // Extract from active Coinbase session
+      const holdings = await coinbaseStealthScraper.extractCryptoHoldings();
+      const xlmHolding = holdings.find(h => h.symbol === 'XLM');
+      
+      if (xlmHolding && xlmHolding.balance > 0) {
+        console.log(`💎 XLM Found: ${xlmHolding.balance} XLM = $${xlmHolding.value}`);
+        
+        res.json({
+          success: true,
+          xlm: {
+            balance: xlmHolding.balance,
+            value: xlmHolding.value,
+            price: xlmHolding.value / xlmHolding.balance,
+            symbol: 'XLM',
+            name: 'Stellar Lumens'
+          },
+          message: `You have ${xlmHolding.balance} XLM worth $${xlmHolding.value}`,
+          extractionTime: new Date().toISOString()
+        });
+      } else {
+        // Check if user has USD balance that could contain XLM
+        const totalBalance = accountBalanceService.getAccountBalance();
+        
+        res.json({
+          success: true,
+          xlm: {
+            balance: 0,
+            value: 0,
+            price: 0.12,
+            symbol: 'XLM',
+            name: 'Stellar Lumens'
+          },
+          message: `No XLM detected. Total account balance: $${totalBalance}`,
+          suggestion: totalBalance > 0 ? 'You can convert USD to XLM on Coinbase' : 'Fund your account to purchase XLM',
+          extractionTime: new Date().toISOString()
+        });
+      }
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to extract XLM balance',
+        message: 'XLM balance extraction error'
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Initialize QNIS Core Engine with WebSocket support
