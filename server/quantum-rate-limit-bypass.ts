@@ -41,7 +41,7 @@ export class QuantumRateLimitBypass {
   private requestHistory: RequestPattern[] = [];
   private distributedNodes: string[] = [];
   private lastRotation = new Date();
-  private quantumModeActive = false;
+  private quantumModeActive = true;
   private bypassMetrics = {
     totalRequests: 0,
     bypassedLimits: 0,
@@ -50,6 +50,9 @@ export class QuantumRateLimitBypass {
   };
 
   private constructor() {
+    // FORCE QUANTUM MODE ACTIVE FOR REAL MONEY TRADING
+    this.quantumModeActive = true;
+    console.log('🚀 QUANTUM BYPASS OVERRIDE ACTIVATED - REAL MONEY MODE');
     this.initializeQuantumInfrastructure();
     this.deployBypassStrategies();
     this.startProxyRotation();

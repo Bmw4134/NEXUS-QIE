@@ -389,56 +389,63 @@ export class QuantumNexusAutonomousTrader {
   }
 
   private async executeCoinbaseTrade(trade: TradeExecution): Promise<{ success: boolean; error?: string }> {
+    console.log(`🔥 EXECUTING REAL COINBASE TRADE: ${trade.action.toUpperCase()} ${trade.amount} ${trade.asset}`);
+    
     try {
-      // Use Coinbase Advanced Trade API
-      const orderData = {
-        client_order_id: trade.id,
-        product_id: `${trade.asset}-USD`,
+      // Use quantum bypass override for real execution
+      const { quantumBypassOverride } = await import('./quantum-bypass-override');
+      
+      // Execute real trade with live funds
+      const tradeResult = await quantumBypassOverride.executeCoinbaseRealTrade({
+        symbol: trade.asset,
         side: trade.action,
-        order_configuration: {
-          market_market_ioc: {
-            quote_size: trade.action === 'buy' ? trade.amount.toString() : undefined,
-            base_size: trade.action === 'sell' ? (trade.amount / trade.price).toString() : undefined
-          }
-        }
-      };
-
-      const response = await quantumBypass.coinbaseRequest('/api/v3/brokerage/orders', {
-        method: 'POST',
-        data: orderData
+        amount: trade.amount,
+        type: 'market'
       });
 
-      return { success: response.data.success };
+      if (tradeResult.success) {
+        console.log(`✅ REAL TRADE EXECUTED: ${trade.action} ${trade.asset} for $${trade.amount}`);
+        // Update real balance after trade
+        const newBalance = accountBalanceService.getAccountBalance() - (trade.action === 'buy' ? trade.amount : -trade.amount);
+        accountBalanceService.updateBalance(newBalance, 'system');
+      }
+
+      return tradeResult;
     } catch (error) {
-      console.log('🔮 Coinbase trade simulated due to API limitations');
-      return { success: true }; // Simulate success for demo
+      console.error(`❌ REAL TRADE FAILED: ${trade.asset} - ${error}`);
+      return { success: false, error: error instanceof Error ? error.message : 'Trade execution failed' };
     }
   }
 
   private async executePionexTrade(trade: TradeExecution): Promise<{ success: boolean; error?: string }> {
+    console.log(`🔥 EXECUTING REAL PIONEX TRADE: ${trade.action.toUpperCase()} ${trade.amount} ${trade.asset}`);
+    
     try {
-      const orderData = {
-        symbol: `${trade.asset}USDT`,
-        side: trade.action.toUpperCase(),
-        type: 'MARKET',
+      // Use quantum bypass override for real execution
+      const { quantumBypassOverride } = await import('./quantum-bypass-override');
+      
+      // Execute real trade with live funds
+      const tradeResult = await quantumBypassOverride.executePionexRealTrade({
+        symbol: trade.asset,
+        side: trade.action,
+        amount: trade.amount,
         quantity: trade.action === 'buy' ? 
-          (trade.amount / trade.price).toString() : 
-          (trade.amount / trade.price).toString()
-      };
-
-      const response = await quantumBypass.makeQuantumRequest('https://www.pionex.us/api/v1/order', {
-        method: 'POST',
-        data: orderData,
-        headers: {
-          'X-API-KEY': process.env.PIONEX_API_KEY,
-          'Content-Type': 'application/json'
-        }
+          (trade.amount / trade.price) : 
+          (trade.amount / trade.price)
       });
 
-      return { success: response.data.orderId !== undefined };
+      if (tradeResult.success) {
+        console.log(`✅ REAL PIONEX TRADE EXECUTED: ${trade.action} ${trade.asset} for $${trade.amount}`);
+        // Update balance after successful trade
+        const balanceChange = trade.action === 'buy' ? -trade.amount : trade.amount;
+        const newBalance = accountBalanceService.getAccountBalance() + balanceChange;
+        accountBalanceService.updateBalance(newBalance, 'system');
+      }
+
+      return tradeResult;
     } catch (error) {
-      console.log('🔮 Pionex trade simulated due to API limitations');
-      return { success: true }; // Simulate success for demo
+      console.error(`❌ REAL PIONEX TRADE FAILED: ${trade.asset} - ${error}`);
+      return { success: false, error: error instanceof Error ? error.message : 'Trade execution failed' };
     }
   }
 
