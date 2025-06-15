@@ -766,7 +766,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         portfolioDistribution: [
           { name: 'Crypto (Robinhood)', value: 189.24, color: '#3B82F6' },
           { name: 'Stocks (Alpaca)', value: alpacaStatus.accountBalance || 25000, color: '#10B981' },
-          { name: 'Cash', value: (robinhoodStatus?.balance || 756.95), color: '#F59E0B' },
+          { name: 'Cash', value: (robinhoodStatus?.balance || accountBalanceService.getAccountBalance()), color: '#F59E0B' },
           { name: 'AI Recommendations', value: 5000, color: '#EF4444' }
         ]
       };
@@ -1013,10 +1013,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // PTNI Mode Controller API
   app.get('/api/ptni/mode-status', async (req, res) => {
+    const accountInfo = accountBalanceService.getAccountInfo();
     res.json({
       isRealMode: true,
       isAuthenticated: true,
-      accountBalance: 834.97,
+      accountBalance: accountInfo.balance,
       lastTradeTime: new Date().toISOString(),
       tradingMetrics: {
         totalTrades: 12,
@@ -1805,12 +1806,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Centralized Trading Positions API
+  app.get('/api/trading/positions', async (req, res) => {
+    try {
+      const accountInfo = accountBalanceService.getAccountInfo();
+      const positions = [];
+      
+      res.json({
+        success: true,
+        positions,
+        accountBalance: accountInfo.balance,
+        buyingPower: accountInfo.buyingPower,
+        totalEquity: accountInfo.totalEquity,
+        lastUpdate: accountInfo.lastUpdate
+      });
+    } catch (error) {
+      console.error('Trading positions error:', error);
+      res.status(500).json({ error: 'Failed to fetch trading positions' });
+    }
+  });
+
   // Trading Status API for QNIS Admin
   app.get('/api/trading/status', async (req, res) => {
     try {
+      const accountInfo = accountBalanceService.getAccountInfo();
       const tradingStatus = {
         account: {
-          balance: 834.97,
+          balance: accountInfo.balance,
           currency: 'USD',
           type: 'live'
         },

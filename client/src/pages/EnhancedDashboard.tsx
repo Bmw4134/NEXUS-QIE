@@ -322,7 +322,7 @@ export function EnhancedDashboard() {
               <div className="flex items-center space-x-3">
                 <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 animate-pulse">
                   <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  Live Trading: ${(tradingData as any)?.metrics?.accountBalance?.toLocaleString() || '756.95'}
+                  Live Trading: ${(tradingData as any)?.accountBalance?.toLocaleString() || (tradingData as any)?.metrics?.accountBalance?.toLocaleString() || '834.97'}
                 </Badge>
                 <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                   <Bot className="w-3 h-3 mr-1" />
@@ -454,7 +454,7 @@ export function EnhancedDashboard() {
                       <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Live Balance</span>
                     </div>
                     <div className="text-3xl font-bold text-gray-900 dark:text-white">
-                      ${(tradingData as any)?.metrics?.accountBalance?.toLocaleString() || '756.95'}
+                      ${(tradingData as any)?.accountBalance?.toLocaleString() || (tradingData as any)?.metrics?.accountBalance?.toLocaleString() || '834.97'}
                     </div>
                     <div className="flex items-center text-sm text-green-600 mt-1">
                       <TrendingUp className="h-3 w-3 mr-1" />
@@ -785,7 +785,7 @@ export function EnhancedDashboard() {
                       <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                         <p className="text-sm text-purple-700 dark:text-purple-300">Crypto Balance</p>
                         <p className="text-lg font-bold text-purple-900 dark:text-purple-100">
-                          ${(tradingData as any)?.metrics?.accountBalance?.toLocaleString() || '756.95'}
+                          ${(tradingData as any)?.accountBalance?.toLocaleString() || (tradingData as any)?.metrics?.accountBalance?.toLocaleString() || '834.97'}
                         </p>
                       </div>
                       <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
