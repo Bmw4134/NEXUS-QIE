@@ -118,9 +118,11 @@ class RealMarketDataService {
     try {
       const symbols = ['bitcoin', 'ethereum', 'dogecoin', 'solana', 'cardano', 'matic-network', 'avalanche-2', 'chainlink', 'uniswap', 'litecoin'];
       
-      // Use quantum bypass for rate limit elimination
-      const response = await quantumBypass.coinGeckoRequest(
-        `/simple/price?ids=${symbols.join(',')}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true`
+      // Use quantum bypass override for real data
+      const { quantumBypassOverride } = await import('./quantum-bypass-override');
+      const response = await quantumBypassOverride.executeRealRequest(
+        `https://api.coingecko.com/api/v3/simple/price?ids=${symbols.join(',')}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true`,
+        { method: 'GET' }
       );
 
       const data = response.data;
