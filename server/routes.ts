@@ -4224,6 +4224,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Autonomous Trading Routes
+  app.post('/api/autonomous/start', async (req, res) => {
+    try {
+      const { autonomousQuantumTrader } = await import('./autonomous-quantum-trader');
+      const { config } = req.body;
+      
+      await autonomousQuantumTrader.startAutonomousTrading(config);
+      
+      res.json({
+        success: true,
+        message: 'Autonomous quantum trading activated',
+        status: autonomousQuantumTrader.getStatus()
+      });
+    } catch (error) {
+      console.error('Autonomous trading start failed:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to start autonomous trading',
+        details: error.message
+      });
+    }
+  });
+
+  app.post('/api/autonomous/stop', async (req, res) => {
+    try {
+      const { autonomousQuantumTrader } = await import('./autonomous-quantum-trader');
+      await autonomousQuantumTrader.stopAutonomousTrading();
+      
+      res.json({
+        success: true,
+        message: 'Autonomous trading stopped',
+        status: autonomousQuantumTrader.getStatus()
+      });
+    } catch (error) {
+      console.error('Autonomous trading stop failed:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to stop autonomous trading'
+      });
+    }
+  });
+
+  app.get('/api/autonomous/status', async (req, res) => {
+    try {
+      const { autonomousQuantumTrader } = await import('./autonomous-quantum-trader');
+      const status = autonomousQuantumTrader.getStatus();
+      const metrics = autonomousQuantumTrader.getPerformanceMetrics();
+      
+      res.json({
+        success: true,
+        ...status,
+        performance: metrics
+      });
+    } catch (error) {
+      console.error('Autonomous status check failed:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get autonomous trading status'
+      });
+    }
+  });
+
+  app.post('/api/autonomous/config', async (req, res) => {
+    try {
+      const { autonomousQuantumTrader } = await import('./autonomous-quantum-trader');
+      const { config } = req.body;
+      
+      autonomousQuantumTrader.updateConfig(config);
+      
+      res.json({
+        success: true,
+        message: 'Configuration updated',
+        status: autonomousQuantumTrader.getStatus()
+      });
+    } catch (error) {
+      console.error('Configuration update failed:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to update configuration'
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Initialize QNIS Core Engine with WebSocket support

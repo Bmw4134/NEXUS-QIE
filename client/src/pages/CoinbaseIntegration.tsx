@@ -1,9 +1,10 @@
 import { CoinbaseRealAccountExtractor } from '@/components/CoinbaseRealAccountExtractor';
 import { CoinbaseLiveTradingPanel } from '@/components/CoinbaseLiveTradingPanel';
+import { AutonomousTraderPanel } from '@/components/AutonomousTraderPanel';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Shield, Zap, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Shield, Zap, TrendingUp, Bot } from 'lucide-react';
 import { Link } from 'wouter';
 
 export function CoinbaseIntegration() {
@@ -30,9 +31,10 @@ export function CoinbaseIntegration() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <Tabs defaultValue="extraction" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="extraction">Account Extraction</TabsTrigger>
                 <TabsTrigger value="trading">Live Trading</TabsTrigger>
+                <TabsTrigger value="autonomous">Autonomous Bot</TabsTrigger>
               </TabsList>
               
               <TabsContent value="extraction" className="space-y-4">
@@ -52,6 +54,23 @@ export function CoinbaseIntegration() {
                   </CardHeader>
                   <CardContent>
                     <CoinbaseLiveTradingPanel />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="autonomous" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Bot className="h-5 w-5" />
+                      Fully Autonomous Trading Bot
+                    </CardTitle>
+                    <CardDescription>
+                      AI-powered autonomous trading with your real Coinbase funds - completely hands-free operation
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <AutonomousTraderPanel />
                   </CardContent>
                 </Card>
               </TabsContent>
