@@ -3,14 +3,42 @@
  * Provides single source of truth for all account balance data
  */
 
+import axios from 'axios';
+import crypto from 'crypto';
+
+interface CoinbaseAccount {
+  id: string;
+  name: string;
+  primary: boolean;
+  type: string;
+  currency: {
+    code: string;
+    name: string;
+  };
+  balance: {
+    amount: string;
+    currency: string;
+  };
+  native_balance: {
+    amount: string;
+    currency: string;
+  };
+}
+
 export class AccountBalanceService {
   private static instance: AccountBalanceService;
-  private accountBalance: number = 0.00; // Authoritative balance - user has no money
+  private accountBalance: number = 0.00;
   private buyingPower: number = 0.00;
   private totalEquity: number = 0.00;
   private lastUpdate: Date = new Date();
+  private coinbaseAccounts: CoinbaseAccount[] = [];
+  private isUpdating: boolean = false;
   
-  private constructor() {}
+  private constructor() {
+    // Initialize with periodic balance updates
+    this.updateCoinbaseBalance();
+    setInterval(() => this.updateCoinbaseBalance(), 60000); // Update every minute
+  }
   
   static getInstance(): AccountBalanceService {
     if (!AccountBalanceService.instance) {
@@ -89,6 +117,82 @@ export class AccountBalanceService {
   // Get balance age in minutes
   getDataAge(): number {
     return Math.floor((Date.now() - this.lastUpdate.getTime()) / (1000 * 60));
+  }
+
+  private async updateCoinbaseBalance(): Promise<void> {
+    if (this.isUpdating) return;
+    
+    try {
+      this.isUpdating = true;
+      const accounts = await this.fetchCoinbaseAccounts();
+      
+      if (accounts && accounts.length > 0) {
+        this.coinbaseAccounts = accounts;
+        
+        // Calculate total USD balance from all accounts
+        let totalUSD = 0;
+        accounts.forEach(account => {
+          if (account.native_balance && account.native_balance.currency === 'USD') {
+            totalUSD += parseFloat(account.native_balance.amount) || 0;
+          }
+        });
+        
+        // Update balances with Coinbase data
+        this.accountBalance = totalUSD;
+        this.buyingPower = totalUSD;
+        this.totalEquity = totalUSD;
+        this.lastUpdate = new Date();
+        
+        console.log(`💰 Coinbase balance updated: $${totalUSD.toFixed(2)}`);
+      }
+    } catch (error) {
+      console.error('Coinbase balance update failed:', error);
+    } finally {
+      this.isUpdating = false;
+    }
+  }
+
+  private async fetchCoinbaseAccounts(): Promise<CoinbaseAccount[]> {
+    const apiKeyId = process.env.CB_API_KEY_ID_NAME;
+    const privateKey = process.env.CB_API_PRIVATE_KEY;
+    
+    if (!apiKeyId || !privateKey) {
+      console.log('Coinbase API credentials not configured');
+      return [];
+    }
+
+    try {
+      const timestamp = Math.floor(Date.now() / 1000);
+      const method = 'GET';
+      const path = '/v2/accounts';
+      const body = '';
+      
+      // Create signature for Coinbase API
+      const message = timestamp + method + path + body;
+      const signature = crypto.createHmac('sha256', privateKey).update(message).digest('hex');
+      
+      const response = await axios.get(`https://api.coinbase.com${path}`, {
+        headers: {
+          'CB-ACCESS-KEY': apiKeyId,
+          'CB-ACCESS-SIGN': signature,
+          'CB-ACCESS-TIMESTAMP': timestamp.toString(),
+          'CB-VERSION': '2023-01-01'
+        }
+      });
+
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Coinbase API error:', error);
+      return [];
+    }
+  }
+
+  getCoinbaseAccounts(): CoinbaseAccount[] {
+    return this.coinbaseAccounts;
+  }
+
+  async refreshBalance(): Promise<void> {
+    await this.updateCoinbaseBalance();
   }
 }
 

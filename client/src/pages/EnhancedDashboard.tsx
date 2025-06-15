@@ -31,13 +31,15 @@ import {
   Bot,
   Kanban,
   LogOut,
-  ChevronDown
+  ChevronDown,
+  RefreshCw
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import CanvasWidget from '@/components/CanvasWidget';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useAuth } from '@/hooks/useAuth';
 import { useQNIS } from '@/hooks/useQNIS';
+import { apiRequest } from '@/lib/queryClient';
 import { SuccessCelebration, useSuccessCelebration } from '@/components/SuccessCelebration';
 import { AnimatedButton } from '@/components/AnimatedButton';
 import { FloatingActionButton } from '@/components/FloatingActionButton';

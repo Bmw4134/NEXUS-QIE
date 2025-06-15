@@ -1810,7 +1810,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/trading/positions', async (req, res) => {
     try {
       const accountInfo = accountBalanceService.getAccountInfo();
-      const positions = [];
+      const coinbaseAccounts = accountBalanceService.getCoinbaseAccounts();
+      
+      const positions = coinbaseAccounts.map(account => ({
+        symbol: account.currency.code,
+        balance: parseFloat(account.balance.amount) || 0,
+        usdValue: parseFloat(account.native_balance.amount) || 0,
+        name: account.name,
+        type: account.type
+      }));
       
       res.json({
         success: true,
@@ -1818,11 +1826,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         accountBalance: accountInfo.balance,
         buyingPower: accountInfo.buyingPower,
         totalEquity: accountInfo.totalEquity,
-        lastUpdate: accountInfo.lastUpdate
+        lastUpdate: accountInfo.lastUpdate,
+        source: 'coinbase'
       });
     } catch (error) {
       console.error('Trading positions error:', error);
       res.status(500).json({ error: 'Failed to fetch trading positions' });
+    }
+  });
+
+  // Refresh Coinbase Balance API
+  app.post('/api/trading/refresh-balance', async (req, res) => {
+    try {
+      await accountBalanceService.refreshBalance();
+      const accountInfo = accountBalanceService.getAccountInfo();
+      
+      res.json({
+        success: true,
+        message: 'Balance refreshed successfully',
+        balance: accountInfo.balance,
+        lastUpdate: accountInfo.lastUpdate
+      });
+    } catch (error) {
+      console.error('Balance refresh error:', error);
+      res.status(500).json({ error: 'Failed to refresh balance' });
     }
   });
 
