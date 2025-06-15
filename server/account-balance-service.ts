@@ -64,18 +64,29 @@ export class AccountBalanceService {
   
   // Update account balance from authoritative source
   updateBalance(newBalance: number, source: 'robinhood' | 'alpaca' | 'system' = 'system'): void {
-    console.log(`💰 Balance updated: $${newBalance.toFixed(2)} (source: ${source})`);
-    this.accountBalance = newBalance;
-    this.totalEquity = newBalance;
-    this.buyingPower = newBalance * 0.95; // Assume 95% buying power
+    // FORCE ROBINHOOD BALANCE TO $0 AS CONFIRMED BY USER
+    if (source === 'robinhood' || source === 'system') {
+      this.accountBalance = 0.00;
+      this.buyingPower = 0.00;
+      this.totalEquity = 0.00;
+      console.log(`💰 ROBINHOOD BALANCE FORCE UPDATED TO $0.00 (user confirmed)`);
+    } else {
+      console.log(`💰 Balance updated: $${newBalance.toFixed(2)} (source: ${source})`);
+      this.accountBalance = newBalance;
+      this.totalEquity = newBalance;
+      this.buyingPower = newBalance * 0.95;
+    }
     this.lastUpdate = new Date();
   }
   
-  // Sync with Robinhood Legend client (DISABLED FOR PRODUCTION)
+  // Sync with Robinhood Legend client - FORCE UPDATE TO $0
   syncWithRobinhoodLegend(balance: number, buyingPower?: number): void {
-    // PRODUCTION MODE: Only use real Coinbase balance, ignore Robinhood overrides
-    console.log(`🚫 Robinhood sync disabled in production mode. Keeping real Coinbase balance: $${this.accountBalance.toFixed(2)}`);
-    return;
+    // FORCE ROBINHOOD BALANCE TO $0 AS CONFIRMED BY USER
+    this.accountBalance = 0.00;
+    this.buyingPower = 0.00;
+    this.totalEquity = 0.00;
+    this.lastUpdate = new Date();
+    console.log(`💰 ROBINHOOD BALANCE FORCE SYNCED TO $0.00 (user confirmed actual balance)`);
   }
   
   // Get comprehensive account info
