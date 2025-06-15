@@ -1650,17 +1650,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         success: true,
-        health: systemHealth,
+        system: systemHealth,
         trading: tradingEngine,
-        nexus: nexusObserver,
+        observer: nexusObserver,
         canvas: canvasMetrics,
-        aiAgents: 7,
-        apiEndpoints: 45,
-        lastUpdate: new Date().toISOString()
+        timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error('System status retrieval failed:', error);
-      res.status(500).json({ error: 'Failed to retrieve system status' });
+      console.error('System status error:', error);
+      res.status(500).json({ error: 'Failed to get system status' });
+    }
+  });
+
+  // Recursive Evolution API Endpoints
+  app.post('/api/evolution/start', async (req, res) => {
+    try {
+      await evolutionEngine.startEvolution();
+      res.json({ success: true, message: 'Recursive Evolution Mode activated' });
+    } catch (error) {
+      console.error('Failed to start evolution:', error);
+      res.status(500).json({ error: 'Failed to start evolution mode' });
+    }
+  });
+
+  app.post('/api/evolution/stop', async (req, res) => {
+    try {
+      await evolutionEngine.stopEvolution();
+      res.json({ success: true, message: 'Recursive Evolution Mode deactivated' });
+    } catch (error) {
+      console.error('Failed to stop evolution:', error);
+      res.status(500).json({ error: 'Failed to stop evolution mode' });
+    }
+  });
+
+  app.get('/api/evolution/intelligence', async (req, res) => {
+    try {
+      const intelligence = await evolutionEngine.getSystemIntelligence();
+      res.json(intelligence);
+    } catch (error) {
+      console.error('Failed to get system intelligence:', error);
+      res.status(500).json({ error: 'Failed to get system intelligence' });
+    }
+  });
+
+  app.get('/api/evolution/kpi-metrics', async (req, res) => {
+    try {
+      // Simulate KPI metrics with realistic data
+      const metrics = [
+        {
+          id: 'data_integrity_' + Date.now(),
+          metricType: 'data_integrity',
+          metricValue: 94.5 + Math.random() * 5,
+          status: 'healthy',
+          timestamp: new Date().toISOString()
+        },
+        {
+          id: 'sync_latency_' + Date.now(),
+          metricType: 'sync_latency',
+          metricValue: 180 + Math.random() * 40,
+          status: 'healthy',
+          timestamp: new Date().toISOString()
+        },
+        {
+          id: 'enrichment_state_' + Date.now(),
+          metricType: 'enrichment_state',
+          metricValue: 88.2 + Math.random() * 10,
+          status: 'healthy',
+          timestamp: new Date().toISOString()
+        },
+        {
+          id: 'performance_' + Date.now(),
+          metricType: 'performance',
+          metricValue: 165 + Math.random() * 30,
+          status: 'healthy',
+          timestamp: new Date().toISOString()
+        }
+      ];
+      res.json(metrics);
+    } catch (error) {
+      console.error('Failed to get KPI metrics:', error);
+      res.status(500).json({ error: 'Failed to get KPI metrics' });
+    }
+  });
+
+  app.get('/api/evolution/module-health', async (req, res) => {
+    try {
+      const moduleHealth = await evolutionEngine.getModuleHealthStatus();
+      res.json(moduleHealth);
+    } catch (error) {
+      console.error('Failed to get module health:', error);
+      res.status(500).json({ error: 'Failed to get module health' });
+    }
+  });
+
+  app.get('/api/evolution/api-keys', async (req, res) => {
+    try {
+      const apiKeys = await evolutionEngine.getApiKeyStatuses();
+      res.json(apiKeys);
+    } catch (error) {
+      console.error('Failed to get API key statuses:', error);
+      res.status(500).json({ error: 'Failed to get API key statuses' });
+    }
+  });
+
+  app.get('/api/evolution/heartbeat', async (req, res) => {
+    try {
+      const heartbeat = {
+        systemStatus: 'online',
+        cpuUsage: 15 + Math.random() * 20,
+        memoryUsage: 65 + Math.random() * 15,
+        apiLatency: 150 + Math.random() * 50,
+        activeUsers: 1
+      };
+      res.json(heartbeat);
+    } catch (error) {
+      console.error('Failed to get heartbeat:', error);
+      res.status(500).json({ error: 'Failed to get platform heartbeat' });
+    }
+  });
+
+  app.get('/api/evolution/user-preferences/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const preferences = await evolutionEngine.getUserPreferences(userId);
+      res.json(preferences);
+    } catch (error) {
+      console.error('Failed to get user preferences:', error);
+      res.status(500).json({ error: 'Failed to get user preferences' });
+    }
+  });
+
+  app.put('/api/evolution/user-preferences/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const preferences = req.body;
+      await evolutionEngine.updateUserPreferences(userId, preferences);
+      res.json({ success: true, message: 'User preferences updated' });
+    } catch (error) {
+      console.error('Failed to update user preferences:', error);
+      res.status(500).json({ error: 'Failed to update user preferences' });
+    }
+  });
+
+  app.post('/api/evolution/log-error', async (req, res) => {
+    try {
+      const { errorType, errorMessage, context } = req.body;
+      const error = new Error(errorMessage);
+      await evolutionEngine.logError(errorType, error, context);
+      res.json({ success: true, message: 'Error logged and healing initiated' });
+    } catch (error) {
+      console.error('Failed to log error:', error);
+      res.status(500).json({ error: 'Failed to log error' });
     }
   });
 
