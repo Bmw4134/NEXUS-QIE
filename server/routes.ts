@@ -4380,6 +4380,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/coinbase/crypto-holdings', async (req, res) => {
+    try {
+      const holdings = await coinbaseStealthScraper.extractCryptoHoldings();
+      const xlmHolding = holdings.find(h => h.symbol === 'XLM');
+      
+      res.json({
+        success: true,
+        holdings,
+        xlm: xlmHolding || { symbol: 'XLM', name: 'Stellar Lumens', balance: 0, value: 0 },
+        total: holdings.length,
+        extractionTime: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to extract crypto holdings' 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Initialize QNIS Core Engine with WebSocket support

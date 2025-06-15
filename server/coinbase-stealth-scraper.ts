@@ -19,6 +19,12 @@ interface CoinbaseAccountData {
     balance: number;
     currency: string;
   }>;
+  cryptoHoldings: Array<{
+    symbol: string;
+    name: string;
+    balance: number;
+    value: number;
+  }>;
   verified: boolean;
 }
 
@@ -221,6 +227,93 @@ export class CoinbaseStealthScraper {
     return this.getDefaultAccountData();
   }
 
+  async extractCryptoHoldings(): Promise<Array<{ symbol: string; name: string; balance: number; value: number }>> {
+    if (!this.isConnected || !this.browser) {
+      return [];
+    }
+
+    try {
+      const pages = await this.browser.pages();
+      
+      for (const page of pages) {
+        try {
+          const url = page.url();
+          if (url.includes('coinbase.com') && (url.includes('portfolio') || url.includes('assets') || url.includes('home'))) {
+            console.log(`🔍 Scanning Coinbase page for crypto holdings: ${url}`);
+            
+            const cryptoData = await page.evaluate(() => {
+              const holdings = [];
+              
+              // Look for crypto asset rows or cards
+              const selectors = [
+                '[data-testid*="asset"]', 
+                '[class*="portfolio"]', 
+                '[class*="asset"]',
+                'tr[role="row"]',
+                '[class*="holding"]'
+              ];
+              
+              for (const selector of selectors) {
+                const elements = document.querySelectorAll(selector);
+                for (const element of elements) {
+                  const text = element.textContent || '';
+                  
+                  // Look specifically for XLM or Stellar Lumens
+                  if (text.toLowerCase().includes('xlm') || text.toLowerCase().includes('stellar')) {
+                    const balanceMatch = text.match(/(\d+\.?\d*)\s*XLM/i);
+                    const valueMatch = text.match(/\$(\d+\.?\d*)/);
+                    
+                    if (balanceMatch) {
+                      holdings.push({
+                        symbol: 'XLM',
+                        name: 'Stellar Lumens',
+                        balance: parseFloat(balanceMatch[1]),
+                        value: valueMatch ? parseFloat(valueMatch[1]) : 0
+                      });
+                    }
+                  }
+                  
+                  // Also check for other major cryptos
+                  const cryptoPatterns = [
+                    { symbol: 'BTC', name: 'Bitcoin', pattern: /(\d+\.?\d*)\s*BTC/i },
+                    { symbol: 'ETH', name: 'Ethereum', pattern: /(\d+\.?\d*)\s*ETH/i },
+                    { symbol: 'ADA', name: 'Cardano', pattern: /(\d+\.?\d*)\s*ADA/i }
+                  ];
+                  
+                  for (const crypto of cryptoPatterns) {
+                    const match = text.match(crypto.pattern);
+                    if (match) {
+                      const valueMatch = text.match(/\$(\d+\.?\d*)/);
+                      holdings.push({
+                        symbol: crypto.symbol,
+                        name: crypto.name,
+                        balance: parseFloat(match[1]),
+                        value: valueMatch ? parseFloat(valueMatch[1]) : 0
+                      });
+                    }
+                  }
+                }
+              }
+              
+              return holdings;
+            });
+            
+            if (cryptoData && cryptoData.length > 0) {
+              console.log(`💎 Found ${cryptoData.length} crypto holdings`);
+              return cryptoData;
+            }
+          }
+        } catch (error) {
+          continue;
+        }
+      }
+    } catch (error) {
+      console.log('Crypto extraction failed:', error);
+    }
+    
+    return [];
+  }
+
   async extractFromAllTabs(): Promise<CoinbaseAccountData> {
     if (!this.isConnected || !this.browser) {
       return this.getDefaultAccountData();
@@ -229,14 +322,18 @@ export class CoinbaseStealthScraper {
     try {
       const pages = await this.browser.pages();
       let bestData = this.getDefaultAccountData();
+      
+      // Extract crypto holdings first
+      const cryptoHoldings = await this.extractCryptoHoldings();
+      bestData.cryptoHoldings = cryptoHoldings;
 
       for (const page of pages) {
         try {
           const url = page.url();
           if (url.includes('coinbase') || url.includes('financial')) {
             const data = await this.extractFromSpecificPage(page);
-            if (data.verified && data.totalBalance > bestData.totalBalance) {
-              bestData = data;
+            if (data.verified && data.balance > bestData.balance) {
+              bestData = { ...data, cryptoHoldings };
             }
           }
         } catch (error) {
@@ -313,6 +410,7 @@ export class CoinbaseStealthScraper {
       availableBalance: 0,
       portfolioValue: 0,
       accounts: [],
+      cryptoHoldings: [],
       verified: false
     };
   }
