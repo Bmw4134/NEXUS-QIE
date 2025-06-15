@@ -44,6 +44,8 @@ import { evolutionEngine } from "./recursive-evolution-engine";
 import { accountBalanceService } from "./account-balance-service";
 import { quantumIntelligentOrchestration } from "./quantum-intelligent-orchestration";
 import { quantumStealthExtraction } from "./quantum-stealth-extraction";
+import { directBalanceExtraction } from "./direct-balance-extraction";
+import { realAccountExtractor } from "./real-account-extractor";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -5235,6 +5237,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('❌ Deployment finalization failed:', error);
     }
   }, 10000); // Finalize deployment 10 seconds after server startup
+
+  // Real Account Balance Extraction Routes
+  app.get('/api/extract/real-balances', async (req, res) => {
+    try {
+      console.log('🔍 Performing stealth balance extraction...');
+      
+      const extractionResult = await directBalanceExtraction.performStealthExtraction();
+      
+      res.json({
+        success: true,
+        message: 'Real balance extraction completed',
+        data: {
+          coinbase: {
+            balance: extractionResult.coinbaseBalance,
+            currency: 'USD'
+          },
+          robinhood: {
+            buyingPower: extractionResult.robinhoodBuyingPower,
+            totalEquity: extractionResult.robinhoodTotalEquity
+          },
+          extractionTime: extractionResult.extractionTime,
+          verified: extractionResult.verified,
+          method: 'stealth_session_analysis'
+        }
+      });
+    } catch (error) {
+      console.error('Stealth extraction error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Extraction failed',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.get('/api/extract/browser-accounts', async (req, res) => {
+    try {
+      console.log('🔍 Extracting real account data from browser sessions...');
+      
+      const accountData = await realAccountExtractor.extractRealAccountData();
+      
+      res.json({
+        success: true,
+        message: 'Browser account extraction completed',
+        data: accountData
+      });
+    } catch (error) {
+      console.error('Browser extraction error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Browser extraction failed',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.get('/api/extract/status', (req, res) => {
+    try {
+      const status = directBalanceExtraction.getExtractionStatus();
+      res.json({
+        success: true,
+        data: status
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get extraction status'
+      });
+    }
+  });
   
   return httpServer;
 }
