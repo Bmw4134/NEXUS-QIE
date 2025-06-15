@@ -3,6 +3,8 @@
  * Connects to live cryptocurrency exchanges and financial APIs
  */
 
+import { quantumBypass } from './quantum-rate-limit-bypass';
+
 interface MarketDataPoint {
   symbol: string;
   name: string;
@@ -116,21 +118,12 @@ class RealMarketDataService {
     try {
       const symbols = ['bitcoin', 'ethereum', 'dogecoin', 'solana', 'cardano', 'matic-network', 'avalanche-2', 'chainlink', 'uniswap', 'litecoin'];
       
-      const response = await fetch(
-        `https://api.coingecko.com/api/v3/simple/price?ids=${symbols.join(',')}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true`,
-        {
-          headers: {
-            'Accept': 'application/json',
-            'User-Agent': 'ConnectHubPro/1.0'
-          }
-        }
+      // Use quantum bypass for rate limit elimination
+      const response = await quantumBypass.coinGeckoRequest(
+        `/simple/price?ids=${symbols.join(',')}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true`
       );
 
-      if (!response.ok) {
-        throw new Error(`CoinGecko API error: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = response.data;
       
       const symbolMap: Record<string, string> = {
         'bitcoin': 'BTC',
