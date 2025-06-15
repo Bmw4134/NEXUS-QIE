@@ -4316,6 +4316,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // XLM Balance Extraction Routes
+  app.get('/api/xlm/balance', async (req, res) => {
+    try {
+      const { browserXLMExtractor } = await import('./browser-session-xlm-extractor');
+      const balances = await browserXLMExtractor.getAllXLMBalances();
+      const total = browserXLMExtractor.getTotalXLMBalance();
+      
+      res.json({
+        success: true,
+        totalXLM: total.xlm,
+        totalUSD: total.usdValue,
+        platforms: balances,
+        timestamp: new Date()
+      });
+    } catch (error) {
+      console.error('XLM balance extraction failed:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to extract XLM balance'
+      });
+    }
+  });
+
+  app.get('/api/xlm/balance/:platform', async (req, res) => {
+    try {
+      const { browserXLMExtractor } = await import('./browser-session-xlm-extractor');
+      const platform = req.params.platform;
+      
+      let balance = null;
+      
+      switch (platform.toLowerCase()) {
+        case 'coinbase':
+          balance = await browserXLMExtractor.extractXLMFromCoinbase();
+          break;
+        case 'robinhood':
+          balance = await browserXLMExtractor.extractXLMFromRobinhood();
+          break;
+        case 'pionex':
+          balance = await browserXLMExtractor.extractXLMFromPionex();
+          break;
+        default:
+          return res.status(400).json({
+            success: false,
+            error: 'Unsupported platform. Use: coinbase, robinhood, or pionex'
+          });
+      }
+      
+      res.json({
+        success: true,
+        platform,
+        xlm: balance?.xlm || 0,
+        usdValue: balance?.usdValue || 0,
+        timestamp: balance?.timestamp || new Date()
+      });
+    } catch (error) {
+      console.error(`XLM balance extraction failed for ${req.params.platform}:`, error);
+      res.status(500).json({
+        success: false,
+        error: `Failed to extract XLM balance from ${req.params.platform}`
+      });
+    }
+  });
+
   // Production Trading Routes
   app.post('/api/trading/execute', async (req, res) => {
     try {
