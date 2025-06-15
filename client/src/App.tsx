@@ -24,6 +24,7 @@ import QIESignalPanel from "./pages/QIESignalPanel";
 import QIEPromptDNA from "./pages/QIEPromptDNA";
 import RecursiveEvolution from "./pages/RecursiveEvolution";
 import { QuantumStealthDashboard } from "./components/QuantumStealthDashboard";
+import { CoinbaseIntegration } from "./pages/CoinbaseIntegration";
 import { useAuth } from "./hooks/useAuth";
 import RealModeIndicator from "./components/RealModeIndicator";
 import LiveTradingPanel from "./components/LiveTradingPanel";
@@ -101,6 +102,7 @@ function Router() {
             <Route path="/qie-prompt-dna" component={QIEPromptDNA} />
             <Route path="/recursive-evolution" component={RecursiveEvolution} />
             <Route path="/quantum-stealth" component={() => <QuantumStealthDashboard />} />
+            <Route path="/coinbase-integration" component={CoinbaseIntegration} />
             {user?.role === "admin" && (
               <Route path="/admin" component={AdminPanel} />
             )}
