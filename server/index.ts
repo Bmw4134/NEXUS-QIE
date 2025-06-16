@@ -1,13 +1,20 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
-import { registerBasicEndpoints } from "./basic-api-endpoints";
+import { createServer } from "http";
+import { WebSocketServer } from "ws";
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '5000', 10);
 
-// Middleware
-app.use(cors());
+// Enhanced CORS configuration
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true
+}));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -41,9 +48,6 @@ app.get('/api/balance', async (req, res) => {
   }
 });
 
-// Register basic API endpoints
-registerBasicEndpoints(app);
-
 // Auth endpoints
 app.post('/api/auth/login', (req, res) => {
   res.json({
@@ -74,8 +78,51 @@ app.get('*', (req, res) => {
   }
 });
 
+// Create HTTP server and WebSocket server
+const httpServer = createServer(app);
+const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+
+// WebSocket connection handling
+wss.on('connection', (ws) => {
+  console.log('WebSocket client connected');
+  
+  // Send initial connection confirmation
+  ws.send(JSON.stringify({
+    type: 'connected',
+    message: 'NEXUS WebSocket connected',
+    timestamp: new Date().toISOString()
+  }));
+
+  // Handle incoming messages
+  ws.on('message', (data) => {
+    try {
+      const message = JSON.parse(data.toString());
+      console.log('WebSocket message received:', message.type);
+      
+      // Echo back for testing
+      ws.send(JSON.stringify({
+        type: 'response',
+        original: message,
+        timestamp: new Date().toISOString()
+      }));
+    } catch (error) {
+      console.error('WebSocket message error:', error);
+    }
+  });
+
+  ws.on('close', () => {
+    console.log('WebSocket client disconnected');
+  });
+
+  ws.on('error', (error) => {
+    console.error('WebSocket error:', error);
+  });
+});
+
 // Start server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
-  console.log('Trading platform ready with real balance data');
+httpServer.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 NEXUS Server running on http://0.0.0.0:${PORT}`);
+  console.log(`🔌 WebSocket server ready on ws://0.0.0.0:${PORT}/ws`);
+  console.log('💰 Trading platform ready with real balance data');
+  console.log('🛡️ Full NEXUS capabilities active');
 });

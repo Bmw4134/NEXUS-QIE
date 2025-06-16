@@ -17,31 +17,46 @@ export class NexusWebSocketManager {
   private ws: WebSocket | null = null;
   private url: string;
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
+  private maxReconnectAttempts = 3;
   private reconnectInterval = 3000;
   private listeners: Map<string, ((data: any) => void)[]> = new Map();
   private connectionState: 'disconnected' | 'connecting' | 'connected' | 'error' = 'disconnected';
   private heartbeatInterval: NodeJS.Timeout | null = null;
+  private isConnecting = false;
+  private shouldConnect = true;
 
   constructor(config: WebSocketConfig = {}) {
     // Construct WebSocket URL properly
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
     this.url = config.url || `${protocol}//${host}/ws`;
-    this.maxReconnectAttempts = config.maxReconnectAttempts || 5;
+    this.maxReconnectAttempts = config.maxReconnectAttempts || 3;
     this.reconnectInterval = config.reconnectInterval || 3000;
   }
 
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
+        if (!this.shouldConnect || this.isConnecting) {
+          resolve();
+          return;
+        }
+
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
           resolve();
           return;
         }
 
+        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+          console.error('❌ Max WebSocket reconnection attempts reached');
+          this.connectionState = 'error';
+          reject(new Error('Max WebSocket reconnection attempts reached'));
+          return;
+        }
+
         this.connectionState = 'connecting';
         console.log(`🔌 Connecting to WebSocket: ${this.url}`);
+        this.isConnecting = true;
 
         // Validate URL before creating WebSocket
         try {
@@ -49,6 +64,7 @@ export class NexusWebSocketManager {
         } catch (urlError) {
           console.error('Invalid WebSocket URL:', this.url);
           this.connectionState = 'error';
+          this.isConnecting = false;
           reject(new Error('Invalid WebSocket URL'));
           return;
         }
@@ -59,6 +75,7 @@ export class NexusWebSocketManager {
           console.log('✅ WebSocket connected successfully');
           this.connectionState = 'connected';
           this.reconnectAttempts = 0;
+          this.isConnecting = false;
           this.startHeartbeat();
           resolve();
         };
@@ -76,8 +93,9 @@ export class NexusWebSocketManager {
           console.log('🔌 WebSocket connection closed:', event.code, event.reason);
           this.connectionState = 'disconnected';
           this.stopHeartbeat();
+          this.isConnecting = false;
 
-          if (!event.wasClean && this.reconnectAttempts < this.maxReconnectAttempts) {
+          if (!event.wasClean && this.reconnectAttempts < this.maxReconnectAttempts && this.shouldConnect) {
             this.scheduleReconnect();
           }
         };
@@ -86,6 +104,7 @@ export class NexusWebSocketManager {
           console.error('❌ WebSocket error:', error);
           this.connectionState = 'error';
           this.stopHeartbeat();
+          this.isConnecting = false;
 
           if (this.reconnectAttempts === 0) {
             reject(error);
@@ -98,6 +117,7 @@ export class NexusWebSocketManager {
             console.warn('⚠️ WebSocket connection timeout');
             this.ws?.close();
             this.connectionState = 'error';
+            this.isConnecting = false;
             reject(new Error('Connection timeout'));
           }
         }, 10000);
@@ -105,14 +125,15 @@ export class NexusWebSocketManager {
       } catch (error) {
         console.error('Failed to create WebSocket connection:', error);
         this.connectionState = 'error';
+        this.isConnecting = false;
         reject(error);
       }
     });
   }
 
   private scheduleReconnect(): void {
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('❌ Max WebSocket reconnection attempts reached');
+    if (!this.shouldConnect || this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.error('❌ Max WebSocket reconnection attempts reached or shouldConnect is false');
       return;
     }
 
@@ -196,71 +217,13 @@ export class NexusWebSocketManager {
   }
 
   disconnect(): void {
+    this.shouldConnect = false;
     this.stopHeartbeat();
     if (this.ws) {
-      this.ws.close();
+      this.ws.close(1000, 'Client disconnect');
       this.ws = null;
     }
     this.connectionState = 'disconnected';
-  }
-
-  private connectSafely() {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      return;
-    }
-
-    try {
-      // Check if we're in a browser environment
-      if (typeof window === 'undefined') {
-        console.log('⚠️ WebSocket not available in server environment');
-        return;
-      }
-
-      // Only attempt connection if we haven't exceeded retry limit
-      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-        console.log('⚠️ WebSocket connection disabled - max retries exceeded');
-        return;
-      }
-
-      // Build proper WebSocket URL
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const host = window.location.host;
-      const wsUrl = `${protocol}//${host}/ws`;
-
-      this.ws = new WebSocket(wsUrl);
-
-      this.ws.onopen = () => {
-        console.log('✅ WebSocket connected');
-        this.reconnectAttempts = 0;
-        this.connectionState = 'connected';
-      };
-
-      this.ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          this.handleMessage(data);
-        } catch (error) {
-          console.error('WebSocket message parse error:', error);
-        }
-      };
-
-      this.ws.onclose = () => {
-        this.connectionState = 'disconnected';
-        // Don't spam reconnection attempts
-        if (this.reconnectAttempts < 2) {
-          setTimeout(() => this.scheduleReconnect(), 5000);
-        }
-      };
-
-      this.ws.onerror = (error) => {
-        this.connectionState = 'error';
-        // Silently handle errors to prevent console spam
-      };
-
-    } catch (error) {
-      this.connectionState = 'error';
-      // Don't retry on constructor errors
-    }
   }
 }
 

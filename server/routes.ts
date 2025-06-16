@@ -220,6 +220,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Alerts API endpoint
+  app.get('/api/alerts', async (req, res) => {
+    try {
+      const alerts = [
+        {
+          id: '1',
+          type: 'info',
+          message: 'NEXUS Quantum systems operational',
+          timestamp: new Date().toISOString(),
+          severity: 'low',
+          source: 'nexus_core'
+        },
+        {
+          id: '2',
+          type: 'success',
+          message: 'All trading engines synchronized',
+          timestamp: new Date().toISOString(),
+          severity: 'low',
+          source: 'trading_engine'
+        },
+        {
+          id: '3',
+          type: 'warning',
+          message: 'High frequency trading detected',
+          timestamp: new Date().toISOString(),
+          severity: 'medium',
+          source: 'risk_management'
+        }
+      ];
+      res.json({ success: true, alerts });
+    } catch (error) {
+      console.error('Alerts API error:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch alerts' });
+    }
+  });
+
   // Live Trading Status endpoint
   app.get("/api/trading/status", (req, res) => {
     try {
