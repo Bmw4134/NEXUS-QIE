@@ -1,3 +1,4 @@
+import React from "react";
 import { Route, Switch } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "./components/theme-provider";
@@ -202,7 +203,11 @@ function Router() {
             <QuantumInsights />
           </AsyncComponentWrapper>
         </Route>
-        <Route path="/api-vault" component={() => import('./pages/APIVaultPage').then(m => m.default)} />
+        <Route path="/api-vault">
+          <AsyncComponentWrapper>
+            {React.lazy(() => import('./pages/APIVaultPage'))}
+          </AsyncComponentWrapper>
+        </Route>
         <Route component={NotFound} />
       </Switch>
     </>
