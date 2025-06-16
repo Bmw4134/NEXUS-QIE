@@ -112,11 +112,15 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd server && npm install --production"
+args = "npm install"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run build"
+args = "cd client && npm install && npm run build && cd .."
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd server && npm install --production && cd .."
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"

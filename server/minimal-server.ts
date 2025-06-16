@@ -66,12 +66,38 @@ app.post('/api/auth/logout', (req, res) => {
 });
 
 // Serve static files from client build
-app.use(express.static(path.join(__dirname, '../client/dist')));
+const clientDistPath = path.join(__dirname, '../client/dist');
+app.use(express.static(clientDistPath));
 
 // Handle React routing
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api/')) {
-    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+    const indexPath = path.join(clientDistPath, 'index.html');
+    // Check if the built client exists
+    if (require('fs').existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      // Fallback if client build doesn't exist
+      res.send(`
+        <html>
+          <head><title>NEXUS Trading Platform</title></head>
+          <body style="font-family: Arial; padding: 20px; background: #0a0a0a; color: #00ff00;">
+            <h1>🚀 NEXUS Trading Platform</h1>
+            <p>✅ Server is running on port ${PORT}</p>
+            <p>💰 Balance: $30.00 USD</p>
+            <p>⚠️ Client build not found. Run 'npm run build' to build the frontend.</p>
+            <div style="margin-top: 20px;">
+              <h3>Available API Endpoints:</h3>
+              <ul>
+                <li><a href="/api/balance" style="color: #00ff00;">/api/balance</a></li>
+                <li><a href="/health" style="color: #00ff00;">/health</a></li>
+                <li>/api/auth/login (POST)</li>
+              </ul>
+            </div>
+          </body>
+        </html>
+      `);
+    }
   } else {
     res.status(404).json({ error: 'API endpoint not found' });
   }
