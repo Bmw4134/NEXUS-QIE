@@ -69,16 +69,14 @@ app.post('/api/auth/logout', (req, res) => {
 const clientDistPath = path.join(__dirname, '../dist');
 app.use(express.static(clientDistPath));
 
-// Handle React routing
+// Handle React routing - serve the sophisticated NEXUS React dashboard
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api/')) {
     const indexPath = path.join(clientDistPath, 'index.html');
-    // Try to serve the built client, fallback to embedded dashboard
-    try {
-      res.sendFile(indexPath);
-    } catch (error) {
-      // Serve the fully functional NEXUS dashboard directly
-      res.send(`
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        // If React build not found, serve sophisticated inline dashboard
+        res.send(`
         <!DOCTYPE html>
         <html lang="en">
           <head>
