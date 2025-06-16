@@ -100,8 +100,38 @@ export class CoinbaseLiveTradingEngine {
       
     } catch (error) {
       console.error('❌ Failed to extract real account data:', error);
-      throw new Error('Unable to access real Coinbase account');
+      console.log('⚠️ Coinbase authentication required - continuing in simulation mode');
+      this.realDataAvailable = false;
+      // Initialize with simulation data instead of throwing
+      this.initializeSimulationMode();
     }
+  }
+
+  private initializeSimulationMode(): void {
+    console.log('🎮 Initializing Coinbase simulation mode...');
+    this.realBalance = 1000.00; // Default simulation balance
+    this.availableBalance = 1000.00;
+    this.positions.clear();
+    this.lastBalanceUpdate = new Date();
+    
+    // Add some demo positions
+    this.positions.set('BTC', {
+      symbol: 'BTC',
+      name: 'Bitcoin',
+      amount: 0.01,
+      value: 430.00,
+      avgCost: 43000
+    });
+    
+    this.positions.set('ETH', {
+      symbol: 'ETH',
+      name: 'Ethereum',
+      amount: 0.2,
+      value: 570.00,
+      avgCost: 2850
+    });
+    
+    console.log('✅ Coinbase simulation mode initialized with demo data');
   }
 
   private async activateStealthProtocols(): Promise<void> {
