@@ -76,7 +76,7 @@ localPort = 5083
 externalPort = 8099
 
 [workflows]
-runButton = "NEXUS Billion Dollar Experience"
+runButton = "NEXUS TRIFECTA DEPLOYMENT"
 
 [[workflows.workflow]]
 name = "Project"
