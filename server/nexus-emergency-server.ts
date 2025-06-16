@@ -21,10 +21,10 @@ class NexusEmergencyServer {
 
   constructor() {
     this.app = express();
+    this.httpServer = createServer(this.app);
     this.setupMiddleware();
     this.setupRoutes();
     this.setupWebSocket();
-    this.httpServer = createServer(this.app);
   }
 
   private setupMiddleware() {

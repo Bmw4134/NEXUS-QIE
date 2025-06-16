@@ -32,6 +32,7 @@ import LiveTradingPanel from "./components/LiveTradingPanel";
 import QIEEmbeddedPanel from "./components/QIEEmbeddedPanel";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import "./index.css";
+import { SidebarProvider } from './components/ui/sidebar';
 
 // Lazy load API Vault page
 const APIVaultPageLazy = React.lazy(() => import('./pages/APIVaultPage'));
@@ -203,8 +204,10 @@ export default function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="light" storageKey="family-platform-theme">
-          <Router />
-          <Toaster />
+          <SidebarProvider>
+            <Router />
+            <Toaster />
+          </SidebarProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>
