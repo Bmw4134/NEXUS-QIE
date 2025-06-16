@@ -255,7 +255,8 @@ app.get('*', (req, res) => {
           </body>
         </html>
       `);
-    }
+      }
+    });
   } else {
     res.status(404).json({ error: 'API endpoint not found' });
   }
