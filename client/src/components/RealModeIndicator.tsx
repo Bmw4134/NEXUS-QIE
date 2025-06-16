@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, Zap, DollarSign, Activity, Shield, Target } from 'lucide-react';
+import { AlertTriangle, Zap, DollarSign, Activity, Shield, Target, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface RealModeStatus {
   realModeEnabled: boolean;
@@ -17,6 +17,7 @@ interface RealModeStatus {
 
 export default function RealModeIndicator() {
   const [pulseAnimation, setPulseAnimation] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const { data: realModeStatus, isLoading } = useQuery({
     queryKey: ['/api/robinhood/live-trading-metrics'],
@@ -77,13 +78,24 @@ export default function RealModeIndicator() {
                 {isRealMode ? 'REAL MODE ACTIVE' : 'SIMULATION MODE'}
               </span>
             </div>
-            <Badge variant={isRealMode ? 'destructive' : 'secondary'} className="text-xs">
-              {isActive ? 'LIVE' : 'OFFLINE'}
-            </Badge>
+            <div className="flex items-center space-x-2">
+              <Badge variant={isRealMode ? 'destructive' : 'secondary'} className="text-xs">
+                {isActive ? 'LIVE' : 'OFFLINE'}
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 text-white hover:bg-white/10"
+                onClick={() => setIsCollapsed(!isCollapsed)}
+              >
+                {isCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         
-        <CardContent className="p-4 pt-0 space-y-3">
+        {!isCollapsed && (
+          <CardContent className="p-4 pt-0 space-y-3 transition-all duration-300 ease-in-out">
           {/* Live Status Indicator */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -153,6 +165,7 @@ export default function RealModeIndicator() {
             </Badge>
           </div>
         </CardContent>
+        )}
       </Card>
     </div>
   );
