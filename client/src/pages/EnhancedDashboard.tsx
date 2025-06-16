@@ -5,7 +5,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AppSidebar } from '@/components/AppSidebar';
-import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarTrigger, SidebarProvider } from "@/components/ui/sidebar";
 
 interface DashboardMetrics {
   totalValue: number;
@@ -126,10 +126,11 @@ export function EnhancedDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="flex">
-        <AppSidebar />
-        <SidebarInset className="flex-1">
+    <SidebarProvider defaultOpen={true}>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="flex">
+          <AppSidebar />
+          <SidebarInset className="flex-1">
           <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
             <div className="container mx-auto px-4 py-4">
               <div className="flex items-center justify-between">
@@ -302,7 +303,8 @@ export function EnhancedDashboard() {
         </div>
           </div>
         </SidebarInset>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

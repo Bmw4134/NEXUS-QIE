@@ -264,14 +264,12 @@ export function AppSidebar() {
   const { isMobile } = useResponsive();
 
   return (
-    <SidebarProvider defaultOpen={!isMobile}>
-      <Sidebar 
-        collapsible={isMobile ? "offcanvas" : "icon"}
-        className="border-sidebar-border"
-      >
-        <AppSidebarContent />
-      </Sidebar>
-    </SidebarProvider>
+    <Sidebar 
+      collapsible={isMobile ? "offcanvas" : "icon"}
+      className="border-sidebar-border"
+    >
+      <AppSidebarContent />
+    </Sidebar>
   );
 }
 
