@@ -1,185 +1,267 @@
+
 import { useEffect, useRef, useState } from 'react';
-import { queryClient } from './queryClient';
 
 interface WebSocketMessage {
   type: string;
   data: any;
+  timestamp: number;
 }
 
-export function createWebSocketConnection(url: string) {
-  try {
-    // Validate WebSocket URL format
-    if (!url || url.includes('undefined') || url.includes('localhost:undefined')) {
-      console.warn('Invalid WebSocket URL detected:', url);
-      return null;
+interface WebSocketConfig {
+  url?: string;
+  reconnectInterval?: number;
+  maxReconnectAttempts?: number;
+  protocols?: string[];
+}
+
+export class NexusWebSocketManager {
+  private ws: WebSocket | null = null;
+  private url: string;
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 5;
+  private reconnectInterval = 3000;
+  private listeners: Map<string, ((data: any) => void)[]> = new Map();
+  private connectionState: 'disconnected' | 'connecting' | 'connected' | 'error' = 'disconnected';
+  private heartbeatInterval: NodeJS.Timeout | null = null;
+
+  constructor(config: WebSocketConfig = {}) {
+    // Construct WebSocket URL properly
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.host;
+    this.url = config.url || `${protocol}//${host}/ws`;
+    this.maxReconnectAttempts = config.maxReconnectAttempts || 5;
+    this.reconnectInterval = config.reconnectInterval || 3000;
+  }
+
+  connect(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+          resolve();
+          return;
+        }
+
+        this.connectionState = 'connecting';
+        console.log(`🔌 Connecting to WebSocket: ${this.url}`);
+
+        // Validate URL before creating WebSocket
+        try {
+          new URL(this.url);
+        } catch (urlError) {
+          console.error('Invalid WebSocket URL:', this.url);
+          this.connectionState = 'error';
+          reject(new Error('Invalid WebSocket URL'));
+          return;
+        }
+
+        this.ws = new WebSocket(this.url);
+
+        this.ws.onopen = () => {
+          console.log('✅ WebSocket connected successfully');
+          this.connectionState = 'connected';
+          this.reconnectAttempts = 0;
+          this.startHeartbeat();
+          resolve();
+        };
+
+        this.ws.onmessage = (event) => {
+          try {
+            const message: WebSocketMessage = JSON.parse(event.data);
+            this.handleMessage(message);
+          } catch (error) {
+            console.error('Failed to parse WebSocket message:', error);
+          }
+        };
+
+        this.ws.onclose = (event) => {
+          console.log('🔌 WebSocket connection closed:', event.code, event.reason);
+          this.connectionState = 'disconnected';
+          this.stopHeartbeat();
+          
+          if (!event.wasClean && this.reconnectAttempts < this.maxReconnectAttempts) {
+            this.scheduleReconnect();
+          }
+        };
+
+        this.ws.onerror = (error) => {
+          console.error('❌ WebSocket error:', error);
+          this.connectionState = 'error';
+          this.stopHeartbeat();
+          
+          if (this.reconnectAttempts === 0) {
+            reject(error);
+          }
+        };
+
+        // Timeout for connection attempt
+        setTimeout(() => {
+          if (this.connectionState === 'connecting') {
+            console.warn('⚠️ WebSocket connection timeout');
+            this.ws?.close();
+            this.connectionState = 'error';
+            reject(new Error('Connection timeout'));
+          }
+        }, 10000);
+
+      } catch (error) {
+        console.error('Failed to create WebSocket connection:', error);
+        this.connectionState = 'error';
+        reject(error);
+      }
+    });
+  }
+
+  private scheduleReconnect(): void {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.error('❌ Max WebSocket reconnection attempts reached');
+      return;
     }
 
-    const ws = new WebSocket(url);
+    this.reconnectAttempts++;
+    const delay = this.reconnectInterval * Math.pow(1.5, this.reconnectAttempts - 1);
+    
+    console.log(`🔄 Scheduling WebSocket reconnect attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
+    
+    setTimeout(() => {
+      this.connect().catch(error => {
+        console.error('Reconnection failed:', error);
+      });
+    }, delay);
+  }
 
-    ws.onopen = () => {
-      console.log('WebSocket connected to:', url);
+  private startHeartbeat(): void {
+    this.heartbeatInterval = setInterval(() => {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        this.send('ping', { timestamp: Date.now() });
+      }
+    }, 30000); // 30 second heartbeat
+  }
+
+  private stopHeartbeat(): void {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
+  }
+
+  private handleMessage(message: WebSocketMessage): void {
+    const listeners = this.listeners.get(message.type) || [];
+    listeners.forEach(listener => {
+      try {
+        listener(message.data);
+      } catch (error) {
+        console.error('WebSocket message handler error:', error);
+      }
+    });
+  }
+
+  send(type: string, data: any): void {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      const message: WebSocketMessage = {
+        type,
+        data,
+        timestamp: Date.now()
+      };
+      
+      try {
+        this.ws.send(JSON.stringify(message));
+      } catch (error) {
+        console.error('Failed to send WebSocket message:', error);
+      }
+    } else {
+      console.warn('⚠️ Cannot send message: WebSocket not connected');
+    }
+  }
+
+  subscribe(type: string, listener: (data: any) => void): () => void {
+    if (!this.listeners.has(type)) {
+      this.listeners.set(type, []);
+    }
+    
+    this.listeners.get(type)!.push(listener);
+    
+    // Return unsubscribe function
+    return () => {
+      const listeners = this.listeners.get(type);
+      if (listeners) {
+        const index = listeners.indexOf(listener);
+        if (index > -1) {
+          listeners.splice(index, 1);
+        }
+      }
     };
+  }
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error for URL:', url, error);
-    };
+  getConnectionState(): string {
+    return this.connectionState;
+  }
 
-    ws.onclose = (event) => {
-      console.log('WebSocket disconnected:', event.code, event.reason);
-    };
-
-    return ws;
-  } catch (error) {
-    console.error('Failed to create WebSocket connection:', error);
-    return null;
+  disconnect(): void {
+    this.stopHeartbeat();
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+    this.connectionState = 'disconnected';
   }
 }
 
-export function useWebSocket() {
-  const wsRef = useRef<WebSocket | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
+// Global WebSocket manager instance
+export const nexusWebSocket = new NexusWebSocketManager();
+
+// React hook for WebSocket connection
+export function useNexusWebSocket(autoConnect: boolean = true) {
+  const [connectionState, setConnectionState] = useState(nexusWebSocket.getConnectionState());
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
-  const reconnectAttempts = useRef(0);
-  const maxReconnectAttempts = 5;
-
-  const connect = () => {
-    try {
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const hostname = window.location.hostname || 'localhost';
-      const port = process.env.NODE_ENV === 'development' ? '5000' : window.location.port;
-
-      const wsUrl = process.env.NODE_ENV === 'development' 
-        ? `ws://${hostname}:5000`
-        : `wss://${hostname}${port ? `:${port}` : ''}`;
-
-      console.log('Connecting to WebSocket:', wsUrl);
-      const ws = createWebSocketConnection(wsUrl);
-
-      if (ws) {
-        wsRef.current = ws;
-
-        wsRef.current.onopen = () => {
-          console.log('WebSocket connected');
-          setIsConnected(true);
-          reconnectAttempts.current = 0;
-        };
-
-        wsRef.current.onmessage = (event) => {
-          try {
-            const message: WebSocketMessage = JSON.parse(event.data);
-            handleMessage(message);
-          } catch (error) {
-            console.error('Error parsing WebSocket message:', error);
-          }
-        };
-
-        wsRef.current.onclose = () => {
-          console.log('WebSocket disconnected');
-          setIsConnected(false);
-
-          // Attempt to reconnect
-          if (reconnectAttempts.current < maxReconnectAttempts) {
-            reconnectAttempts.current++;
-            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
-
-            reconnectTimeoutRef.current = setTimeout(() => {
-              console.log(`Attempting to reconnect (${reconnectAttempts.current}/${maxReconnectAttempts})...`);
-              connect();
-            }, delay);
-          }
-        };
-
-        wsRef.current.onerror = (error) => {
-          console.error('WebSocket error:', error);
-        };
-      } else {
-        console.error('Failed to create WebSocket connection.');
-      }
-
-    } catch (error) {
-      console.error('Error creating WebSocket connection:', error);
-    }
-  };
-
-  const handleMessage = (message: WebSocketMessage) => {
-    switch (message.type) {
-      case 'stats_update':
-        // Invalidate and refetch dashboard data
-        queryClient.setQueryData(['/api/dashboard/stats'], message.data.stats);
-        queryClient.setQueryData(['/api/dashboard/activity'], message.data.activity);
-        queryClient.setQueryData(['/api/dashboard/learning-progress'], message.data.learningProgress);
-        break;
-
-      case 'query_processed':
-        // Invalidate activity and stats queries
-        queryClient.invalidateQueries({ queryKey: ['/api/dashboard/activity'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
-        break;
-
-      case 'node_created':
-        // Invalidate knowledge graph and stats
-        queryClient.invalidateQueries({ queryKey: ['/api/quantum/knowledge-graph'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/dashboard/activity'] });
-        break;
-
-      case 'market_update':
-        // Handle real-time market data updates
-        queryClient.invalidateQueries({ queryKey: ['/api/market/summary'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/market/alerts'] });
-        if (message.data) {
-          queryClient.setQueryData(['/api/market/summary'], message.data.summary);
-        }
-        break;
-
-      case 'kaizen_update':
-        // Handle KaizenGPT optimization updates
-        queryClient.invalidateQueries({ queryKey: ['/api/kaizen/metrics'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/kaizen/optimizations'] });
-        break;
-
-      case 'watson_update':
-        // Handle Watson Command Engine updates
-        queryClient.invalidateQueries({ queryKey: ['/api/watson/state'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/watson/history'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/watson/visual-state'] });
-        break;
-
-      case 'system_health':
-        // Handle system health updates
-        queryClient.invalidateQueries({ queryKey: ['/api/infinity/health'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/infinity/modules'] });
-        break;
-
-      default:
-        console.log('Unknown WebSocket message type:', message.type);
-    }
-  };
-
-  const disconnect = () => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-    }
-
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
-    }
-
-    setIsConnected(false);
-  };
 
   useEffect(() => {
-    connect();
+    if (autoConnect && connectionState === 'disconnected') {
+      // Small delay to prevent immediate connection on mount
+      reconnectTimeoutRef.current = setTimeout(() => {
+        nexusWebSocket.connect().catch(error => {
+          console.error('WebSocket connection failed:', error);
+          setConnectionState('error');
+        });
+      }, 1000);
+    }
+
+    // Update connection state
+    const checkState = () => {
+      setConnectionState(nexusWebSocket.getConnectionState());
+    };
+
+    const interval = setInterval(checkState, 1000);
 
     return () => {
-      disconnect();
+      clearInterval(interval);
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
     };
-  }, []);
+  }, [autoConnect, connectionState]);
 
   return {
-    isConnected,
-    disconnect,
-    reconnect: connect
+    connectionState,
+    connect: () => nexusWebSocket.connect(),
+    disconnect: () => nexusWebSocket.disconnect(),
+    send: (type: string, data: any) => nexusWebSocket.send(type, data),
+    subscribe: (type: string, listener: (data: any) => void) => nexusWebSocket.subscribe(type, listener)
   };
+}
+
+// Utility function to safely handle WebSocket operations
+export function withWebSocketErrorHandling<T>(
+  operation: () => T,
+  fallback?: T
+): T | undefined {
+  try {
+    return operation();
+  } catch (error) {
+    if (error instanceof DOMException) {
+      console.error('DOM Exception in WebSocket operation:', error.message);
+    } else {
+      console.error('WebSocket operation failed:', error);
+    }
+    return fallback;
+  }
 }
