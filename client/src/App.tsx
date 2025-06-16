@@ -202,12 +202,7 @@ function Router() {
             <QuantumInsights />
           </AsyncComponentWrapper>
         </Route>
-        <Route path="/api-vault">
-            <AsyncComponentWrapper>
-                {/* @ts-expect-error */}
-                <import('./pages/APIVaultPage').then(m => m.default)}
-            </AsyncComponentWrapper>
-        </Route>
+        <Route path="/api-vault" component={() => import('./pages/APIVaultPage').then(m => m.default)} />
         <Route component={NotFound} />
       </Switch>
     </>
