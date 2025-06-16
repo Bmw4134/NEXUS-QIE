@@ -1,24 +1,47 @@
-
-import React, { Suspense } from 'react';
+import React, { Suspense, ReactNode } from 'react';
 import { Skeleton } from './ui/skeleton';
 
 interface AsyncComponentWrapperProps {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
+  children: ReactNode;
+  fallback?: ReactNode;
 }
 
 export function AsyncComponentWrapper({ children, fallback }: AsyncComponentWrapperProps) {
-  const defaultFallback = (
-    <div className="space-y-2">
-      <Skeleton className="h-4 w-full" />
-      <Skeleton className="h-4 w-3/4" />
-      <Skeleton className="h-4 w-1/2" />
-    </div>
-  );
+  // Ensure children is properly resolved before rendering
+  const resolvedChildren = React.isValidElement(children) ? children : null;
+
+  if (!resolvedChildren) {
+    return fallback || <Skeleton className="w-full h-32" />;
+  }
 
   return (
-    <Suspense fallback={fallback || defaultFallback}>
-      {children}
+    <Suspense fallback={fallback || <Skeleton className="w-full h-32" />}>
+      {resolvedChildren}
     </Suspense>
   );
+}
+
+// Helper component for async components that return promises
+export function PromiseResolver({ 
+  promise, 
+  fallback 
+}: { 
+  promise: Promise<ReactNode>; 
+  fallback?: ReactNode;
+}) {
+  const [resolved, setResolved] = React.useState<ReactNode>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    promise
+      .then(setResolved)
+      .catch(() => setResolved(<div>Error loading component</div>))
+      .finally(() => setLoading(false));
+  }, [promise]);
+
+  if (loading) {
+    return <>{fallback || <Skeleton className="w-full h-32" />}</>;
+  }
+
+  return <>{resolved}</>;
 }

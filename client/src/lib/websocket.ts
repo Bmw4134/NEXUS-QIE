@@ -16,10 +16,14 @@ export function useWebSocket() {
   const connect = () => {
     try {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const hostname = window.location.hostname || 'localhost';
+      const port = process.env.NODE_ENV === 'development' ? '5000' : window.location.port;
+      
       const wsUrl = process.env.NODE_ENV === 'development' 
-  ? `ws://${window.location.hostname}:5000`
-  : `wss://${window.location.host}`;
+        ? `ws://${hostname}:5000`
+        : `wss://${hostname}${port ? `:${port}` : ''}`;
 
+      console.log('Connecting to WebSocket:', wsUrl);
       wsRef.current = new WebSocket(wsUrl);
 
       wsRef.current.onopen = () => {

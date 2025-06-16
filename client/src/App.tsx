@@ -98,35 +98,125 @@ function Router() {
           </>
         ) : (
           <>
-            <Route path="/" component={EnhancedDashboard} />
-            <Route path="/smart-planner" component={SmartPlanner} />
-            <Route path="/wealth-pulse" component={WealthPulse} />
-            <Route path="/quantum-insights" component={QuantumInsights} />
-            <Route path="/nexus-notes" component={NexusNotes} />
-            <Route path="/family-sync" component={FamilySync} />
-            <Route path="/family-boards" component={FamilyBoards} />
-            <Route path="/canvas-boards" component={CanvasBoards} />
-            <Route path="/ai-config" component={AIConfiguration} />
-            <Route path="/qnis-admin" component={QNISAdmin} />
-            <Route path="/ai-assistant" component={AIAssistant} />
-            <Route path="/qie-intelligence" component={QIEIntelligenceHub} />
-            <Route path="/qie-signals" component={QIESignalPanel} />
-            <Route path="/qie-prompt-dna" component={QIEPromptDNA} />
-            <Route path="/recursive-evolution" component={RecursiveEvolution} />
-            <Route path="/quantum-stealth" component={() => <QuantumStealthDashboard />} />
-            <Route path="/coinbase-integration" component={CoinbaseIntegration} />
+            <Route path="/">
+              <AsyncComponentWrapper>
+                <EnhancedDashboard />
+              </AsyncComponentWrapper>
+            </Route>
+            <Route path="/smart-planner">
+              <AsyncComponentWrapper>
+                <SmartPlanner />
+              </AsyncComponentWrapper>
+            </Route>
+            <Route path="/wealth-pulse">
+              <AsyncComponentWrapper>
+                <WealthPulse />
+              </AsyncComponentWrapper>
+            </Route>
+            <Route path="/quantum-insights">
+              <AsyncComponentWrapper>
+                <QuantumInsights />
+              </AsyncComponentWrapper>
+            </Route>
+            <Route path="/nexus-notes">
+              <AsyncComponentWrapper>
+                <NexusNotes />
+              </AsyncComponentWrapper>
+            </Route>
+            <Route path="/family-sync">
+              <AsyncComponentWrapper>
+                <FamilySync />
+              </AsyncComponentWrapper>
+            </Route>
+            <Route path="/family-boards">
+              <AsyncComponentWrapper>
+                <FamilyBoards />
+              </AsyncComponentWrapper>
+            </Route>
+            <Route path="/canvas-boards">
+              <AsyncComponentWrapper>
+                <CanvasBoards />
+              </AsyncComponentWrapper>
+            </Route>
+            <Route path="/ai-config">
+              <AsyncComponentWrapper>
+                <AIConfiguration />
+              </AsyncComponentWrapper>
+            </Route>
+            <Route path="/qnis-admin">
+              <AsyncComponentWrapper>
+                <QNISAdmin />
+              </AsyncComponentWrapper>
+            </Route>
+            <Route path="/ai-assistant">
+              <AsyncComponentWrapper>
+                <AIAssistant />
+              </AsyncComponentWrapper>
+            </Route>
+            <Route path="/qie-intelligence">
+              <AsyncComponentWrapper>
+                <QIEIntelligenceHub />
+              </AsyncComponentWrapper>
+            </Route>
+            <Route path="/qie-signals">
+              <AsyncComponentWrapper>
+                <QIESignalPanel />
+              </AsyncComponentWrapper>
+            </Route>
+            <Route path="/qie-prompt-dna">
+              <AsyncComponentWrapper>
+                <QIEPromptDNA />
+              </AsyncComponentWrapper>
+            </Route>
+            <Route path="/recursive-evolution">
+              <AsyncComponentWrapper>
+                <RecursiveEvolution />
+              </AsyncComponentWrapper>
+            </Route>
+            <Route path="/quantum-stealth">
+              <AsyncComponentWrapper>
+                <QuantumStealthDashboard />
+              </AsyncComponentWrapper>
+            </Route>
+            <Route path="/coinbase-integration">
+              <AsyncComponentWrapper>
+                <CoinbaseIntegration />
+              </AsyncComponentWrapper>
+            </Route>
             {user?.role === "admin" && (
-              <Route path="/admin" component={AdminPanel} />
+              <Route path="/admin">
+                <AsyncComponentWrapper>
+                  <AdminPanel />
+                </AsyncComponentWrapper>
+              </Route>
             )}
           </>
         )}
-        <Route path="/ai-assistant" component={AIAssistant} />
-        <Route path="/quantum-insights" component={QuantumInsights} />
-        <Route path="/api-vault" component={() => import('./pages/APIVaultPage').then(m => m.default)} />
+        <Route path="/ai-assistant">
+          <AsyncComponentWrapper>
+            <AIAssistant />
+          </AsyncComponentWrapper>
+        </Route>
+        <Route path="/quantum-insights">
+          <AsyncComponentWrapper>
+            <QuantumInsights />
+          </AsyncComponentWrapper>
+        </Route>
+        <Route path="/api-vault">
+            <AsyncComponentWrapper>
+                {/* @ts-expect-error */}
+                <import('./pages/APIVaultPage').then(m => m.default)}
+            </AsyncComponentWrapper>
+        </Route>
         <Route component={NotFound} />
       </Switch>
     </>
   );
+}
+
+// Define AsyncComponentWrapper to handle promise rendering
+function AsyncComponentWrapper({ children }: { children: React.ReactNode }) {
+    return <>{children}</>;
 }
 
 export default function App() {

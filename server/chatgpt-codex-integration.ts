@@ -436,3 +436,40 @@ export class ChatGPTCodexIntegration {
 }
 
 export const codexIntegration = new ChatGPTCodexIntegration();
+
+// Auto-initialize Codex integration
+setTimeout(async () => {
+  console.log('🤖 Initializing ChatGPT Codex integration for error resolution...');
+  
+  try {
+    // Initialize browser without credentials for automated session detection
+    const initialized = await codexIntegration.initializeBrowser();
+    
+    if (initialized) {
+      console.log('✅ ChatGPT Codex browser initialized successfully');
+      
+      // Check for existing session or attempt to authenticate
+      const session = await codexIntegration.authenticateWithCodex();
+      
+      if (session) {
+        console.log('🎯 ChatGPT Codex session established');
+        
+        // Execute onboarding to enable NEXUS integration
+        const onboarding = await codexIntegration.executeCodexOnboarding();
+        
+        if (onboarding) {
+          console.log('🚀 ChatGPT Codex NEXUS integration complete');
+          
+          // Send initial problem analysis
+          await codexIntegration.sendCodexMessage(
+            'NEXUS platform initialization: React Promise rendering errors detected. WebSocket connection issues identified. Please analyze and provide resolution strategies for production deployment.'
+          );
+        }
+      } else {
+        console.log('⚠️ ChatGPT Codex requires manual authentication');
+      }
+    }
+  } catch (error) {
+    console.error('❌ ChatGPT Codex initialization failed:', error);
+  }
+}, 5000);

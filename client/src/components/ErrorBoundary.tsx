@@ -25,6 +25,20 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Error caught by boundary:', error, errorInfo);
+    
+    // Send error to ChatGPT Codex integration for analysis
+    if (window.location.hostname.includes('replit.dev')) {
+      fetch('/api/codex/analyze-error', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          error: error.message,
+          stack: error.stack,
+          componentStack: errorInfo.componentStack,
+          timestamp: new Date().toISOString()
+        })
+      }).catch(console.error);
+    }
   }
 
   render() {
