@@ -102,36 +102,12 @@ function Router() {
           </>
         ) : (
           <>
-            <Route path="/">
-              <AsyncComponentWrapper>
-                <EnhancedDashboard />
-              </AsyncComponentWrapper>
-            </Route>
-            <Route path="/smart-planner">
-              <AsyncComponentWrapper>
-                <SmartPlanner />
-              </AsyncComponentWrapper>
-            </Route>
-            <Route path="/wealth-pulse">
-              <AsyncComponentWrapper>
-                <WealthPulse />
-              </AsyncComponentWrapper>
-            </Route>
-            <Route path="/quantum-insights">
-              <AsyncComponentWrapper>
-                <QuantumInsights />
-              </AsyncComponentWrapper>
-            </Route>
-            <Route path="/nexus-notes">
-              <AsyncComponentWrapper>
-                <NexusNotes />
-              </AsyncComponentWrapper>
-            </Route>
-            <Route path="/family-sync">
-              <AsyncComponentWrapper>
-                <FamilySync />
-              </AsyncComponentWrapper>
-            </Route>
+            <Route path="/" component={EnhancedDashboard} />
+            <Route path="/smart-planner" component={SmartPlanner} />
+            <Route path="/wealth-pulse" component={WealthPulse} />
+            <Route path="/quantum-insights" component={QuantumInsights} />
+            <Route path="/nexus-notes" component={NexusNotes} />
+            <Route path="/family-sync" component={FamilySync} />
             <Route path="/family-boards">
               <AsyncComponentWrapper>
                 <FamilyBoards />
