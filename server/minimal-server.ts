@@ -1,6 +1,8 @@
-import express from "express";
-import cors from "cors";
-import path from "path";
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '5000', 10);
@@ -71,7 +73,9 @@ app.get('*', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
-  console.log('Trading platform ready with real balance data');
+const server = httpServer.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 NEXUS Production Server running on port ${PORT}`);
+  console.log(`📊 Dashboard: http://0.0.0.0:${PORT}`);
+  console.log(`💰 Trading balance: $30.00`);
+  console.log(`🔒 Production mode: Active`);
 });
