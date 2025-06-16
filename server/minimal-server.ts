@@ -1,11 +1,16 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 const PORT = parseInt(process.env.PORT || '5000', 10);
+const httpServer = createServer(app);
 
 // Middleware
 app.use(cors());
@@ -73,7 +78,7 @@ app.get('*', (req, res) => {
 });
 
 // Start server
-const server = httpServer.listen(PORT, '0.0.0.0', () => {
+httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 NEXUS Production Server running on port ${PORT}`);
   console.log(`📊 Dashboard: http://0.0.0.0:${PORT}`);
   console.log(`💰 Trading balance: $30.00`);
