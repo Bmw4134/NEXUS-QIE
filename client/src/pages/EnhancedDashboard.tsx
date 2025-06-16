@@ -1,4 +1,4 @@
-import React, { Suspense, ErrorBoundary } from 'react';
+import React, { Suspense } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { ErrorBoundary as CustomErrorBoundary } from '@/components/ErrorBoundary';
