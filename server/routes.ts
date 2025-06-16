@@ -762,6 +762,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Alpaca Crypto Trading API Endpoints
+  app.post('/api/alpaca/crypto/execute-trade', async (req, res) => {
+    try {
+      const { symbol, side, quantity, orderType, limitPrice } = req.body;
+      
+      console.log(`🪙 NEXUS Alpaca Crypto: Executing ${side.toUpperCase()} ${quantity} ${symbol}`);
+      
+      const result = await alpacaTradeEngine.executeCryptoTrade({
+        symbol,
+        side,
+        quantity,
+        orderType: orderType || 'market',
+        limitPrice
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Alpaca crypto trade execution failed:', error);
+      res.status(500).json({ error: 'Failed to execute Alpaca crypto trade' });
+    }
+  });
+
+  app.get('/api/alpaca/crypto/assets', async (req, res) => {
+    try {
+      const assets = await alpacaTradeEngine.getCryptoAssets();
+      res.json(assets);
+    } catch (error) {
+      console.error('Failed to fetch Alpaca crypto assets:', error);
+      res.status(500).json({ error: 'Failed to fetch crypto assets' });
+    }
+  });
+
+  app.get('/api/alpaca/crypto/quote/:symbol', async (req, res) => {
+    try {
+      const { symbol } = req.params;
+      const quote = await alpacaTradeEngine.getCryptoQuote(symbol);
+      res.json(quote);
+    } catch (error) {
+      console.error('Failed to fetch Alpaca crypto quote:', error);
+      res.status(500).json({ error: 'Failed to fetch crypto quote' });
+    }
+  });
+
   app.get('/api/alpaca/account', async (req, res) => {
     try {
       const accountInfo = await alpacaTradeEngine.getAccountInfo();
