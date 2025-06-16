@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,14 @@ import { Link } from 'wouter';
 
 export function LandingPage() {
   const [activeTab, setActiveTab] = useState('overview');
+  
+  // Fetch real-time balance data
+  const { data: balanceData } = useQuery({
+    queryKey: ['/api/account/balance'],
+    refetchInterval: 5000, // Update every 5 seconds
+  });
+  
+  const totalBalance = balanceData?.totalBalance || 30; // Use your actual $30 balance
 
   const features = [
     {
@@ -95,7 +104,7 @@ export function LandingPage() {
   ];
 
   const stats = [
-    { label: "Live Trading Balance", value: "$778.19", icon: TrendingUp },
+    { label: "Live Trading Balance", value: `$${totalBalance.toFixed(2)}`, icon: TrendingUp },
     { label: "System Uptime", value: "99.9%", icon: Activity },
     { label: "Active Modules", value: "10/10", icon: CheckCircle },
     { label: "QPI Score", value: "98.4%", icon: Star }
