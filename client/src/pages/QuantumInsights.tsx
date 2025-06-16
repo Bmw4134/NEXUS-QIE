@@ -436,3 +436,5 @@ export function QuantumInsights() {
     </div>
   );
 }
+
+export default QuantumInsights;

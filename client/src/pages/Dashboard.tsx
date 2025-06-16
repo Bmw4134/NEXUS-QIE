@@ -273,8 +273,8 @@ export function Dashboard() {
   );
 }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LiveTradingPanel } from '../components/LiveTradingPanel';
-import { AlpacaAPIKeyFinder } from "../components/AlpacaAPIKeyFinder";
+import LiveTradingPanel from '../components/LiveTradingPanel';
+import AlpacaAPIKeyFinder from "../components/AlpacaAPIKeyFinder";
 import { ApiVaultDashboard } from "../components/ApiVaultDashboard";
 import { Key, Shield } from "lucide-react";
 
@@ -317,3 +317,5 @@ export function TradingDashboard() {
     </div>
   )
 }
+
+export default TradingDashboard;
