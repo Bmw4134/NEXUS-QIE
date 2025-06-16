@@ -48,6 +48,7 @@ import { quantumStealthExtraction } from "./quantum-stealth-extraction";
 import { directBalanceExtraction } from "./direct-balance-extraction";
 import { realAccountExtractor } from "./real-account-extractor";
 import { coinbaseStealthScraper } from "./coinbase-stealth-scraper";
+import { liveTradingCoordinator } from "./live-trading-coordinator";
 import { browserSessionDetector } from "./browser-session-detector";
 import { coinbaseAPIClient } from "./coinbase-api-client";
 import { quantumNexusBypass } from "./quantum-nexus-bypass";
@@ -211,6 +212,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         robinhood_legend: robinhoodLegendClient.isConnected() ? "connected" : "disconnected"
       }
     });
+  });
+
+  // Live Trading Status endpoint
+  app.get("/api/trading/status", (req, res) => {
+    try {
+      const status = liveTradingCoordinator.getStatus();
+      res.json({
+        success: true,
+        ...status,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Trading status error:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Failed to get trading status" 
+      });
+    }
   });
 
   // Pionex.us API endpoints

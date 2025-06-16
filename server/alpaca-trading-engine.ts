@@ -54,7 +54,7 @@ export class AlpacaTradeEngine {
   private async initialize() {
     console.log('🔐 Initializing NEXUS Alpaca Trading Engine...');
     
-    if (!process.env.ALPACA_KEY || !process.env.ALPACA_SECRET) {
+    if (!process.env.ALPACA_API_KEY || !process.env.ALPACA_SECRET_KEY) {
       console.log('⚠️ Alpaca credentials not found - using simulation mode');
       this.initializeSimulationMode();
       return;
@@ -78,9 +78,9 @@ from alpaca.trading.client import TradingClient
 
 try:
     client = TradingClient(
-        api_key=os.getenv("ALPACA_KEY"),
-        secret_key=os.getenv("ALPACA_SECRET"),
-        paper=False  # Live trading mode
+        api_key=os.getenv("ALPACA_API_KEY"),
+        secret_key=os.getenv("ALPACA_SECRET_KEY"),
+        paper=True  # Start with paper trading for safety
     )
     
     account = client.get_account()
