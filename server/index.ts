@@ -3,7 +3,7 @@
  * Production-ready server with all core features
  */
 
-import './watson-production-server.js';
+import './clean-watson-server.js';
 
 console.log('NEXUS Production Server starting...');
 console.log('Trading platform ready with real balance data');

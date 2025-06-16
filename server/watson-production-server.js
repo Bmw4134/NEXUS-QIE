@@ -26,6 +26,10 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Serve React build files
+app.use('/assets', express.static(path.join(__dirname, '../client/dist/assets')));
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
 // Trading data simulation
 let accountBalance = 834.97;
 let buyingPower = 1200.00;
@@ -257,15 +261,10 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Serve Watson Desktop Interface
+// Serve React app for all other routes
 app.get('*', (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Watson Desktop - NEXUS Quantum Trading Platform</title>
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { 
