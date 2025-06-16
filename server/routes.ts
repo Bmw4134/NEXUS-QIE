@@ -52,6 +52,7 @@ import { liveTradingCoordinator } from "./live-trading-coordinator";
 import { browserSessionDetector } from "./browser-session-detector";
 import { coinbaseAPIClient } from "./coinbase-api-client";
 import { quantumNexusBypass } from "./quantum-nexus-bypass";
+import { comprehensiveAnalyzer } from "./comprehensive-system-analyzer";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -5928,6 +5929,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false,
         error: 'Failed to get extraction status'
       });
+    }
+  });
+
+  // Comprehensive System Analysis API
+  app.get('/api/system/analyze', async (req, res) => {
+    try {
+      console.log('🔍 NEXUS: Starting comprehensive system analysis...');
+      const analysis = await comprehensiveAnalyzer.analyzeEntireSystem();
+      
+      res.json({
+        success: true,
+        analysis,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('System analysis error:', error);
+      res.status(500).json({ error: 'System analysis failed' });
+    }
+  });
+
+  app.post('/api/system/fix', async (req, res) => {
+    try {
+      console.log('🔧 NEXUS: Generating fix scripts...');
+      const fixes = await comprehensiveAnalyzer.generateFixScript();
+      
+      res.json({
+        success: true,
+        fixes,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Fix generation error:', error);
+      res.status(500).json({ error: 'Fix generation failed' });
     }
   });
   
