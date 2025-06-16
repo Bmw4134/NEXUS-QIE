@@ -63,7 +63,7 @@ export class AlpacaTradeEngine {
     console.log('✅ Alpaca secrets detected:');
     console.log(`   API Key: ${process.env.ALPACA_API_KEY ? '***' + process.env.ALPACA_API_KEY.slice(-4) : 'Not set'}`);
     console.log(`   Secret: ${process.env.ALPACA_SECRET_KEY ? '***configured' : 'Not set'}`);
-    console.log(`   Endpoint: ${process.env.ALPACA_API_ENDPOINT || 'https://api.alpaca.markets (default)'}`);}
+    console.log(`   Endpoint: ${process.env.ALPACA_API_ENDPOINT || 'https://api.alpaca.markets (default)'}`);
 
     try {
       await this.authenticateAlpaca();
