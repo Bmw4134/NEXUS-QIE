@@ -232,6 +232,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Execute Live Trade endpoint
+  app.post("/api/trading/execute", async (req, res) => {
+    try {
+      const { symbol, side, quantity, orderType, limitPrice, platform } = req.body;
+      
+      if (!symbol || !side || !quantity || !platform) {
+        return res.status(400).json({
+          success: false,
+          error: "Missing required parameters: symbol, side, quantity, platform"
+        });
+      }
+
+      const tradeResult = await liveTradingCoordinator.executeTrade({
+        symbol,
+        side,
+        quantity: parseFloat(quantity),
+        orderType: orderType || 'market',
+        limitPrice: limitPrice ? parseFloat(limitPrice) : undefined,
+        platform
+      });
+
+      res.json({
+        success: tradeResult.success,
+        ...tradeResult
+      });
+    } catch (error) {
+      console.error("Trade execution error:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to execute trade"
+      });
+    }
+  });
+
   // Pionex.us API endpoints
   app.post("/api/pionex/setup", async (req, res) => {
     try {
