@@ -75,12 +75,20 @@ export class AlpacaTradeEngine {
       const pythonScript = `
 import os
 from alpaca.trading.client import TradingClient
+from alpaca.data.historical import CryptoHistoricalDataClient
 
 try:
+    # Initialize trading client for crypto
     client = TradingClient(
         api_key=os.getenv("ALPACA_API_KEY"),
         secret_key=os.getenv("ALPACA_SECRET_KEY"),
         paper=True  # Start with paper trading for safety
+    )
+
+    # Initialize crypto data client
+    crypto_client = CryptoHistoricalDataClient(
+        api_key=os.getenv("ALPACA_API_KEY"),
+        secret_key=os.getenv("ALPACA_SECRET_KEY")
     )
 
     account = client.get_account()
@@ -167,11 +175,12 @@ except Exception as e:
 
   private async executeLiveTrade(request: AlpacaTradeRequest): Promise<AlpacaTradeResult> {
     return new Promise((resolve, reject) => {
+      const isCrypto = this.isCryptoSymbol(request.symbol);
       const pythonScript = `
 import os
 from alpaca.trading.client import TradingClient
 from alpaca.trading.requests import MarketOrderRequest, LimitOrderRequest
-from alpaca.trading.enums import OrderSide, TimeInForce
+from alpaca.trading.enums import OrderSide, TimeInForce, AssetClass
 import json
 
 try:
@@ -182,20 +191,21 @@ try:
     )
 
     side = OrderSide.BUY if "${request.side}" == "buy" else OrderSide.SELL
+    is_crypto = ${isCrypto}
 
     if "${request.orderType}" == "market":
         order_request = MarketOrderRequest(
             symbol="${request.symbol}",
             qty=${request.quantity},
             side=side,
-            time_in_force=TimeInForce.DAY
+            time_in_force=TimeInForce.GTC if is_crypto else TimeInForce.DAY
         )
     else:
         order_request = LimitOrderRequest(
             symbol="${request.symbol}",
             qty=${request.quantity},
             side=side,
-            time_in_force=TimeInForce.DAY,
+            time_in_force=TimeInForce.GTC if is_crypto else TimeInForce.DAY,
             limit_price=${request.limitPrice || 0}
         )
 
@@ -209,7 +219,8 @@ try:
         "quantity": float(order.qty),
         "status": str(order.status),
         "timestamp": order.created_at.isoformat(),
-        "accountBalance": float(account.cash)
+        "accountBalance": float(account.cash),
+        "assetType": "crypto" if is_crypto else "stock"
     }
 
     print(f"ALPACA_TRADE_SUCCESS:{json.dumps(result)}")
@@ -368,8 +379,14 @@ except Exception as e:
     });
   }
 
+  private isCryptoSymbol(symbol: string): boolean {
+    const cryptoSymbols = ['BTCUSD', 'ETHUSD', 'LTCUSD', 'BCHUSD', 'ADAUSD', 'DOTUSD', 'UNIUSD', 'LINKUSD', 'AAVEUSD', 'ALGOUSD'];
+    return cryptoSymbols.includes(symbol.toUpperCase());
+  }
+
   private getSimulatedPrice(symbol: string): number {
     const prices: Record<string, number> = {
+      // Stocks
       'AAPL': 150.00,
       'TSLA': 200.00,
       'MSFT': 300.00,
@@ -377,10 +394,21 @@ except Exception as e:
       'GOOGL': 2500.00,
       'AMZN': 3000.00,
       'SPY': 450.00,
-      'QQQ': 350.00
+      'QQQ': 350.00,
+      // Crypto
+      'BTCUSD': 43000.00,
+      'ETHUSD': 2400.00,
+      'LTCUSD': 70.00,
+      'BCHUSD': 240.00,
+      'ADAUSD': 0.45,
+      'DOTUSD': 6.50,
+      'UNIUSD': 7.20,
+      'LINKUSD': 14.50,
+      'AAVEUSD': 95.00,
+      'ALGOUSD': 0.18
     };
 
-    const basePrice = prices[symbol] || 100.00;
+    const basePrice = prices[symbol.toUpperCase()] || 100.00;
     const variation = (Math.random() - 0.5) * 0.02; // ±1% variation
     return basePrice * (1 + variation);
   }
