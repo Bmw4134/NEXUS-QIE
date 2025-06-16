@@ -10,13 +10,28 @@ interface User {
 }
 
 export function useAuth() {
-  // Force clear localStorage on every check to ensure landing page shows
-  // This addresses the issue where cached auth data bypasses the landing page
-  localStorage.removeItem('auth_token');
-  localStorage.removeItem('user_data');
-  localStorage.removeItem('demo_mode');
+  const authToken = localStorage.getItem('auth_token');
+  const userData = localStorage.getItem('user_data');
   
-  // Always return unauthenticated to show the complete application flow
+  // Check for valid authentication
+  if (authToken && userData) {
+    try {
+      const user = JSON.parse(userData);
+      return {
+        user: user as User,
+        isLoading: false,
+        isAuthenticated: true,
+        error: null
+      };
+    } catch (error) {
+      // Clear invalid data
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_data');
+      localStorage.removeItem('demo_mode');
+    }
+  }
+  
+  // Not authenticated - show landing page
   return {
     user: null,
     isLoading: false,

@@ -56,6 +56,39 @@ app.use((req, res, next) => {
     });
   });
 
+  // Account balance endpoint for landing page
+  app.get('/api/account/balance', async (req, res) => {
+    try {
+      const { accountBalanceService } = await import('./account-balance-service');
+      const balance = accountBalanceService.getAccountBalance();
+      const buyingPower = accountBalanceService.getBuyingPower();
+      const totalEquity = accountBalanceService.getTotalEquity();
+      const coinbaseAccounts = accountBalanceService.getCoinbaseAccounts();
+      
+      // Calculate total balance from all sources
+      const coinbaseTotal = coinbaseAccounts.reduce((total, account) => {
+        return total + parseFloat(account.balance.amount || '0');
+      }, 0);
+      
+      const totalBalance = balance + coinbaseTotal;
+      
+      res.json({
+        totalBalance,
+        tradingBalance: balance,
+        buyingPower,
+        totalEquity,
+        coinbaseBalance: coinbaseTotal,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Balance fetch failed:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch balance'
+      });
+    }
+  });
+
   // Codex error analysis endpoint
   app.post('/api/codex/analyze-error', async (req, res) => {
     try {
