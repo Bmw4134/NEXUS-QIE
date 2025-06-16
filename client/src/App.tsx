@@ -29,6 +29,7 @@ import { useAuth } from "./hooks/useAuth";
 import RealModeIndicator from "./components/RealModeIndicator";
 import LiveTradingPanel from "./components/LiveTradingPanel";
 import QIEEmbeddedPanel from "./components/QIEEmbeddedPanel";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import "./index.css";
 
 const queryClient = new QueryClient({
@@ -130,11 +131,13 @@ function Router() {
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light" storageKey="family-platform-theme">
-        <Router />
-        <Toaster />
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider defaultTheme="light" storageKey="family-platform-theme">
+          <Router />
+          <Toaster />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
