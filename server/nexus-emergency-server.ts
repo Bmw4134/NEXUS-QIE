@@ -96,7 +96,16 @@ class NexusEmergencyServer {
 
     // Catch-all handler for SPA - Serve React app
     this.app.get('*', (req, res) => {
-      // Create a working React HTML page that loads your actual app
+      // Try to serve the actual React build first
+      const indexPath = path.join(__dirname, '..', 'client', 'dist', 'index.html');
+      
+      // Check if React build exists
+      if (require('fs').existsSync(indexPath)) {
+        res.sendFile(indexPath);
+        return;
+      }
+      
+      // Fallback to emergency landing page if React build not found
       res.status(200).send(`
         <!DOCTYPE html>
         <html lang="en">
