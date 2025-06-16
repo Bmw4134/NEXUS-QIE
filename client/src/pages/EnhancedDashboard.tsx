@@ -1,5 +1,4 @@
 import React, { Suspense, useRef } from 'react';
-import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { ErrorBoundary as CustomErrorBoundary } from '@/components/ErrorBoundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -10,6 +9,20 @@ const Dashboard = React.lazy(() => import('./Dashboard'));
 const LiveTradingPanel = React.lazy(() => import('@/components/LiveTradingPanel'));
 const QuantumInsights = React.lazy(() => import('./QuantumInsights'));
 const InvestorMode = React.lazy(() => import('@/components/InvestorMode'));
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 export default function EnhancedDashboard() {
   // Fetch system status

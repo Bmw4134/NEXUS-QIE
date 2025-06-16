@@ -3,6 +3,10 @@ import cors from "cors";
 import path from "path";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '5000', 10);
