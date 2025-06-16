@@ -868,18 +868,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Alpaca Stock Trading API Endpoints
   app.post('/api/alpaca/execute-trade', async (req, res) => {
     try {
-      const { symbol, side, quantity, orderType, limitPrice, mode } = req.body;
+      const { symbol, side, quantity, orderType, limitPrice } = req.body;
       
-      const tradingMode = mode || 'paper';
-      console.log(`🔮 NEXUS Alpaca ${tradingMode.toUpperCase()}: Executing ${side.toUpperCase()} ${quantity} ${symbol}`);
+      console.log(`🔮 NEXUS Alpaca: Executing ${side.toUpperCase()} ${quantity} ${symbol}`);
       
       const result = await alpacaTradeEngine.executeTrade({
         symbol,
         side,
         quantity,
         orderType: orderType || 'market',
-        limitPrice,
-        mode: tradingMode
+        limitPrice
       });
       
       res.json(result);
@@ -934,8 +932,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/alpaca/account', async (req, res) => {
     try {
-      const mode = (req.query.mode as string) || 'paper';
-      const accountInfo = await alpacaTradeEngine.getAccountInfo(mode as 'paper' | 'live');
+      const accountInfo = await alpacaTradeEngine.getAccountInfo();
       res.json(accountInfo);
     } catch (error) {
       console.error('Failed to fetch Alpaca account:', error);
