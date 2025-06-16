@@ -27,10 +27,11 @@ export function useAuth() {
       // Clear invalid data
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user_data');
+      localStorage.removeItem('demo_mode');
     }
   }
   
-  // Not authenticated
+  // Not authenticated - show landing page
   return {
     user: null,
     isLoading: false,
