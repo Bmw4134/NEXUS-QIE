@@ -1,0 +1,83 @@
+# 🚀 Kaizen Infinity Deployment Playbook
+
+## 📦 Bundle Contents:
+
+* `kaizen_assistant_core.ts`: Master orchestrator component
+* `lib/widget_coordinator.ts`: Global event bus for cross-widget communication
+* `lib/goal_tracker.ts`: Prompt interaction logger
+* `lib/chart_renderer.ts`: Assistant-triggered Plotly renderer
+* `lib/strict_validator.ts`: Output schema/type guard
+* `lib/metrics_stream.ts`: WebSocket/SSE live metrics
+* `lib/auth_wrapper.tsx`: Role-safe layout guard
+* `lib/prompt_dna.ts`: Prompt fingerprinting + structure log
+* `lib/firebase_sync.ts`: Log persistence with cloud backend
+* `lib/llm_test_harness.ts`: Assistant output filter
+* 🔜 Optional: `widget_registry.ts`, `command_dispatcher.ts`, `metrics_cache.ts`, `debug_overlay.tsx`, `error_overlay.tsx`, `state_snapshot.ts`, `widget_perf_tracker.ts`
+
+---
+
+## 🧠 Phase 1: Introspection Prompt (Replit Assistant)
+
+```
+Assistant, perform full introspection of this project:
+
+- List UI libraries, state methods, real-time data logic, auth strategy
+- Identify widget coordination patterns or gaps
+- Check for deployment configurations and test coverage
+- Output structured JSON summary
+```
+
+---
+
+## 🔧 Phase 2: Deployment Prompt
+
+```
+Assistant, deploy the Kaizen Infinity Bundle:
+
+- Mount <KaizenAssistantCore> at the App root
+- Ensure all `lib/` modules are imported and available
+- Inject firebase sync, prompt logging, chart renderer, event bus, and output validator
+- Add widget lifecycle and command dispatcher if missing
+- Do NOT overwrite existing logic — confirm every insertion
+```
+
+---
+
+## ✅ Once Applied:
+
+* ✅ Assistant/Agents can coordinate widgets, validate outputs, render live charts
+* ✅ Auto-tracks prompt goals and assistant DNA fingerprints
+* ✅ Reconnects to metrics feeds on failure, logs data to Firebase
+* ✅ Supports future commands via `window.KAIZEN_DISPATCH({type, target, payload})`
+* ✅ Supports event replay and snapshot restore via `state_snapshot.ts`
+* ✅ Metrics throttle and usage statistics tracked in `widget_perf_tracker.ts`
+
+---
+
+## 🔐 Final Deployment Checklist:
+
+* \## 🔐 Final Deployment Checklist:
+
+  \- \[ ] Confirm \`\<KaizenAssistantCore>\` wraps root in all dashboards
+
+  \- \[ ] All \`lib/\` modules present, no syntax or import errors
+
+  \- \[ ] Firebase config set for \`firebase\_sync.ts\`
+
+  \- \[ ] All prompts render charts, validate outputs, log goals
+
+  \- \[ ] Assistant runs \`introspection → deploy\` flow with zero conflict
+
+  \- \[ ] \`.replit\` entrypoints align with desired agent/assistant config
+
+  \- \[ ] (Optional) \`debug\_overlay.tsx\` visually shows event bus traffic
+
+  \- \[ ] (Optional) \`error\_overlay.tsx\` shows last assistant error messages
+
+  \- \[ ] (Optional) \`state\_snapshot.ts\` enables undo/replay system
+
+  \- \[ ] (Optional) \`widget\_perf\_tracker.ts\` displays render performance
+
+---
+
+🎯 Once complete, dashboards are fully evolved to Kaizen Infinity tier and safe for lock-and-deploy mode.
