@@ -740,6 +740,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // API Vault Routes
+  app.get('/api/vault/credentials', async (req, res) => {
+    try {
+      const { apiVaultService } = await import('./api-vault-service');
+      const credentials = await apiVaultService.listAllCredentials();
+      
+      res.json({
+        success: true,
+        credentials,
+        count: credentials.length
+      });
+    } catch (error) {
+      console.error('Failed to list credentials:', error);
+      res.status(500).json({ error: 'Failed to load credentials' });
+    }
+  });
+
+  app.post('/api/vault/credentials', async (req, res) => {
+    try {
+      const { apiVaultService } = await import('./api-vault-service');
+      const credential = req.body;
+      
+      const id = await apiVaultService.storeCredential(credential);
+      
+      res.json({
+        success: true,
+        id,
+        message: 'Credential stored securely'
+      });
+    } catch (error) {
+      console.error('Failed to store credential:', error);
+      res.status(500).json({ error: 'Failed to store credential' });
+    }
+  });
+
+  app.get('/api/vault/credentials/:service/validate', async (req, res) => {
+    try {
+      const { apiVaultService } = await import('./api-vault-service');
+      const { service } = req.params;
+      
+      const validation = await apiVaultService.validateCredential(service);
+      
+      res.json({
+        success: true,
+        valid: validation.valid,
+        message: validation.message
+      });
+    } catch (error) {
+      console.error('Failed to validate credential:', error);
+      res.status(500).json({ error: 'Failed to validate credential' });
+    }
+  });
+
+  app.delete('/api/vault/credentials/:service', async (req, res) => {
+    try {
+      const { apiVaultService } = await import('./api-vault-service');
+      const { service } = req.params;
+      
+      const deleted = await apiVaultService.deleteCredential(service);
+      
+      res.json({
+        success: deleted,
+        message: deleted ? 'Credential deleted successfully' : 'Failed to delete credential'
+      });
+    } catch (error) {
+      console.error('Failed to delete credential:', error);
+      res.status(500).json({ error: 'Failed to delete credential' });
+    }
+  });
+
   // Alpaca API Key Discovery Routes
   app.get('/api/alpaca/find-credentials', async (req, res) => {
     try {
@@ -3139,39 +3209,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(result);
     } catch (error) {
       res.status(500).json({ success: false, error: 'IP location API error' });
-    }
-  });
-
-  // API Vault Management Routes
-  const { getAPIKeys, addAPIKey, updateAPIKey, deleteAPIKey, getKeysByService } = await import('./api-vault-service');
-  
-  app.get('/api/vault/keys', getAPIKeys);
-  app.post('/api/vault/keys', addAPIKey);
-  app.put('/api/vault/keys/:keyId', updateAPIKey);
-  app.delete('/api/vault/keys/:keyId', deleteAPIKey);
-  app.get('/api/vault/keys/service/:service', getKeysByService);
-
-  app.get('/api/vault/status', (req, res) => {
-    try {
-      const { apiVaultService } = require('./api-vault-service');
-      const stats = apiVaultService.getKeyStatistics();
-      
-      res.json({
-        success: true,
-        status: 'operational',
-        encryption: 'AES-256',
-        statistics: stats,
-        integrations: {
-          replitSecrets: true,
-          environmentVariables: true,
-          autoSync: true
-        }
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: 'Failed to get vault status'
-      });
     }
   });
 

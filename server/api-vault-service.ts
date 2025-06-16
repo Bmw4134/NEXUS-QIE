@@ -1,320 +1,284 @@
 
-import { Request, Response } from 'express';
-import crypto from 'crypto';
+/**
+ * NEXUS Internal API Vault Service
+ * Secure credential management with encrypted storage and rotation
+ */
 
-interface StoredAPIKey {
+import { db } from "./db";
+import { evolutionApiKeyVault } from "../shared/schema";
+import { eq } from "drizzle-orm";
+import crypto from "crypto";
+
+export interface ApiCredential {
   id: string;
   service: string;
-  keyName: string;
-  keyValue: string;
-  status: 'active' | 'inactive' | 'expired' | 'rate_limited';
+  apiKey: string;
+  secretKey?: string;
+  status: 'active' | 'inactive' | 'rate_limited' | 'expired';
+  environment: 'paper' | 'live' | 'sandbox';
+  lastUsed?: Date;
   usageCount: number;
-  lastUsed: string;
-  environment: 'development' | 'production' | 'testing';
-  description: string;
-  createdAt: string;
-  updatedAt: string;
+  errorCount: number;
+  metadata?: Record<string, any>;
 }
 
-class APIVaultService {
-  private keys: Map<string, StoredAPIKey> = new Map();
+export interface VaultConfig {
+  encryptionKey: string;
+  maxRetries: number;
+  rotationInterval: number;
+}
+
+export class ApiVaultService {
   private encryptionKey: string;
+  private readonly algorithm = 'aes-256-gcm';
 
   constructor() {
-    this.encryptionKey = process.env.VAULT_ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
-    this.loadKeysFromEnvironment();
+    this.encryptionKey = process.env.VAULT_ENCRYPTION_KEY || this.generateEncryptionKey();
   }
 
-  private encrypt(text: string): string {
-    const cipher = crypto.createCipher('aes-256-cbc', this.encryptionKey);
+  private generateEncryptionKey(): string {
+    return crypto.randomBytes(32).toString('hex');
+  }
+
+  private encrypt(text: string): { encrypted: string; iv: string; tag: string } {
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipher(this.algorithm, this.encryptionKey);
+    
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    return encrypted;
+    
+    const tag = cipher.getAuthTag();
+    
+    return {
+      encrypted,
+      iv: iv.toString('hex'),
+      tag: tag.toString('hex')
+    };
   }
 
-  private decrypt(encryptedText: string): string {
+  private decrypt(encryptedData: { encrypted: string; iv: string; tag: string }): string {
+    const decipher = crypto.createDecipher(this.algorithm, this.encryptionKey);
+    decipher.setAuthTag(Buffer.from(encryptedData.tag, 'hex'));
+    
+    let decrypted = decipher.update(encryptedData.encrypted, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    
+    return decrypted;
+  }
+
+  async storeCredential(credential: Omit<ApiCredential, 'id'>): Promise<string> {
     try {
-      const decipher = crypto.createDecipher('aes-256-cbc', this.encryptionKey);
-      let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
-      decrypted += decipher.final('utf8');
-      return decrypted;
-    } catch (error) {
-      return encryptedText; // Return as-is if not encrypted
-    }
-  }
+      const id = crypto.randomUUID();
+      const encryptedApiKey = this.encrypt(credential.apiKey);
+      const encryptedSecretKey = credential.secretKey ? this.encrypt(credential.secretKey) : null;
 
-  private loadKeysFromEnvironment(): void {
-    // Load existing environment variables as API keys
-    const envKeys = [
-      { name: 'OPENAI_API_KEY', service: 'OpenAI' },
-      { name: 'ALPACA_API_KEY', service: 'Alpaca' },
-      { name: 'ALPACA_SECRET_KEY', service: 'Alpaca' },
-      { name: 'COINBASE_API_KEY', service: 'Coinbase' },
-      { name: 'COINBASE_API_SECRET', service: 'Coinbase' },
-      { name: 'PERPLEXITY_API_KEY', service: 'Perplexity' },
-      { name: 'ANTHROPIC_API_KEY', service: 'Anthropic' },
-      { name: 'XAI_API_KEY', service: 'xAI' }
-    ];
-
-    envKeys.forEach(({ name, service }) => {
-      const value = process.env[name];
-      if (value) {
-        const id = crypto.randomUUID();
-        this.keys.set(id, {
+      await db.insert(evolutionApiKeyVault).values({
+        service: credential.service,
+        keyStatus: credential.status,
+        lastUsed: credential.lastUsed || new Date(),
+        usageCount: credential.usageCount,
+        errorCount: credential.errorCount,
+        metadata: {
           id,
-          service,
-          keyName: name,
-          keyValue: value,
-          status: 'active',
-          usageCount: 0,
-          lastUsed: 'Never',
-          environment: 'development',
-          description: `Loaded from environment variable`,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        });
+          environment: credential.environment,
+          encryptedApiKey,
+          encryptedSecretKey,
+          ...credential.metadata
+        }
+      });
+
+      console.log(`🔐 Credential stored securely for ${credential.service}`);
+      return id;
+    } catch (error) {
+      console.error('Failed to store credential:', error);
+      throw new Error('Credential storage failed');
+    }
+  }
+
+  async getCredential(service: string): Promise<ApiCredential | null> {
+    try {
+      const result = await db.select()
+        .from(evolutionApiKeyVault)
+        .where(eq(evolutionApiKeyVault.service, service))
+        .limit(1);
+
+      if (!result.length) return null;
+
+      const vaultEntry = result[0];
+      const metadata = vaultEntry.metadata as any;
+
+      if (!metadata.encryptedApiKey) return null;
+
+      const apiKey = this.decrypt(metadata.encryptedApiKey);
+      const secretKey = metadata.encryptedSecretKey ? this.decrypt(metadata.encryptedSecretKey) : undefined;
+
+      return {
+        id: metadata.id,
+        service: vaultEntry.service,
+        apiKey,
+        secretKey,
+        status: vaultEntry.keyStatus as any,
+        environment: metadata.environment || 'paper',
+        lastUsed: vaultEntry.lastUsed || undefined,
+        usageCount: vaultEntry.usageCount || 0,
+        errorCount: vaultEntry.errorCount || 0,
+        metadata: metadata
+      };
+    } catch (error) {
+      console.error(`Failed to retrieve credential for ${service}:`, error);
+      return null;
+    }
+  }
+
+  async updateCredentialStatus(service: string, status: ApiCredential['status']): Promise<boolean> {
+    try {
+      await db.update(evolutionApiKeyVault)
+        .set({ 
+          keyStatus: status,
+          updatedAt: new Date()
+        })
+        .where(eq(evolutionApiKeyVault.service, service));
+
+      return true;
+    } catch (error) {
+      console.error(`Failed to update credential status for ${service}:`, error);
+      return false;
+    }
+  }
+
+  async incrementUsage(service: string): Promise<void> {
+    try {
+      const current = await this.getCredential(service);
+      if (!current) return;
+
+      await db.update(evolutionApiKeyVault)
+        .set({ 
+          usageCount: (current.usageCount || 0) + 1,
+          lastUsed: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(evolutionApiKeyVault.service, service));
+    } catch (error) {
+      console.error(`Failed to increment usage for ${service}:`, error);
+    }
+  }
+
+  async incrementError(service: string): Promise<void> {
+    try {
+      const current = await this.getCredential(service);
+      if (!current) return;
+
+      await db.update(evolutionApiKeyVault)
+        .set({ 
+          errorCount: (current.errorCount || 0) + 1,
+          updatedAt: new Date()
+        })
+        .where(eq(evolutionApiKeyVault.service, service));
+    } catch (error) {
+      console.error(`Failed to increment error count for ${service}:`, error);
+    }
+  }
+
+  async listAllCredentials(): Promise<Omit<ApiCredential, 'apiKey' | 'secretKey'>[]> {
+    try {
+      const results = await db.select().from(evolutionApiKeyVault);
+      
+      return results.map(entry => {
+        const metadata = entry.metadata as any;
+        return {
+          id: metadata.id || entry.service,
+          service: entry.service,
+          status: entry.keyStatus as any,
+          environment: metadata.environment || 'paper',
+          lastUsed: entry.lastUsed || undefined,
+          usageCount: entry.usageCount || 0,
+          errorCount: entry.errorCount || 0,
+          metadata: metadata
+        };
+      });
+    } catch (error) {
+      console.error('Failed to list credentials:', error);
+      return [];
+    }
+  }
+
+  async deleteCredential(service: string): Promise<boolean> {
+    try {
+      await db.delete(evolutionApiKeyVault)
+        .where(eq(evolutionApiKeyVault.service, service));
+      
+      console.log(`🗑️ Credential deleted for ${service}`);
+      return true;
+    } catch (error) {
+      console.error(`Failed to delete credential for ${service}:`, error);
+      return false;
+    }
+  }
+
+  async validateCredential(service: string): Promise<{ valid: boolean; message: string }> {
+    const credential = await this.getCredential(service);
+    
+    if (!credential) {
+      return { valid: false, message: 'Credential not found' };
+    }
+
+    if (credential.status === 'expired' || credential.status === 'inactive') {
+      return { valid: false, message: `Credential is ${credential.status}` };
+    }
+
+    // Perform service-specific validation
+    switch (service) {
+      case 'alpaca':
+        return this.validateAlpacaCredential(credential);
+      case 'coinbase':
+        return this.validateCoinbaseCredential(credential);
+      case 'openai':
+        return this.validateOpenAICredential(credential);
+      default:
+        return { valid: true, message: 'Credential appears valid' };
+    }
+  }
+
+  private async validateAlpacaCredential(credential: ApiCredential): Promise<{ valid: boolean; message: string }> {
+    try {
+      // Basic validation - check if keys exist and have proper format
+      if (!credential.apiKey || !credential.secretKey) {
+        return { valid: false, message: 'Missing API key or secret key' };
       }
-    });
-  }
 
-  getAllKeys(): StoredAPIKey[] {
-    return Array.from(this.keys.values()).map(key => ({
-      ...key,
-      keyValue: this.maskKey(key.keyValue)
-    }));
-  }
+      if (credential.apiKey.length < 20 || credential.secretKey.length < 30) {
+        return { valid: false, message: 'API keys appear to be invalid format' };
+      }
 
-  getKey(id: string): StoredAPIKey | null {
-    return this.keys.get(id) || null;
-  }
-
-  addKey(keyData: Omit<StoredAPIKey, 'id' | 'createdAt' | 'updatedAt' | 'usageCount' | 'lastUsed' | 'status'>): StoredAPIKey {
-    const id = crypto.randomUUID();
-    const now = new Date().toISOString();
-    
-    const newKey: StoredAPIKey = {
-      id,
-      ...keyData,
-      keyValue: this.encrypt(keyData.keyValue),
-      status: 'active',
-      usageCount: 0,
-      lastUsed: 'Never',
-      createdAt: now,
-      updatedAt: now
-    };
-
-    this.keys.set(id, newKey);
-    
-    // Also set as environment variable for immediate use
-    process.env[keyData.keyName] = keyData.keyValue;
-    
-    return {
-      ...newKey,
-      keyValue: this.maskKey(keyData.keyValue)
-    };
-  }
-
-  updateKey(id: string, updates: Partial<StoredAPIKey>): StoredAPIKey | null {
-    const existingKey = this.keys.get(id);
-    if (!existingKey) return null;
-
-    const updatedKey = {
-      ...existingKey,
-      ...updates,
-      updatedAt: new Date().toISOString()
-    };
-
-    if (updates.keyValue) {
-      updatedKey.keyValue = this.encrypt(updates.keyValue);
-      // Update environment variable
-      process.env[existingKey.keyName] = updates.keyValue;
-    }
-
-    this.keys.set(id, updatedKey);
-    
-    return {
-      ...updatedKey,
-      keyValue: this.maskKey(this.decrypt(updatedKey.keyValue))
-    };
-  }
-
-  deleteKey(id: string): boolean {
-    const key = this.keys.get(id);
-    if (!key) return false;
-
-    // Remove from environment
-    delete process.env[key.keyName];
-    
-    return this.keys.delete(id);
-  }
-
-  incrementUsage(keyName: string): void {
-    const key = Array.from(this.keys.values()).find(k => k.keyName === keyName);
-    if (key) {
-      key.usageCount++;
-      key.lastUsed = new Date().toLocaleString();
-      this.keys.set(key.id, key);
+      return { valid: true, message: 'Alpaca credentials appear valid' };
+    } catch (error) {
+      return { valid: false, message: 'Validation failed' };
     }
   }
 
-  validateKey(service: string, keyValue: string): Promise<boolean> {
-    // Add service-specific validation logic here
-    return Promise.resolve(true);
+  private async validateCoinbaseCredential(credential: ApiCredential): Promise<{ valid: boolean; message: string }> {
+    try {
+      if (!credential.apiKey || !credential.secretKey) {
+        return { valid: false, message: 'Missing API key or secret key' };
+      }
+
+      return { valid: true, message: 'Coinbase credentials appear valid' };
+    } catch (error) {
+      return { valid: false, message: 'Validation failed' };
+    }
   }
 
-  private maskKey(key: string): string {
-    if (key.length <= 8) return '*'.repeat(key.length);
-    return key.substring(0, 4) + '*'.repeat(key.length - 8) + key.substring(key.length - 4);
-  }
+  private async validateOpenAICredential(credential: ApiCredential): Promise<{ valid: boolean; message: string }> {
+    try {
+      if (!credential.apiKey || !credential.apiKey.startsWith('sk-')) {
+        return { valid: false, message: 'Invalid OpenAI API key format' };
+      }
 
-  getKeysByService(service: string): StoredAPIKey[] {
-    return Array.from(this.keys.values())
-      .filter(key => key.service === service)
-      .map(key => ({
-        ...key,
-        keyValue: this.maskKey(key.keyValue)
-      }));
-  }
-
-  getKeyStatistics() {
-    const keys = Array.from(this.keys.values());
-    return {
-      total: keys.length,
-      active: keys.filter(k => k.status === 'active').length,
-      inactive: keys.filter(k => k.status === 'inactive').length,
-      byService: keys.reduce((acc, key) => {
-        acc[key.service] = (acc[key.service] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>),
-      totalUsage: keys.reduce((sum, key) => sum + key.usageCount, 0)
-    };
+      return { valid: true, message: 'OpenAI credentials appear valid' };
+    } catch (error) {
+      return { valid: false, message: 'Validation failed' };
+    }
   }
 }
 
-export const apiVaultService = new APIVaultService();
-
-// Express route handlers
-export const getAPIKeys = (req: Request, res: Response) => {
-  try {
-    const keys = apiVaultService.getAllKeys();
-    const stats = apiVaultService.getKeyStatistics();
-    
-    res.json({
-      success: true,
-      keys,
-      statistics: stats
-    });
-  } catch (error) {
-    console.error('Error fetching API keys:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch API keys'
-    });
-  }
-};
-
-export const addAPIKey = (req: Request, res: Response) => {
-  try {
-    const { service, keyName, keyValue, environment, description } = req.body;
-    
-    if (!service || !keyName || !keyValue) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: service, keyName, keyValue'
-      });
-    }
-
-    const newKey = apiVaultService.addKey({
-      service,
-      keyName,
-      keyValue,
-      environment: environment || 'development',
-      description: description || ''
-    });
-
-    res.json({
-      success: true,
-      key: newKey,
-      message: 'API key added successfully'
-    });
-  } catch (error) {
-    console.error('Error adding API key:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to add API key'
-    });
-  }
-};
-
-export const updateAPIKey = (req: Request, res: Response) => {
-  try {
-    const { keyId } = req.params;
-    const updates = req.body;
-    
-    const updatedKey = apiVaultService.updateKey(keyId, updates);
-    
-    if (!updatedKey) {
-      return res.status(404).json({
-        success: false,
-        error: 'API key not found'
-      });
-    }
-
-    res.json({
-      success: true,
-      key: updatedKey,
-      message: 'API key updated successfully'
-    });
-  } catch (error) {
-    console.error('Error updating API key:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to update API key'
-    });
-  }
-};
-
-export const deleteAPIKey = (req: Request, res: Response) => {
-  try {
-    const { keyId } = req.params;
-    
-    const deleted = apiVaultService.deleteKey(keyId);
-    
-    if (!deleted) {
-      return res.status(404).json({
-        success: false,
-        error: 'API key not found'
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'API key deleted successfully'
-    });
-  } catch (error) {
-    console.error('Error deleting API key:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to delete API key'
-    });
-  }
-};
-
-export const getKeysByService = (req: Request, res: Response) => {
-  try {
-    const { service } = req.params;
-    const keys = apiVaultService.getKeysByService(service);
-    
-    res.json({
-      success: true,
-      keys,
-      service
-    });
-  } catch (error) {
-    console.error('Error fetching keys by service:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch keys by service'
-    });
-  }
-};
+export const apiVaultService = new ApiVaultService();

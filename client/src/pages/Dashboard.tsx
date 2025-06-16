@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import CanvasWidget from "@/components/CanvasWidget";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, DollarSign, Brain, FileText, Users, Settings, LogOut, Bot, Kanban, TrendingUp, Zap, Shield } from "lucide-react";
+import { Calendar, DollarSign, Brain, FileText, Users, Settings, LogOut, Bot, Kanban, TrendingUp, Zap } from "lucide-react";
 
 export function Dashboard() {
   const { user } = useAuth();
@@ -90,13 +90,6 @@ export function Dashboard() {
       icon: Bot,
       path: "/ai-assistant",
       color: "cyan"
-    },
-    {
-      title: "API Vault",
-      description: "Secure API key management with encryption and monitoring",
-      icon: Shield,
-      path: "/api-vault",
-      color: "emerald"
     }
   ];
 
@@ -274,7 +267,9 @@ export function Dashboard() {
 }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { LiveTradingPanel } from '../components/LiveTradingPanel';
-import AlpacaAPIKeyFinder from '../components/AlpacaAPIKeyFinder';
+import { AlpacaAPIKeyFinder } from "../components/AlpacaAPIKeyFinder";
+import { ApiVaultDashboard } from "../components/ApiVaultDashboard";
+import { Key, Shield } from "lucide-react";
 
 export function TradingDashboard() {
   return (
@@ -283,7 +278,11 @@ export function TradingDashboard() {
         <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="trading">Trading</TabsTrigger>
-              <TabsTrigger value="alpaca-setup">Alpaca Setup</TabsTrigger>
+              <TabsTrigger value="api-vault" className="flex items-center space-x-2">
+              <Shield className="h-4 w-4" />
+              <span>API Vault</span>
+            </TabsTrigger>
+            <TabsTrigger value="alpaca-setup">Alpaca Setup</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
@@ -294,7 +293,11 @@ export function TradingDashboard() {
               <LiveTradingPanel />
             </TabsContent>
 
-            <TabsContent value="alpaca-setup" className="space-y-4">
+            <TabsContent value="api-vault">
+          <ApiVaultDashboard />
+        </TabsContent>
+
+        <TabsContent value="alpaca-setup" className="space-y-4">
               <AlpacaAPIKeyFinder />
             </TabsContent>
         <TabsContent value="analytics" className="space-y-4">
