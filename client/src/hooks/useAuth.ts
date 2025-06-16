@@ -6,7 +6,7 @@ interface User {
 }
 
 export function useAuth() {
-  // Simplified auth hook without React Query to prevent errors
+  // Simplified auth hook to prevent React errors
   return {
     isAuthenticated: true,
     user: { 

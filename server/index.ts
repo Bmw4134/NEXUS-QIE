@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
+import { registerBasicEndpoints } from "./basic-api-endpoints";
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '5000', 10);
@@ -39,6 +40,9 @@ app.get('/api/balance', async (req, res) => {
     });
   }
 });
+
+// Register basic API endpoints
+registerBasicEndpoints(app);
 
 // Auth endpoints
 app.post('/api/auth/login', (req, res) => {

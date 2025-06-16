@@ -37,4 +37,18 @@ export function registerBasicEndpoints(app: any) {
       timestamp: new Date().toISOString()
     });
   });
+
+  // Alerts endpoint
+  app.get('/api/alerts', (req: any, res: any) => {
+    res.json({ 
+      alerts: [
+        {
+          id: '1',
+          type: 'info',
+          message: 'System running normally',
+          timestamp: new Date().toISOString()
+        }
+      ]
+    });
+  });
 }

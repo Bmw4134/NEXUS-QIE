@@ -204,7 +204,7 @@ export class NexusWebSocketManager {
     this.connectionState = 'disconnected';
   }
 
-  private connect() {
+  private connectSafely() {
     if (this.ws?.readyState === WebSocket.OPEN) {
       return;
     }
@@ -216,43 +216,49 @@ export class NexusWebSocketManager {
         return;
       }
 
-      // Create WebSocket connection with error handling
-      const wsUrl = this.url.replace('undefined', window.location.port || '5000');
-      console.log('🔌 Attempting WebSocket connection to:', wsUrl);
+      // Only attempt connection if we haven't exceeded retry limit
+      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+        console.log('⚠️ WebSocket connection disabled - max retries exceeded');
+        return;
+      }
+
+      // Build proper WebSocket URL
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.host;
+      const wsUrl = `${protocol}//${host}/ws`;
 
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
         console.log('✅ WebSocket connected');
         this.reconnectAttempts = 0;
-        this.emit('connected');
+        this.connectionState = 'connected';
       };
 
       this.ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          this.emit('message', data);
+          this.handleMessage(data);
         } catch (error) {
           console.error('WebSocket message parse error:', error);
         }
       };
 
       this.ws.onclose = () => {
-        console.log('❌ WebSocket disconnected');
-        this.emit('disconnected');
-        // Don't automatically reconnect to prevent spam
-        if (this.reconnectAttempts < 3) {
-          this.scheduleReconnect();
+        this.connectionState = 'disconnected';
+        // Don't spam reconnection attempts
+        if (this.reconnectAttempts < 2) {
+          setTimeout(() => this.scheduleReconnect(), 5000);
         }
       };
 
       this.ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        this.emit('error', error);
+        this.connectionState = 'error';
+        // Silently handle errors to prevent console spam
       };
 
     } catch (error) {
-      console.error('WebSocket connection failed:', error);
+      this.connectionState = 'error';
       // Don't retry on constructor errors
     }
   }
