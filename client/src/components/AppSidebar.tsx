@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'wouter';
 import { 
@@ -263,7 +262,7 @@ function AppSidebarContent() {
 
 export function AppSidebar() {
   const { isMobile } = useResponsive();
-  
+
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <Sidebar 
