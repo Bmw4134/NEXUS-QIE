@@ -37,12 +37,16 @@ class NexusEmergencyServer {
   }
 
   private setupRoutes() {
-    // Serve static files from dist directory
-    const clientDistPath = path.join(__dirname, '..', 'dist', 'public');
+    // Serve static files from multiple possible locations
+    const clientDistPath = path.join(__dirname, '..', 'dist');
+    const clientPublicPath = path.join(__dirname, '..', 'dist', 'public');
+    const clientBuildPath = path.join(__dirname, '..', 'client', 'dist');
     const clientPath = path.join(__dirname, '..', 'client');
 
     this.app.use(express.static(clientDistPath));
-    this.app.use(express.static(path.join(clientPath, 'dist')));
+    this.app.use(express.static(clientPublicPath));
+    this.app.use(express.static(clientBuildPath));
+    this.app.use(express.static(clientPath));
 
     // Emergency API endpoints
     this.app.get('/api/health', (req, res) => {
