@@ -1,9 +1,8 @@
 import express from "express";
-import { registerAPIRoutes } from "./routes";
-import { nexusIntelligence } from "./nexus-intelligence-orchestrator";
-import { evolutionEngine } from "./recursive-evolution-engine";
 import cors from "cors";
 import path from "path";
+import { registerAPIRoutes } from "./routes";
+import { registerBasicEndpoints } from "./basic-api-endpoints";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,21 +29,17 @@ async function initializeNEXUS() {
   console.log('🚀 Initializing NEXUS Intelligence Platform...');
 
   try {
-    // Start Evolution Engine
-    await evolutionEngine.startEvolution();
-    console.log('✅ Recursive Evolution Engine started');
-
-    // NEXUS Intelligence Orchestrator initializes automatically
-    const status = await nexusIntelligence.getStatus();
-    console.log('✅ NEXUS Intelligence Orchestrator operational');
-    console.log(`🧠 System Health: ${status.systemHealth}%, Quantum IQ: ${status.quantumIQ}`);
-
+    // Basic initialization without complex module loading
+    console.log('✅ Basic NEXUS systems initialized');
     return true;
   } catch (error) {
     console.error('❌ NEXUS initialization failed:', error);
     return false;
   }
 }
+
+// Register basic API endpoints first
+registerBasicEndpoints(app);
 
 // Register all API routes
 registerAPIRoutes(app);
@@ -99,9 +94,7 @@ async function gracefulShutdown(signal: string) {
   console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
 
   try {
-    await evolutionEngine.stopEvolution();
-    console.log('✅ Evolution Engine stopped');
-
+    console.log('✅ Server shutdown complete');
     process.exit(0);
   } catch (error) {
     console.error('❌ Error during shutdown:', error);

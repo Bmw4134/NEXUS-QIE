@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 
 interface WebSocketMessage {
@@ -77,7 +76,7 @@ export class NexusWebSocketManager {
           console.log('🔌 WebSocket connection closed:', event.code, event.reason);
           this.connectionState = 'disconnected';
           this.stopHeartbeat();
-          
+
           if (!event.wasClean && this.reconnectAttempts < this.maxReconnectAttempts) {
             this.scheduleReconnect();
           }
@@ -87,7 +86,7 @@ export class NexusWebSocketManager {
           console.error('❌ WebSocket error:', error);
           this.connectionState = 'error';
           this.stopHeartbeat();
-          
+
           if (this.reconnectAttempts === 0) {
             reject(error);
           }
@@ -119,9 +118,9 @@ export class NexusWebSocketManager {
 
     this.reconnectAttempts++;
     const delay = this.reconnectInterval * Math.pow(1.5, this.reconnectAttempts - 1);
-    
+
     console.log(`🔄 Scheduling WebSocket reconnect attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
-    
+
     setTimeout(() => {
       this.connect().catch(error => {
         console.error('Reconnection failed:', error);
@@ -162,7 +161,7 @@ export class NexusWebSocketManager {
         data,
         timestamp: Date.now()
       };
-      
+
       try {
         this.ws.send(JSON.stringify(message));
       } catch (error) {
@@ -177,9 +176,9 @@ export class NexusWebSocketManager {
     if (!this.listeners.has(type)) {
       this.listeners.set(type, []);
     }
-    
+
     this.listeners.get(type)!.push(listener);
-    
+
     // Return unsubscribe function
     return () => {
       const listeners = this.listeners.get(type);
@@ -203,6 +202,59 @@ export class NexusWebSocketManager {
       this.ws = null;
     }
     this.connectionState = 'disconnected';
+  }
+
+  private connect() {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      return;
+    }
+
+    try {
+      // Check if we're in a browser environment
+      if (typeof window === 'undefined') {
+        console.log('⚠️ WebSocket not available in server environment');
+        return;
+      }
+
+      // Create WebSocket connection with error handling
+      const wsUrl = this.url.replace('undefined', window.location.port || '5000');
+      console.log('🔌 Attempting WebSocket connection to:', wsUrl);
+
+      this.ws = new WebSocket(wsUrl);
+
+      this.ws.onopen = () => {
+        console.log('✅ WebSocket connected');
+        this.reconnectAttempts = 0;
+        this.emit('connected');
+      };
+
+      this.ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          this.emit('message', data);
+        } catch (error) {
+          console.error('WebSocket message parse error:', error);
+        }
+      };
+
+      this.ws.onclose = () => {
+        console.log('❌ WebSocket disconnected');
+        this.emit('disconnected');
+        // Don't automatically reconnect to prevent spam
+        if (this.reconnectAttempts < 3) {
+          this.scheduleReconnect();
+        }
+      };
+
+      this.ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        this.emit('error', error);
+      };
+
+    } catch (error) {
+      console.error('WebSocket connection failed:', error);
+      // Don't retry on constructor errors
+    }
   }
 }
 

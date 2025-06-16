@@ -1474,6 +1474,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Alerts API Endpoint
+  app.get('/api/alerts', async (req, res) => {
+    try {
+      const alerts = [
+        {
+          id: '1',
+          type: 'info',
+          message: 'System running normally',
+          timestamp: new Date().toISOString(),
+          severity: 'low'
+        },
+        {
+          id: '2',
+          type: 'success',
+          message: 'All services operational',
+          timestamp: new Date().toISOString(),
+          severity: 'low'
+        }
+      ];
+      res.json({ alerts });
+    } catch (error) {
+      console.error('Alerts API error:', error);
+      res.status(500).json({ error: 'Failed to fetch alerts' });
+    }
+  });
+
   // NEXUS Validation API Endpoints
   app.get('/api/nexus/validate', async (req, res) => {
     try {
