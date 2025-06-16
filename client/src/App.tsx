@@ -8,6 +8,7 @@ import { AutonomousTraderPanel } from './components/AutonomousTraderPanel';
 import { RecursiveEvolutionDashboard } from './components/RecursiveEvolutionDashboard';
 import { QuantumStealthDashboard } from './components/QuantumStealthDashboard';
 import { InvestorMode } from './components/InvestorMode';
+import { Trifecta } from './components/Trifecta';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
 import { Badge } from './components/ui/badge';
 import { Brain, Zap, TrendingUp, Shield, DollarSign, Activity, Database, Cpu, Network, Lock, Eye, Layers, Globe, Star } from 'lucide-react';
@@ -524,6 +525,61 @@ export default function App() {
                     </CardHeader>
                     <CardContent style={{ height: 'calc(100% - 90px)', position: 'relative', zIndex: 1 }}>
                       <AutonomousTraderPanel />
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* TRIFECTA CORE SYSTEM - The Crown Jewel */}
+                <div style={{ marginBottom: '30px' }}>
+                  <Card style={{
+                    backgroundColor: 'rgba(0, 17, 34, 0.98)',
+                    border: '4px solid #ff00ff',
+                    borderRadius: '20px',
+                    boxShadow: '0 30px 100px rgba(255, 0, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                    backdropFilter: 'blur(15px)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'radial-gradient(circle at 50% 50%, rgba(255, 0, 255, 0.08) 0%, transparent 70%)',
+                      pointerEvents: 'none'
+                    }}></div>
+                    <CardHeader>
+                      <CardTitle style={{ 
+                        color: '#ff00ff',
+                        fontSize: '32px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '20px',
+                        textShadow: '0 0 20px rgba(255, 0, 255, 0.8)',
+                        zIndex: 1,
+                        position: 'relative',
+                        fontWeight: 'bold',
+                        letterSpacing: '2px'
+                      }}>
+                        <Star className="w-12 h-12" />
+                        🌌 TRIFECTA QUANTUM SUPREMACY CORE SYSTEM 🌌
+                        <Badge style={{ 
+                          backgroundColor: 'rgba(255, 0, 255, 0.3)', 
+                          color: '#ff00ff', 
+                          border: '3px solid #ff00ff',
+                          fontSize: '16px',
+                          padding: '12px 24px',
+                          fontWeight: 'bold',
+                          boxShadow: '0 0 25px rgba(255, 0, 255, 0.8)',
+                          animation: `pulse ${1.5 / pulseIntensity}s infinite`
+                        }}>
+                          TRI-MODULE SYNCHRONIZATION ACTIVE
+                        </Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent style={{ height: '600px', position: 'relative', zIndex: 1 }}>
+                      <Trifecta />
                     </CardContent>
                   </Card>
                 </div>
