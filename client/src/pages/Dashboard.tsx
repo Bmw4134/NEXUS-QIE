@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import CanvasWidget from "@/components/CanvasWidget";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, DollarSign, Brain, FileText, Users, Settings, LogOut, Bot, Kanban, TrendingUp, Zap } from "lucide-react";
+import { Calendar, DollarSign, Brain, FileText, Users, Settings, LogOut, Bot, Kanban, TrendingUp, Zap, Shield } from "lucide-react";
 
 export function Dashboard() {
   const { user } = useAuth();
@@ -90,6 +90,13 @@ export function Dashboard() {
       icon: Bot,
       path: "/ai-assistant",
       color: "cyan"
+    },
+    {
+      title: "API Vault",
+      description: "Secure API key management with encryption and monitoring",
+      icon: Shield,
+      path: "/api-vault",
+      color: "emerald"
     }
   ];
 

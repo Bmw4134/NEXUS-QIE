@@ -3142,6 +3142,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // API Vault Management Routes
+  const { getAPIKeys, addAPIKey, updateAPIKey, deleteAPIKey, getKeysByService } = await import('./api-vault-service');
+  
+  app.get('/api/vault/keys', getAPIKeys);
+  app.post('/api/vault/keys', addAPIKey);
+  app.put('/api/vault/keys/:keyId', updateAPIKey);
+  app.delete('/api/vault/keys/:keyId', deleteAPIKey);
+  app.get('/api/vault/keys/service/:service', getKeysByService);
+
+  app.get('/api/vault/status', (req, res) => {
+    try {
+      const { apiVaultService } = require('./api-vault-service');
+      const stats = apiVaultService.getKeyStatistics();
+      
+      res.json({
+        success: true,
+        status: 'operational',
+        encryption: 'AES-256',
+        statistics: stats,
+        integrations: {
+          replitSecrets: true,
+          environmentVariables: true,
+          autoSync: true
+        }
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get vault status'
+      });
+    }
+  });
+
   app.get('/api/public-apis/advice', async (req, res) => {
     try {
       const result = await publicApisService.getRandomAdvice();
