@@ -53,7 +53,7 @@ export class AlpacaTradeEngine {
 
   private async initialize() {
     console.log('🔐 Initializing NEXUS Alpaca Trading Engine...');
-    
+
     if (!process.env.ALPACA_API_KEY || !process.env.ALPACA_SECRET_KEY) {
       console.log('⚠️ Alpaca credentials not found - using simulation mode');
       this.initializeSimulationMode();
@@ -82,7 +82,7 @@ try:
         secret_key=os.getenv("ALPACA_SECRET_KEY"),
         paper=True  # Start with paper trading for safety
     )
-    
+
     account = client.get_account()
     print(f"ALPACA_AUTH_SUCCESS:{account.cash}:{account.buying_power}:{account.portfolio_value}")
 except Exception as e:
@@ -139,7 +139,7 @@ except Exception as e:
 
     console.log(`🎯 Executing Alpaca trade: ${request.side.toUpperCase()} ${request.quantity} ${request.symbol}`);
 
-    if (!process.env.ALPACA_KEY || !process.env.ALPACA_SECRET) {
+    if (!process.env.ALPACA_API_KEY || !process.env.ALPACA_SECRET_KEY) {
       return this.simulateTrade(request);
     }
 
@@ -157,13 +157,13 @@ import json
 
 try:
     client = TradingClient(
-        api_key=os.getenv("ALPACA_KEY"),
-        secret_key=os.getenv("ALPACA_SECRET"),
+        api_key=os.getenv("ALPACA_API_KEY"),
+        secret_key=os.getenv("ALPACA_SECRET_KEY"),
         paper=False
     )
-    
+
     side = OrderSide.BUY if "${request.side}" == "buy" else OrderSide.SELL
-    
+
     if "${request.orderType}" == "market":
         order_request = MarketOrderRequest(
             symbol="${request.symbol}",
@@ -179,10 +179,10 @@ try:
             time_in_force=TimeInForce.DAY,
             limit_price=${request.limitPrice || 0}
         )
-    
+
     order = client.submit_order(order_request)
     account = client.get_account()
-    
+
     result = {
         "orderId": str(order.id),
         "symbol": order.symbol,
@@ -192,9 +192,9 @@ try:
         "timestamp": order.created_at.isoformat(),
         "accountBalance": float(account.cash)
     }
-    
+
     print(f"ALPACA_TRADE_SUCCESS:{json.dumps(result)}")
-    
+
 except Exception as e:
     print(f"ALPACA_TRADE_ERROR:{str(e)}")
 `;
@@ -227,7 +227,7 @@ except Exception as e:
     const orderId = `SIM-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const executedPrice = this.getSimulatedPrice(request.symbol);
     const totalCost = request.quantity * executedPrice;
-    
+
     if (request.side === 'buy' && this.accountData) {
       this.accountData.cash -= totalCost;
     } else if (request.side === 'sell' && this.accountData) {
@@ -257,7 +257,7 @@ except Exception as e:
       'SPY': 450.00,
       'QQQ': 350.00
     };
-    
+
     const basePrice = prices[symbol] || 100.00;
     const variation = (Math.random() - 0.5) * 0.02; // ±1% variation
     return basePrice * (1 + variation);
@@ -268,7 +268,7 @@ except Exception as e:
       throw new Error('Alpaca trading engine not initialized');
     }
 
-    if (!process.env.ALPACA_KEY || !process.env.ALPACA_SECRET) {
+    if (!process.env.ALPACA_API_KEY || !process.env.ALPACA_SECRET_KEY) {
       return this.accountData;
     }
 
@@ -281,14 +281,14 @@ import json
 
 try:
     client = TradingClient(
-        api_key=os.getenv("ALPACA_KEY"),
-        secret_key=os.getenv("ALPACA_SECRET"),
+        api_key=os.getenv("ALPACA_API_KEY"),
+        secret_key=os.getenv("ALPACA_SECRET_KEY"),
         paper=False
     )
-    
+
     account = client.get_account()
     positions = client.get_all_positions()
-    
+
     position_data = []
     for pos in positions:
         position_data.append({
@@ -299,7 +299,7 @@ try:
             "unrealizedPnl": float(pos.unrealized_pl),
             "side": "long" if float(pos.qty) > 0 else "short"
         })
-    
+
     result = {
         "cash": float(account.cash),
         "buyingPower": float(account.buying_power),
@@ -307,9 +307,9 @@ try:
         "dayTradeCount": int(account.daytrade_count),
         "positions": position_data
     }
-    
+
     print(f"ALPACA_ACCOUNT_SUCCESS:{json.dumps(result)}")
-    
+
 except Exception as e:
     print(f"ALPACA_ACCOUNT_ERROR:{str(e)}")
 `;
@@ -342,7 +342,7 @@ except Exception as e:
   }
 
   isLiveMode(): boolean {
-    return !!(process.env.ALPACA_KEY && process.env.ALPACA_SECRET);
+    return !!(process.env.ALPACA_API_KEY && process.env.ALPACA_SECRET_KEY);
   }
 
   getConnectionStatus() {
