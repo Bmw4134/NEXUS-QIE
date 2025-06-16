@@ -317,10 +317,64 @@ export function EnhancedDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Streamlined Header - Reduced Height for Better Flow */}
-      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-8xl mx-auto px-6 lg:px-8">
-          <div className="flex justify-between items-center py-3">
+      {/* Sidebar Navigation */}
+      <div className="fixed left-0 top-0 h-full w-64 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-r border-gray-200/50 dark:border-gray-700/50 z-40 shadow-lg">
+        <div className="p-4">
+          <div className="flex items-center space-x-3 mb-8">
+            <Shield className="h-8 w-8 text-blue-600" />
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">NEXUS</h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Trading Suite</p>
+            </div>
+          </div>
+          
+          <nav className="space-y-2">
+            <Link href="/">
+              <Button variant="ghost" className="w-full justify-start">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Dashboard
+              </Button>
+            </Link>
+            <Link href="/api-vault">
+              <Button variant="ghost" className="w-full justify-start">
+                <Settings className="w-4 h-4 mr-2" />
+                API Vault
+              </Button>
+            </Link>
+            <Link href="/wealth-pulse">
+              <Button variant="ghost" className="w-full justify-start">
+                <TrendingUp className="w-4 h-4 mr-2" />
+                Wealth Pulse
+              </Button>
+            </Link>
+            <Link href="/quantum-insights">
+              <Button variant="ghost" className="w-full justify-start">
+                <Brain className="w-4 h-4 mr-2" />
+                Quantum Insights
+              </Button>
+            </Link>
+            <Link href="/smart-planner">
+              <Button variant="ghost" className="w-full justify-start">
+                <Calendar className="w-4 h-4 mr-2" />
+                Smart Planner
+              </Button>
+            </Link>
+            <Link href="/family-sync">
+              <Button variant="ghost" className="w-full justify-start">
+                <Users className="w-4 h-4 mr-2" />
+                Family Sync
+              </Button>
+            </Link>
+          </nav>
+        </div>
+      </div>
+
+      {/* Main Content with Sidebar Offset */}
+      <div className="ml-64">
+        {/* Streamlined Header - Reduced Height for Better Flow */}
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-50 shadow-sm">
+          <div className="max-w-8xl mx-auto px-6 lg:px-8">
+            <div className="flex justify-between items-center py-3">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3">
                 <Shield className="h-8 w-8 text-blue-600" />
