@@ -6,6 +6,35 @@ interface WebSocketMessage {
   data: any;
 }
 
+export function createWebSocketConnection(url: string) {
+  try {
+    // Validate WebSocket URL format
+    if (!url || url.includes('undefined') || url.includes('localhost:undefined')) {
+      console.warn('Invalid WebSocket URL detected:', url);
+      return null;
+    }
+
+    const ws = new WebSocket(url);
+
+    ws.onopen = () => {
+      console.log('WebSocket connected to:', url);
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error for URL:', url, error);
+    };
+
+    ws.onclose = (event) => {
+      console.log('WebSocket disconnected:', event.code, event.reason);
+    };
+
+    return ws;
+  } catch (error) {
+    console.error('Failed to create WebSocket connection:', error);
+    return null;
+  }
+}
+
 export function useWebSocket() {
   const wsRef = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -18,48 +47,54 @@ export function useWebSocket() {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const hostname = window.location.hostname || 'localhost';
       const port = process.env.NODE_ENV === 'development' ? '5000' : window.location.port;
-      
+
       const wsUrl = process.env.NODE_ENV === 'development' 
         ? `ws://${hostname}:5000`
         : `wss://${hostname}${port ? `:${port}` : ''}`;
 
       console.log('Connecting to WebSocket:', wsUrl);
-      wsRef.current = new WebSocket(wsUrl);
+      const ws = createWebSocketConnection(wsUrl);
 
-      wsRef.current.onopen = () => {
-        console.log('WebSocket connected');
-        setIsConnected(true);
-        reconnectAttempts.current = 0;
-      };
+      if (ws) {
+        wsRef.current = ws;
 
-      wsRef.current.onmessage = (event) => {
-        try {
-          const message: WebSocketMessage = JSON.parse(event.data);
-          handleMessage(message);
-        } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
-        }
-      };
+        wsRef.current.onopen = () => {
+          console.log('WebSocket connected');
+          setIsConnected(true);
+          reconnectAttempts.current = 0;
+        };
 
-      wsRef.current.onclose = () => {
-        console.log('WebSocket disconnected');
-        setIsConnected(false);
+        wsRef.current.onmessage = (event) => {
+          try {
+            const message: WebSocketMessage = JSON.parse(event.data);
+            handleMessage(message);
+          } catch (error) {
+            console.error('Error parsing WebSocket message:', error);
+          }
+        };
 
-        // Attempt to reconnect
-        if (reconnectAttempts.current < maxReconnectAttempts) {
-          reconnectAttempts.current++;
-          const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
+        wsRef.current.onclose = () => {
+          console.log('WebSocket disconnected');
+          setIsConnected(false);
 
-          reconnectTimeoutRef.current = setTimeout(() => {
-            console.log(`Attempting to reconnect (${reconnectAttempts.current}/${maxReconnectAttempts})...`);
-            connect();
-          }, delay);
-        }
-      };
+          // Attempt to reconnect
+          if (reconnectAttempts.current < maxReconnectAttempts) {
+            reconnectAttempts.current++;
+            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
 
-      wsRef.current.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
+            reconnectTimeoutRef.current = setTimeout(() => {
+              console.log(`Attempting to reconnect (${reconnectAttempts.current}/${maxReconnectAttempts})...`);
+              connect();
+            }, delay);
+          }
+        };
+
+        wsRef.current.onerror = (error) => {
+          console.error('WebSocket error:', error);
+        };
+      } else {
+        console.error('Failed to create WebSocket connection.');
+      }
 
     } catch (error) {
       console.error('Error creating WebSocket connection:', error);
