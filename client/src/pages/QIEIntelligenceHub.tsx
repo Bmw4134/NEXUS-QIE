@@ -127,11 +127,25 @@ export default function QIEIntelligenceHub() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="platforms">Platforms</TabsTrigger>
-          <TabsTrigger value="agents">Agents</TabsTrigger>
-          <TabsTrigger value="cognition">Cognition</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-6 bg-black/20 border border-gray-700">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400">
+            🎯 Intelligence Overview
+          </TabsTrigger>
+          <TabsTrigger value="signals" className="data-[state=active]:bg-purple-600/20 data-[state=active]:text-purple-400">
+            ⚡ Signal Processing
+          </TabsTrigger>
+          <TabsTrigger value="cognition" className="data-[state=active]:bg-green-600/20 data-[state=active]:text-green-400">
+            🧠 Cognition Engine
+          </TabsTrigger>
+          <TabsTrigger value="quantum-evolution" className="data-[state=active]:bg-cyan-600/20 data-[state=active]:text-cyan-400">
+            🌌 Quantum Evolution
+          </TabsTrigger>
+          <TabsTrigger value="autonomous-systems" className="data-[state=active]:bg-orange-600/20 data-[state=active]:text-orange-400">
+            🤖 Autonomous Systems
+          </TabsTrigger>
+          <TabsTrigger value="system" className="data-[state=active]:bg-red-600/20 data-[state=active]:text-red-400">
+            🛡️ System Status
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -367,7 +381,7 @@ export default function QIEIntelligenceHub() {
                   <p className="text-sm text-gray-600">Accuracy Rate</p>
                 </div>
               </div>
-              
+
               <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                 <div className="flex items-center space-x-2">
                   <AlertTriangle className="h-5 w-5 text-yellow-600" />

@@ -4,14 +4,22 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
+// Import all your sophisticated pages
+import QIEIntelligenceHub from './pages/QIEIntelligenceHub';
+import EnhancedDashboard from './pages/EnhancedDashboard';
+import { LandingPage } from '@/pages/LandingPage';
+import { LoginPage } from '@/pages/LoginPage';
+import { Dashboard } from '@/pages/Dashboard';
+import { QIEEngine } from '@/components/QIEEngine';
+import { RecursiveEvolutionDashboard } from '@/components/RecursiveEvolutionDashboard';
+import { QuantumStealthDashboard } from '@/components/QuantumStealthDashboard';
+
 // Import the sophisticated NEXUS components
 import { NexusQuantumDashboard } from '@/components/dashboard/nexus-quantum-dashboard';
 import { CompetitiveIntelligencePanel } from '@/components/dashboard/competitive-intelligence-panel';
 import { UniformityMirrorDashboard } from '@/components/dashboard/uniformity-mirror-dashboard';
 import { PerformanceAnalytics } from '@/components/dashboard/performance-analytics';
 import LiveTradingDashboard from '@/components/LiveTradingDashboard';
-import { Dashboard } from '@/pages/Dashboard';
-import QIEIntelligenceHub from './pages/QIEIntelligenceHub';
 
 const queryClient = new QueryClient({
   defaultOptions: {
