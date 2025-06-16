@@ -86,24 +86,31 @@ export class QuantumStealthCryptoEngine {
 
   private generateStealthHeaders(platform: string): Record<string, string> {
     const userAgents = [
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0',
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15'
     ];
 
     const baseHeaders = {
       'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
-      'Accept': 'application/json',
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Accept-Encoding': 'gzip, deflate, br',
-      'Cache-Control': 'no-cache',
+      'Accept': 'application/json, text/plain, */*',
+      'Accept-Language': ['en-US,en;q=0.9', 'en-US,en;q=0.8,fr;q=0.6', 'en-US,en;q=0.9,es;q=0.8'][Math.floor(Math.random() * 3)],
+      'Accept-Encoding': 'gzip, deflate, br, zstd',
+      'Cache-Control': ['no-cache', 'max-age=0', 'no-store'][Math.floor(Math.random() * 3)],
       'Pragma': 'no-cache',
-      'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+      'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="121", "Google Chrome";v="121"',
       'Sec-Ch-Ua-Mobile': '?0',
-      'Sec-Ch-Ua-Platform': '"Windows"',
+      'Sec-Ch-Ua-Platform': ['"Windows"', '"macOS"', '"Linux"'][Math.floor(Math.random() * 3)],
       'Sec-Fetch-Dest': 'empty',
       'Sec-Fetch-Mode': 'cors',
-      'Sec-Fetch-Site': 'same-origin'
+      'Sec-Fetch-Site': ['same-origin', 'cross-site', 'same-site'][Math.floor(Math.random() * 3)],
+      'Connection': 'keep-alive',
+      'Upgrade-Insecure-Requests': '1',
+      'X-Forwarded-For': this.generateRandomIP(),
+      'X-Real-IP': this.generateRandomIP(),
+      'X-Client-IP': this.generateRandomIP()
     };
 
     // Platform-specific stealth headers
@@ -300,6 +307,18 @@ export class QuantumStealthCryptoEngine {
 
   private generateRequestId(): string {
     return crypto.randomUUID();
+  }
+
+  private generateRandomIP(): string {
+    // Generate realistic IP addresses from major ISP ranges
+    const ipRanges = [
+      () => `173.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`, // Comcast
+      () => `24.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`, // Comcast
+      () => `76.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`, // Verizon
+      () => `108.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`, // AT&T
+      () => `71.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}` // Charter
+    ];
+    return ipRanges[Math.floor(Math.random() * ipRanges.length)]();
   }
 
   private generateOrderId(): string {

@@ -339,10 +339,19 @@ export class QuantumRateLimitBypass {
   }
 
   private calculateOptimalSpacing(proxy: QuantumProxy): number {
-    // Calculate optimal spacing based on request count and service type
-    const baseSpacing = 100; // 100ms base
-    const loadFactor = Math.min(proxy.requestCount / 10, 5); // Scale with load
-    return baseSpacing + (loadFactor * 50);
+    // Enhanced stealth timing with human-like patterns
+    const baseSpacing = 150 + Math.random() * 200; // 150-350ms with variance
+    const loadFactor = Math.min(proxy.requestCount / 10, 3); // Reduced load scaling
+    const humanVariance = Math.random() * 100 - 50; // ±50ms human variation
+    const stealthDelay = this.isHighTrafficPeriod() ? 200 : 0; // Extra delay during high traffic
+    
+    return Math.max(50, baseSpacing + (loadFactor * 30) + humanVariance + stealthDelay);
+  }
+
+  private isHighTrafficPeriod(): boolean {
+    const hour = new Date().getHours();
+    // Market hours and high activity periods (EST)
+    return (hour >= 9 && hour <= 16) || (hour >= 20 && hour <= 23);
   }
 
   async makeQuantumRequest<T = any>(

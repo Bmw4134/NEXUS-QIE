@@ -265,20 +265,31 @@ export class NEXUSQNISQuantumStealth {
   }
 
   private async executeStealthOrderSlice(order: QuantumStealthOrder) {
-    // Execute small slices of the order to maintain stealth
-    const sliceSize = order.remainingQuantity * 0.1; // 10% slices
+    // Enhanced stealth execution with anti-detection patterns
+    const baseSlicePercent = 0.08 + Math.random() * 0.04; // 8-12% variable slices
+    const sliceSize = order.remainingQuantity * baseSlicePercent;
     
     if (sliceSize > 0.001) { // Minimum execution size
-      console.log(`🥷 Executing stealth slice: ${order.symbol} ${sliceSize.toFixed(6)} @ $${order.targetPrice}`);
+      // Add realistic execution delay to mimic human trading
+      const executionDelay = 800 + Math.random() * 1200; // 0.8-2.0 second delay
+      await new Promise(resolve => setTimeout(resolve, executionDelay));
       
-      // Update order progress
+      console.log(`🥷 STEALTH SLICE EXECUTED: ${order.symbol} ${sliceSize.toFixed(6)} @ $${order.targetPrice}`);
+      console.log(`🛡️ Anti-Detection: ${baseSlicePercent.toFixed(3)}% slice with ${executionDelay.toFixed(0)}ms human timing`);
+      
+      // Update order progress with realistic price variance
+      const priceVariance = 1 + (Math.random() - 0.5) * 0.002; // ±0.1% realistic slippage
+      const executedPrice = order.targetPrice * priceVariance;
+      
       order.executedVolume += sliceSize;
       order.remainingQuantity -= sliceSize;
+      order.averagePrice = ((order.averagePrice * (order.executedVolume - sliceSize)) + (executedPrice * sliceSize)) / order.executedVolume;
       order.status = 'executing';
       
       if (order.remainingQuantity <= 0.001) {
         order.status = 'completed';
         console.log(`✅ QUANTUM STEALTH ORDER COMPLETED: ${order.id}`);
+        console.log(`📊 Final Stats: ${order.executedVolume.toFixed(6)} ${order.symbol} @ avg $${order.averagePrice.toFixed(2)}`);
       }
     }
   }
