@@ -1,0 +1,51 @@
+DOMException {}
+stack: "SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=Gb0V1UCegWwV' is invalid.↵ at new t (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:218737)↵ at setupWebSocket (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@vite/client:536:19)↵ at fallback (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@vite/client:509:16)↵ at WebSocket.<anonymous> (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@vite/client:555:7)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: DOMException
+
+Objects are not valid as a React child (found: [object Promise]). If you meant to render a collection of children, use an array instead.
+at throwOnInvalidObjectType (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:9934:17)
+at reconcileChildFibers2 (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:10564:15)
+at reconcileChildren (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:14290:37)
+at mountIndeterminateComponent (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:14986:13)
+at beginWork (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:15914:22)
+at HTMLUnknownElement.callCallback2 (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:3674:22)
+at Object.invokeGuardedCallbackDev (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:3699:24)
+at invokeGuardedCallback (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:3733:39)
+at beginWork$1 (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:19765:15)
+at performUnitOfWork (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:19198:20)
+Objects are not valid as a React child (found: [object Promise]). If you meant to render a collection of children, use an array instead.
+at throwOnInvalidObjectType (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:9934:17)
+at reconcileChildFibers2 (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:10564:15)
+at reconcileChildren (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:14290:37)
+at mountIndeterminateComponent (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:14986:13)
+at beginWork (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:15914:22)
+at HTMLUnknownElement.callCallback2 (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:3674:22)
+at Object.invokeGuardedCallbackDev (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:3699:24)
+at invokeGuardedCallback (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:3733:39)
+at beginWork$1 (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:19765:15)
+at performUnitOfWork (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:19198:20)
+The above error occurred in the <component> component:
+
+    at component
+    at Route (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=93244283:265:16)
+    at Switch (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=93244283:321:17)
+    at Router
+    at ThemeProvider (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/src/components/theme-provider.tsx:25:3)
+    at QueryClientProvider (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=93244283:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+Objects are not valid as a React child (found: [object Promise]). If you meant to render a collection of children, use an array instead.
+at throwOnInvalidObjectType (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:9934:17)
+at reconcileChildFibers2 (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:10564:15)
+at reconcileChildren (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:14290:37)
+at mountIndeterminateComponent (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:14986:13)
+at beginWork (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:15914:22)
+at beginWork$1 (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:19753:22)
+at performUnitOfWork (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:19198:20)
+at workLoopSync (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:19137:13)
+at renderRootSync (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WERSD76P.js?v=93244283:19116:15)
+at recoverFromConcurrentError (https://6c61b826-1d0e-485c-8559-05584d15ae88-00-1v1k33b9gbogw.worf.replit.dev/@fs/home/runner/workspace/node_modu
