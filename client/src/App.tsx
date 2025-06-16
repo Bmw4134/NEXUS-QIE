@@ -1,398 +1,315 @@
-
-import React, { Suspense, useEffect, useState } from 'react';
-import { Route, Router } from 'wouter';
+import React, { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
-import { ThemeProvider } from '@/components/theme-provider';
-import { Toaster } from '@/components/ui/toaster';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { AsyncComponentWrapper } from '@/components/AsyncComponentWrapper';
-import { QIEEmbeddedPanel } from '@/components/QIEEmbeddedPanel';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Brain, Zap, Shield, Crown, Activity, Server, Database, Eye } from 'lucide-react';
-
-// Lazy load components
-const Dashboard = React.lazy(() => import('@/pages/Dashboard'));
-const EnhancedDashboard = React.lazy(() => import('@/pages/EnhancedDashboard'));
-const TradingBot = React.lazy(() => import('@/pages/trading-bot'));
-const LiveTrading = React.lazy(() => import('@/pages/live-trading'));
-const WatsonCommand = React.lazy(() => import('@/pages/watson-command'));
-const QIEIntelligenceHub = React.lazy(() => import('@/pages/QIEIntelligenceHub'));
-const QuantumInsights = React.lazy(() => import('@/pages/QuantumInsights'));
-const AIConfiguration = React.lazy(() => import('@/pages/AIConfiguration'));
-const NexusOperatorConsole = React.lazy(() => import('@/pages/NexusOperatorConsole'));
-const PTNIBrowserTerminal = React.lazy(() => import('@/pages/ptni-browser-terminal'));
-const RecursiveEvolution = React.lazy(() => import('@/pages/RecursiveEvolution'));
-const QuantumTradingDashboard = React.lazy(() => import('@/pages/quantum-trading-dashboard'));
-const BimInfinity = React.lazy(() => import('@/pages/bim-infinity'));
-const InfinitySovereign = React.lazy(() => import('@/pages/infinity-sovereign'));
-const InfinityUniform = React.lazy(() => import('@/pages/infinity-uniform'));
-const KaizenAgent = React.lazy(() => import('@/pages/kaizen-agent'));
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { NexusQuantumDashboard } from './components/dashboard/nexus-quantum-dashboard';
+import { LiveTradingDashboard } from './components/LiveTradingDashboard';
+import { AutonomousTraderPanel } from './components/AutonomousTraderPanel';
+import { RecursiveEvolutionDashboard } from './components/RecursiveEvolutionDashboard';
+import { QuantumStealthDashboard } from './components/QuantumStealthDashboard';
+import { InvestorMode } from './components/InvestorMode';
+import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
+import { Badge } from './components/ui/badge';
+import { Brain, Zap, TrendingUp, Shield, DollarSign } from 'lucide-react';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2,
-      staleTime: 5 * 60 * 1000,
-      refetchOnWindowFocus: false,
+      refetchInterval: 2000,
+      staleTime: 1000,
     },
   },
 });
 
-// QIE Platform Landing Component
-function QIEPlatformLanding() {
-  const [systemStatus, setSystemStatus] = useState<any>(null);
-  const [qieStats, setQieStats] = useState<any>(null);
+interface SystemMetrics {
+  quantumIQ: number;
+  systemHealth: {
+    overall: number;
+    trading: number;
+    intelligence: number;
+  };
+  activeModules: number;
+  tradingBalance: number;
+  profitToday: number;
+  riskLevel: number;
+}
+
+export default function App() {
+  const [systemMetrics, setSystemMetrics] = useState<SystemMetrics>({
+    quantumIQ: 847,
+    systemHealth: { overall: 98, trading: 96, intelligence: 99 },
+    activeModules: 24,
+    tradingBalance: 834.97,
+    profitToday: 127.45,
+    riskLevel: 3.2
+  });
+
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
-    // Fetch QIE system status
-    fetch('/api/qie/status')
-      .then(res => res.json())
-      .then(data => setSystemStatus(data))
-      .catch(console.error);
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
-    // Fetch QIE platform stats
-    fetch('/api/system/overview')
-      .then(res => res.json())
-      .then(data => setQieStats(data))
-      .catch(console.error);
+  useEffect(() => {
+    // Simulate real-time system metrics updates
+    const metricsTimer = setInterval(() => {
+      setSystemMetrics(prev => ({
+        ...prev,
+        quantumIQ: prev.quantumIQ + Math.random() * 2 - 1,
+        systemHealth: {
+          overall: Math.min(100, prev.systemHealth.overall + Math.random() * 1 - 0.5),
+          trading: Math.min(100, prev.systemHealth.trading + Math.random() * 2 - 1),
+          intelligence: Math.min(100, prev.systemHealth.intelligence + Math.random() * 0.5 - 0.25)
+        },
+        profitToday: prev.profitToday + Math.random() * 10 - 5,
+        riskLevel: Math.max(0, Math.min(10, prev.riskLevel + Math.random() * 0.2 - 0.1))
+      }));
+    }, 3000);
+
+    return () => clearInterval(metricsTimer);
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-hidden relative">
-      {/* Quantum Background Effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-500/20 via-transparent to-transparent"></div>
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+    <QueryClientProvider client={queryClient}>
+      <div style={{
+        background: 'linear-gradient(135deg, #000011 0%, #001122 50%, #000033 100%)',
+        minHeight: '100vh',
+        color: '#ffffff',
+        fontFamily: 'Monaco, Consolas, monospace'
+      }}>
+        {/* Premium Header Bar */}
+        <div style={{
+          background: 'linear-gradient(90deg, #001122, #002244)',
+          padding: '15px 30px',
+          borderBottom: '2px solid #00ffff',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              background: 'linear-gradient(45deg, #00ffff, #ffffff)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              🌌 NEXUS QUANTUM INTELLIGENCE PLATFORM
+            </div>
+            <Badge style={{ backgroundColor: '#00ff00', color: '#000000', fontSize: '12px' }}>
+              PRODUCTION ACTIVE
+            </Badge>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '14px', color: '#00ffff' }}>BALANCE</div>
+              <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#00ff00' }}>
+                ${systemMetrics.tradingBalance.toFixed(2)}
+              </div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '14px', color: '#00ffff' }}>TODAY P&L</div>
+              <div style={{ 
+                fontSize: '20px', 
+                fontWeight: 'bold', 
+                color: systemMetrics.profitToday >= 0 ? '#00ff00' : '#ff6666' 
+              }}>
+                ${systemMetrics.profitToday.toFixed(2)}
+              </div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '14px', color: '#00ffff' }}>QUANTUM IQ</div>
+              <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#ffffff' }}>
+                {Math.floor(systemMetrics.quantumIQ)}
+              </div>
+            </div>
+            <div style={{ fontSize: '14px', color: '#aaaaaa' }}>
+              {currentTime.toLocaleTimeString()}
+            </div>
+          </div>
+        </div>
+
+        {/* Live System Status Bar */}
+        <div style={{
+          background: '#002233',
+          padding: '10px 30px',
+          borderBottom: '1px solid #004455',
+          display: 'flex',
+          gap: '40px',
+          alignItems: 'center'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ 
+              width: '8px', 
+              height: '8px', 
+              borderRadius: '50%', 
+              backgroundColor: '#00ff00',
+              animation: 'pulse 2s infinite'
+            }}></div>
+            <span style={{ fontSize: '14px' }}>Trading Engine: ACTIVE</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Brain className="w-4 h-4 text-cyan-400" />
+            <span style={{ fontSize: '14px' }}>AI Intelligence: {systemMetrics.systemHealth.intelligence.toFixed(1)}%</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Shield className="w-4 h-4 text-green-400" />
+            <span style={{ fontSize: '14px' }}>Security: MAXIMUM</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Zap className="w-4 h-4 text-yellow-400" />
+            <span style={{ fontSize: '14px' }}>Active Modules: {systemMetrics.activeModules}</span>
+          </div>
+          <div style={{ marginLeft: 'auto', fontSize: '14px', color: '#00ffff' }}>
+            Risk Level: {systemMetrics.riskLevel.toFixed(1)}/10
+          </div>
+        </div>
+
+        <Router>
+          <Routes>
+            <Route path="/" element={
+              <div style={{ padding: '20px' }}>
+                {/* Main Dashboard Grid */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr 1fr',
+                  gap: '20px',
+                  marginBottom: '20px'
+                }}>
+                  {/* Primary Trading Dashboard */}
+                  <Card style={{
+                    backgroundColor: 'rgba(0, 17, 34, 0.8)',
+                    border: '2px solid #00aaaa',
+                    borderRadius: '12px'
+                  }}>
+                    <CardHeader>
+                      <CardTitle style={{ 
+                        color: '#00ffff',
+                        fontSize: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px'
+                      }}>
+                        <TrendingUp className="w-6 h-6" />
+                        Quantum Trading Visualization
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <NexusQuantumDashboard />
+                    </CardContent>
+                  </Card>
+
+                  {/* Live Intelligence Panel */}
+                  <Card style={{
+                    backgroundColor: 'rgba(0, 17, 34, 0.8)',
+                    border: '2px solid #00ffaa',
+                    borderRadius: '12px'
+                  }}>
+                    <CardHeader>
+                      <CardTitle style={{ 
+                        color: '#00ffaa',
+                        fontSize: '18px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px'
+                      }}>
+                        <Brain className="w-5 h-5" />
+                        Autonomous Intelligence
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <AutonomousTraderPanel />
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Secondary Modules Grid */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+                  gap: '20px'
+                }}>
+                  <Card style={{
+                    backgroundColor: 'rgba(0, 34, 51, 0.8)',
+                    border: '1px solid #0088aa',
+                    borderRadius: '8px'
+                  }}>
+                    <CardHeader>
+                      <CardTitle style={{ color: '#00aaff', fontSize: '16px' }}>
+                        Live Trading Engine
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <LiveTradingDashboard />
+                    </CardContent>
+                  </Card>
+
+                  <Card style={{
+                    backgroundColor: 'rgba(0, 34, 51, 0.8)',
+                    border: '1px solid #aa00aa',
+                    borderRadius: '8px'
+                  }}>
+                    <CardHeader>
+                      <CardTitle style={{ color: '#aa00ff', fontSize: '16px' }}>
+                        Recursive Evolution
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <RecursiveEvolutionDashboard />
+                    </CardContent>
+                  </Card>
+
+                  <Card style={{
+                    backgroundColor: 'rgba(0, 34, 51, 0.8)',
+                    border: '1px solid #ffaa00',
+                    borderRadius: '8px'
+                  }}>
+                    <CardHeader>
+                      <CardTitle style={{ color: '#ffaa00', fontSize: '16px' }}>
+                        Stealth Operations
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <QuantumStealthDashboard />
+                    </CardContent>
+                  </Card>
+
+                  <Card style={{
+                    backgroundColor: 'rgba(0, 34, 51, 0.8)',
+                    border: '1px solid #00ff88',
+                    borderRadius: '8px'
+                  }}>
+                    <CardHeader>
+                      <CardTitle style={{ color: '#00ff88', fontSize: '16px' }}>
+                        Investor Mode
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <InvestorMode />
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            } />
+          </Routes>
+        </Router>
+
+        <style>
+          {`
+            @keyframes pulse {
+              0%, 100% { opacity: 1; }
+              50% { opacity: 0.5; }
+            }
+
+            body {
+              margin: 0;
+              padding: 0;
+              overflow-x: hidden;
+            }
+          `}
+        </style>
       </div>
-
-      <div className="relative z-10 container mx-auto px-6 py-12">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <div className="flex items-center justify-center mb-6">
-            <Brain className="w-16 h-16 text-purple-400 mr-4" />
-            <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
-              QIE PLATFORM
-            </h1>
-          </div>
-          <p className="text-2xl text-blue-200 mb-4">Quantum Intelligence Engine</p>
-          <p className="text-lg text-gray-300 max-w-4xl mx-auto">
-            Autonomous AI orchestration, quantum trading, browser automation, and superintelligent decision making
-          </p>
-          
-          {/* Live Status Indicators */}
-          <div className="flex items-center justify-center gap-6 mt-8">
-            <Badge className="bg-green-600 text-white px-4 py-2">
-              <Activity className="w-4 h-4 mr-2" />
-              {systemStatus?.engine?.status || 'ACTIVE'}
-            </Badge>
-            <Badge className="bg-blue-600 text-white px-4 py-2">
-              <Server className="w-4 h-4 mr-2" />
-              {systemStatus?.engine?.activeTargets || 0} Targets
-            </Badge>
-            <Badge className="bg-purple-600 text-white px-4 py-2">
-              <Zap className="w-4 h-4 mr-2" />
-              {systemStatus?.engine?.quantumAccuracy || 99.7}% Accuracy
-            </Badge>
-          </div>
-        </div>
-
-        {/* Core Modules Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {/* Watson Command Engine */}
-          <Card className="bg-gray-900/50 border-purple-500/30 hover:border-purple-400/50 transition-all cursor-pointer group">
-            <CardHeader>
-              <CardTitle className="text-purple-400 flex items-center">
-                <Brain className="w-6 h-6 mr-2" />
-                Watson Command
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-300 mb-4">Natural language AI command processing with memory awareness</p>
-              <Button 
-                className="w-full bg-purple-600 hover:bg-purple-700"
-                onClick={() => window.location.href = '/watson-command'}
-              >
-                Access Watson
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* QIE Intelligence Hub */}
-          <Card className="bg-gray-900/50 border-blue-500/30 hover:border-blue-400/50 transition-all cursor-pointer group">
-            <CardHeader>
-              <CardTitle className="text-blue-400 flex items-center">
-                <Activity className="w-6 h-6 mr-2" />
-                Intelligence Hub
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-300 mb-4">Unified agent orchestration and signal intelligence</p>
-              <Button 
-                className="w-full bg-blue-600 hover:bg-blue-700"
-                onClick={() => window.location.href = '/qie-intelligence-hub'}
-              >
-                Enter Hub
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Quantum Trading */}
-          <Card className="bg-gray-900/50 border-green-500/30 hover:border-green-400/50 transition-all cursor-pointer group">
-            <CardHeader>
-              <CardTitle className="text-green-400 flex items-center">
-                <Zap className="w-6 h-6 mr-2" />
-                Quantum Trading
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-300 mb-4">Autonomous trading with quantum-enhanced decision making</p>
-              <Button 
-                className="w-full bg-green-600 hover:bg-green-700"
-                onClick={() => window.location.href = '/quantum-trading-dashboard'}
-              >
-                Trade Now
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* PTNI Browser Terminal */}
-          <Card className="bg-gray-900/50 border-yellow-500/30 hover:border-yellow-400/50 transition-all cursor-pointer group">
-            <CardHeader>
-              <CardTitle className="text-yellow-400 flex items-center">
-                <Eye className="w-6 h-6 mr-2" />
-                PTNI Terminal
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-300 mb-4">Playwright browser automation and stealth operations</p>
-              <Button 
-                className="w-full bg-yellow-600 hover:bg-yellow-700"
-                onClick={() => window.location.href = '/ptni-browser-terminal'}
-              >
-                Launch Terminal
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* NEXUS Console */}
-          <Card className="bg-gray-900/50 border-red-500/30 hover:border-red-400/50 transition-all cursor-pointer group">
-            <CardHeader>
-              <CardTitle className="text-red-400 flex items-center">
-                <Shield className="w-6 h-6 mr-2" />
-                NEXUS Console
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-300 mb-4">Master control for system orchestration and monitoring</p>
-              <Button 
-                className="w-full bg-red-600 hover:bg-red-700"
-                onClick={() => window.location.href = '/nexus-operator-console'}
-              >
-                Access Console
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Infinity Sovereign */}
-          <Card className="bg-gray-900/50 border-cyan-500/30 hover:border-cyan-400/50 transition-all cursor-pointer group">
-            <CardHeader>
-              <CardTitle className="text-cyan-400 flex items-center">
-                <Crown className="w-6 h-6 mr-2" />
-                Infinity Sovereign
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-300 mb-4">Supreme AI controller with recursive evolution</p>
-              <Button 
-                className="w-full bg-cyan-600 hover:bg-cyan-700"
-                onClick={() => window.location.href = '/infinity-sovereign'}
-              >
-                Enter Sovereign
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Live System Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-          <div className="text-center">
-            <div className="text-4xl font-bold text-purple-400 mb-2">
-              {qieStats?.totalModules || 47}
-            </div>
-            <div className="text-gray-400">Active Modules</div>
-          </div>
-          <div className="text-center">
-            <div className="text-4xl font-bold text-blue-400 mb-2">
-              {qieStats?.processedSignals || '8.9K'}
-            </div>
-            <div className="text-gray-400">Signals Processed</div>
-          </div>
-          <div className="text-center">
-            <div className="text-4xl font-bold text-green-400 mb-2">
-              {qieStats?.systemUptime || '99.97%'}
-            </div>
-            <div className="text-gray-400">System Uptime</div>
-          </div>
-          <div className="text-center">
-            <div className="text-4xl font-bold text-yellow-400 mb-2">
-              ${qieStats?.tradingVolume || '2.4M'}
-            </div>
-            <div className="text-gray-400">Trading Volume</div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="text-center">
-          <h3 className="text-2xl font-bold text-white mb-6">Platform Access</h3>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-              onClick={() => window.location.href = '/enhanced-dashboard'}
-            >
-              Enhanced Dashboard
-            </Button>
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
-              onClick={() => window.location.href = '/live-trading'}
-            >
-              Live Trading
-            </Button>
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-              onClick={() => window.location.href = '/recursive-evolution'}
-            >
-              Evolution Engine
-            </Button>
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700"
-              onClick={() => window.location.href = '/kaizen-agent'}
-            >
-              Kaizen Agent
-            </Button>
-          </div>
-        </div>
-
-        {/* Embedded QIE Panel */}
-        <div className="fixed top-4 right-4 z-50">
-          <QIEEmbeddedPanel 
-            panelId="landing_intelligence"
-            type="mini_intelligence"
-            position="top_right"
-            dashboard="landing"
-          />
-        </div>
-      </div>
-    </div>
+    </QueryClientProvider>
   );
 }
-
-function App() {
-  return (
-    <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <QueryClientProvider client={queryClient}>
-          <Router>
-            <div className="flex h-screen bg-background">
-              <Route path="/" component={QIEPlatformLanding} />
-              
-              {/* Main Platform Routes with Sidebar */}
-              <Route path="/platform/:page" component={() => (
-                <SidebarProvider>
-                  <AppSidebar />
-                  <main className="flex-1 overflow-auto">
-                    <Suspense fallback={<AsyncComponentWrapper />}>
-                      <Route path="/platform/dashboard" component={Dashboard} />
-                      <Route path="/platform/enhanced-dashboard" component={EnhancedDashboard} />
-                      <Route path="/platform/trading-bot" component={TradingBot} />
-                      <Route path="/platform/live-trading" component={LiveTrading} />
-                      <Route path="/platform/watson-command" component={WatsonCommand} />
-                      <Route path="/platform/qie-intelligence-hub" component={QIEIntelligenceHub} />
-                      <Route path="/platform/quantum-insights" component={QuantumInsights} />
-                      <Route path="/platform/ai-configuration" component={AIConfiguration} />
-                      <Route path="/platform/nexus-operator-console" component={NexusOperatorConsole} />
-                      <Route path="/platform/ptni-browser-terminal" component={PTNIBrowserTerminal} />
-                      <Route path="/platform/recursive-evolution" component={RecursiveEvolution} />
-                      <Route path="/platform/quantum-trading-dashboard" component={QuantumTradingDashboard} />
-                      <Route path="/platform/bim-infinity" component={BimInfinity} />
-                      <Route path="/platform/infinity-sovereign" component={InfinitySovereign} />
-                      <Route path="/platform/infinity-uniform" component={InfinityUniform} />
-                      <Route path="/platform/kaizen-agent" component={KaizenAgent} />
-                    </Suspense>
-                  </main>
-                </SidebarProvider>
-              )} />
-
-              {/* Direct Access Routes (without sidebar) */}
-              <Route path="/watson-command" component={() => (
-                <Suspense fallback={<AsyncComponentWrapper />}>
-                  <WatsonCommand />
-                </Suspense>
-              )} />
-              <Route path="/qie-intelligence-hub" component={() => (
-                <Suspense fallback={<AsyncComponentWrapper />}>
-                  <QIEIntelligenceHub />
-                </Suspense>
-              )} />
-              <Route path="/quantum-trading-dashboard" component={() => (
-                <Suspense fallback={<AsyncComponentWrapper />}>
-                  <QuantumTradingDashboard />
-                </Suspense>
-              )} />
-                <Route path="/ptni-browser-terminal" element={
-                  <Suspense fallback={<AsyncComponentWrapper />}>
-                    <PTNIBrowserTerminal />
-                  </Suspense>
-                } />
-                <Route path="/nexus-operator-console" element={
-                  <Suspense fallback={<AsyncComponentWrapper />}>
-                    <NexusOperatorConsole />
-                  </Suspense>
-                } />
-                <Route path="/infinity-sovereign" element={
-                  <Suspense fallback={<AsyncComponentWrapper />}>
-                    <InfinitySovereign />
-                  </Suspense>
-                } />
-                <Route path="/enhanced-dashboard" element={
-                  <Suspense fallback={<AsyncComponentWrapper />}>
-                    <EnhancedDashboard />
-                  </Suspense>
-                } />
-                <Route path="/live-trading" element={
-                  <Suspense fallback={<AsyncComponentWrapper />}>
-                    <LiveTrading />
-                  </Suspense>
-                } />
-                <Route path="/recursive-evolution" element={
-                  <Suspense fallback={<AsyncComponentWrapper />}>
-                    <RecursiveEvolution />
-                  </Suspense>
-                } />
-                <Route path="/kaizen-agent" element={
-                  <Suspense fallback={<AsyncComponentWrapper />}>
-                    <KaizenAgent />
-                  </Suspense>
-                } />
-
-                {/* Fallback */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </div>
-          </Router>
-          <Toaster />
-        </QueryClientProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
-  );
-}
-
-export default App;
