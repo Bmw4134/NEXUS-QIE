@@ -1414,6 +1414,7 @@ export function EnhancedDashboard() {
           onAIAction={() => console.log('AI action triggered')}
           onSystemAction={() => console.log('System action triggered')}
         />
+        </div>
       </div>
     </div>
   );
