@@ -1,6 +1,6 @@
 
 import React, { Suspense, useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Route, Router } from 'wouter';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -302,55 +302,51 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <Router>
             <div className="flex h-screen bg-background">
-              <Routes>
-                {/* QIE Platform Landing */}
-                <Route path="/" element={<QIEPlatformLanding />} />
-                
-                {/* Main Platform Routes */}
-                <Route path="/platform/*" element={
-                  <SidebarProvider>
-                    <AppSidebar />
-                    <main className="flex-1 overflow-auto">
-                      <Suspense fallback={<AsyncComponentWrapper />}>
-                        <Routes>
-                          <Route path="dashboard" element={<Dashboard />} />
-                          <Route path="enhanced-dashboard" element={<EnhancedDashboard />} />
-                          <Route path="trading-bot" element={<TradingBot />} />
-                          <Route path="live-trading" element={<LiveTrading />} />
-                          <Route path="watson-command" element={<WatsonCommand />} />
-                          <Route path="qie-intelligence-hub" element={<QIEIntelligenceHub />} />
-                          <Route path="quantum-insights" element={<QuantumInsights />} />
-                          <Route path="ai-configuration" element={<AIConfiguration />} />
-                          <Route path="nexus-operator-console" element={<NexusOperatorConsole />} />
-                          <Route path="ptni-browser-terminal" element={<PTNIBrowserTerminal />} />
-                          <Route path="recursive-evolution" element={<RecursiveEvolution />} />
-                          <Route path="quantum-trading-dashboard" element={<QuantumTradingDashboard />} />
-                          <Route path="bim-infinity" element={<BimInfinity />} />
-                          <Route path="infinity-sovereign" element={<InfinitySovereign />} />
-                          <Route path="infinity-uniform" element={<InfinityUniform />} />
-                          <Route path="kaizen-agent" element={<KaizenAgent />} />
-                        </Routes>
-                      </Suspense>
-                    </main>
-                  </SidebarProvider>
-                } />
+              <Route path="/" component={QIEPlatformLanding} />
+              
+              {/* Main Platform Routes with Sidebar */}
+              <Route path="/platform/:page" component={() => (
+                <SidebarProvider>
+                  <AppSidebar />
+                  <main className="flex-1 overflow-auto">
+                    <Suspense fallback={<AsyncComponentWrapper />}>
+                      <Route path="/platform/dashboard" component={Dashboard} />
+                      <Route path="/platform/enhanced-dashboard" component={EnhancedDashboard} />
+                      <Route path="/platform/trading-bot" component={TradingBot} />
+                      <Route path="/platform/live-trading" component={LiveTrading} />
+                      <Route path="/platform/watson-command" component={WatsonCommand} />
+                      <Route path="/platform/qie-intelligence-hub" component={QIEIntelligenceHub} />
+                      <Route path="/platform/quantum-insights" component={QuantumInsights} />
+                      <Route path="/platform/ai-configuration" component={AIConfiguration} />
+                      <Route path="/platform/nexus-operator-console" component={NexusOperatorConsole} />
+                      <Route path="/platform/ptni-browser-terminal" component={PTNIBrowserTerminal} />
+                      <Route path="/platform/recursive-evolution" component={RecursiveEvolution} />
+                      <Route path="/platform/quantum-trading-dashboard" component={QuantumTradingDashboard} />
+                      <Route path="/platform/bim-infinity" component={BimInfinity} />
+                      <Route path="/platform/infinity-sovereign" component={InfinitySovereign} />
+                      <Route path="/platform/infinity-uniform" component={InfinityUniform} />
+                      <Route path="/platform/kaizen-agent" component={KaizenAgent} />
+                    </Suspense>
+                  </main>
+                </SidebarProvider>
+              )} />
 
-                {/* Direct Access Routes (without sidebar) */}
-                <Route path="/watson-command" element={
-                  <Suspense fallback={<AsyncComponentWrapper />}>
-                    <WatsonCommand />
-                  </Suspense>
-                } />
-                <Route path="/qie-intelligence-hub" element={
-                  <Suspense fallback={<AsyncComponentWrapper />}>
-                    <QIEIntelligenceHub />
-                  </Suspense>
-                } />
-                <Route path="/quantum-trading-dashboard" element={
-                  <Suspense fallback={<AsyncComponentWrapper />}>
-                    <QuantumTradingDashboard />
-                  </Suspense>
-                } />
+              {/* Direct Access Routes (without sidebar) */}
+              <Route path="/watson-command" component={() => (
+                <Suspense fallback={<AsyncComponentWrapper />}>
+                  <WatsonCommand />
+                </Suspense>
+              )} />
+              <Route path="/qie-intelligence-hub" component={() => (
+                <Suspense fallback={<AsyncComponentWrapper />}>
+                  <QIEIntelligenceHub />
+                </Suspense>
+              )} />
+              <Route path="/quantum-trading-dashboard" component={() => (
+                <Suspense fallback={<AsyncComponentWrapper />}>
+                  <QuantumTradingDashboard />
+                </Suspense>
+              )} />
                 <Route path="/ptni-browser-terminal" element={
                   <Suspense fallback={<AsyncComponentWrapper />}>
                     <PTNIBrowserTerminal />
