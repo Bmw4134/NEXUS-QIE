@@ -740,6 +740,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Alpaca API Key Discovery Routes
+  app.get('/api/alpaca/find-credentials', async (req, res) => {
+    try {
+      const { alpacaAPIKeyFinder } = await import('./alpaca-api-key-finder');
+      
+      console.log('🔍 Starting intelligent Alpaca credential discovery...');
+      const credentials = await alpacaAPIKeyFinder.findAlpacaCredentials();
+      
+      res.json({
+        success: true,
+        credentials,
+        found: credentials.some(cred => cred.found),
+        message: credentials.length > 0 ? 'API credentials found in browser session' : 'No credentials found - check navigation guide'
+      });
+    } catch (error) {
+      console.error('Alpaca credential discovery failed:', error);
+      res.status(500).json({ error: 'Failed to find Alpaca credentials' });
+    }
+  });
+
+  app.get('/api/alpaca/navigation-guide', async (req, res) => {
+    try {
+      const { alpacaAPIKeyFinder } = await import('./alpaca-api-key-finder');
+      
+      const guide = await alpacaAPIKeyFinder.getAlpacaNavigationGuide();
+      
+      res.json({
+        success: true,
+        guide,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Failed to generate navigation guide:', error);
+      res.status(500).json({ error: 'Failed to generate guide' });
+    }
+  });
+
+  app.get('/api/alpaca/scan-session', async (req, res) => {
+    try {
+      const { alpacaAPIKeyFinder } = await import('./alpaca-api-key-finder');
+      
+      const sessionInfo = await alpacaAPIKeyFinder.scanForAlpacaSession();
+      
+      res.json({
+        success: true,
+        ...sessionInfo,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Alpaca session scan failed:', error);
+      res.status(500).json({ error: 'Failed to scan for Alpaca session' });
+    }
+  });
+
   // Alpaca Stock Trading API Endpoints
   app.post('/api/alpaca/execute-trade', async (req, res) => {
     try {

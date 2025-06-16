@@ -7,7 +7,7 @@ class OpenAIService {
     if (!process.env.OPENAI_API_KEY) {
       throw new Error('OPENAI_API_KEY environment variable is required');
     }
-    
+
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
@@ -22,7 +22,7 @@ class OpenAIService {
   }) {
     try {
       const prompt = `Analyze this family data and provide 3-5 actionable insights for better family management:
-      
+
 Tasks: ${JSON.stringify(familyData.tasks.slice(0, 10))}
 Events: ${JSON.stringify(familyData.events.slice(0, 10))}
 Expenses: ${JSON.stringify(familyData.expenses.slice(0, 10))}
@@ -217,6 +217,35 @@ Return JSON format:
     } catch (error) {
       console.error('OpenAI goal generation error:', error);
       return [];
+    }
+  }
+
+  async generateCompletion(prompt: string, options: {
+    maxTokens?: number;
+    temperature?: number;
+    model?: string;
+  } = {}): Promise<string> {
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: options.model || 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a helpful assistant.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: options.maxTokens || 200,
+        temperature: options.temperature || 0.7
+      });
+
+      return response.choices[0].message.content || 'I could not generate a completion at this time.';
+    } catch (error) {
+      console.error('OpenAI completion error:', error);
+      return 'I could not generate a completion at this time.';
     }
   }
 }

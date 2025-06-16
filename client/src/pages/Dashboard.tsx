@@ -265,3 +265,38 @@ export function Dashboard() {
     </div>
   );
 }
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { LiveTradingPanel } from '../components/LiveTradingPanel';
+import AlpacaAPIKeyFinder from '../components/AlpacaAPIKeyFinder';
+
+export function TradingDashboard() {
+  return (
+    <div className="w-full">
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="trading">Trading</TabsTrigger>
+              <TabsTrigger value="alpaca-setup">Alpaca Setup</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
+        <TabsContent value="overview" className="space-y-4">
+          <p>This is the overview tab.</p>
+        </TabsContent>
+        <TabsContent value="trading" className="space-y-4">
+              <LiveTradingPanel />
+            </TabsContent>
+
+            <TabsContent value="alpaca-setup" className="space-y-4">
+              <AlpacaAPIKeyFinder />
+            </TabsContent>
+        <TabsContent value="analytics" className="space-y-4">
+          <p>This is the analytics tab.</p>
+        </TabsContent>
+        <TabsContent value="settings" className="space-y-4">
+          <p>This is the settings tab.</p>
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}
