@@ -73,10 +73,10 @@ app.use(express.static(clientDistPath));
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api/')) {
     const indexPath = path.join(clientDistPath, 'index.html');
-    // Check if the built client exists
-    if (require('fs').existsSync(indexPath)) {
+    // Try to serve the built client, fallback to embedded dashboard
+    try {
       res.sendFile(indexPath);
-    } else {
+    } catch (error) {
       // Serve the fully functional NEXUS dashboard directly
       res.send(`
         <!DOCTYPE html>

@@ -76,7 +76,7 @@ localPort = 5083
 externalPort = 8099
 
 [workflows]
-runButton = "Production Deploy"
+runButton = "NEXUS Production Server"
 
 [[workflows.workflow]]
 name = "Project"
@@ -121,3 +121,16 @@ args = "npm run build"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "NODE_ENV=production npm start"
+
+[[workflows.workflow]]
+name = "NEXUS Production Server"
+author = 42738758
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "NODE_ENV=production node server/minimal-server.ts"
