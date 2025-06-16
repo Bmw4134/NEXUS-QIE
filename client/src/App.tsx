@@ -60,6 +60,18 @@ function NotFound() {
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
 
+  // Skip loading spinner and show landing page immediately if not authenticated
+  if (isLoading && !isAuthenticated) {
+    return (
+      <Switch>
+        <Route path="/" component={LandingPage} />
+        <Route path="/simple" component={Landing} />
+        <Route path="/login" component={LoginPage} />
+        <Route component={LandingPage} />
+      </Switch>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
