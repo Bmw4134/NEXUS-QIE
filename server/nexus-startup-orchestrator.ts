@@ -41,6 +41,22 @@ export class NexusStartupOrchestrator {
     this.httpServer = createServer(this.app);
   }
 
+  private async findAvailablePort(startPort: number): Promise<number> {
+    const net = await import('net');
+    
+    return new Promise((resolve) => {
+      const server = net.createServer();
+      server.listen(startPort, () => {
+        const port = (server.address() as any)?.port;
+        server.close(() => resolve(port));
+      });
+      
+      server.on('error', () => {
+        this.findAvailablePort(startPort + 1).then(resolve);
+      });
+    });
+  }
+
   private initializeExpressApp(): void {
     // Enhanced CORS with intelligent origin detection
     this.app.use(cors({
@@ -440,6 +456,10 @@ export class NexusStartupOrchestrator {
   async startServer(): Promise<void> {
     try {
       console.log('🔄 Starting NEXUS Startup Orchestrator...');
+      
+      // Find available port
+      this.port = await this.findAvailablePort(this.port);
+      console.log(`🔍 Found available port: ${this.port}`);
       
       // Initialize NEXUS modules first
       await this.initializeNexusModules();
