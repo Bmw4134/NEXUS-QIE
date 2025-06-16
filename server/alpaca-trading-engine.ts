@@ -60,6 +60,11 @@ export class AlpacaTradeEngine {
       return;
     }
 
+    console.log('✅ Alpaca secrets detected:');
+    console.log(`   API Key: ${process.env.ALPACA_API_KEY ? '***' + process.env.ALPACA_API_KEY.slice(-4) : 'Not set'}`);
+    console.log(`   Secret: ${process.env.ALPACA_SECRET_KEY ? '***configured' : 'Not set'}`);
+    console.log(`   Endpoint: ${process.env.ALPACA_API_ENDPOINT || 'https://api.alpaca.markets (default)'}`);}
+
     try {
       await this.authenticateAlpaca();
       this.isInitialized = true;
@@ -78,11 +83,15 @@ from alpaca.trading.client import TradingClient
 from alpaca.data.historical import CryptoHistoricalDataClient
 
 try:
+    # Get API endpoint from environment (defaults to production if not set)
+    api_endpoint = os.getenv("ALPACA_API_ENDPOINT", "https://api.alpaca.markets")
+    
     # Initialize trading client for crypto
     client = TradingClient(
         api_key=os.getenv("ALPACA_API_KEY"),
         secret_key=os.getenv("ALPACA_SECRET_KEY"),
-        paper=True  # Start with paper trading for safety
+        paper=True,  # Start with paper trading for safety
+        base_url=api_endpoint
     )
 
     # Initialize crypto data client

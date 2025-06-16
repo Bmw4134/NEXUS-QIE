@@ -865,6 +865,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Alpaca Secrets Verification Endpoint
+  app.get('/api/alpaca/verify-secrets', async (req, res) => {
+    try {
+      const hasApiKey = !!process.env.ALPACA_API_KEY;
+      const hasSecret = !!process.env.ALPACA_SECRET_KEY;
+      const endpoint = process.env.ALPACA_API_ENDPOINT || 'https://api.alpaca.markets';
+      
+      console.log('🔍 NEXUS: Verifying Alpaca secrets configuration...');
+      
+      const secretsStatus = {
+        apiKey: hasApiKey ? 'Found (' + process.env.ALPACA_API_KEY.slice(-4) + ')' : 'Missing',
+        secretKey: hasSecret ? 'Found (configured)' : 'Missing',
+        endpoint: endpoint,
+        ready: hasApiKey && hasSecret,
+        timestamp: new Date().toISOString()
+      };
+      
+      if (secretsStatus.ready) {
+        console.log('✅ All Alpaca secrets properly configured');
+      } else {
+        console.log('❌ Missing Alpaca secrets - check your Secrets tab');
+      }
+      
+      res.json({
+        success: true,
+        secrets: secretsStatus,
+        message: secretsStatus.ready ? 'Alpaca integration ready!' : 'Missing required secrets'
+      });
+    } catch (error) {
+      console.error('Alpaca secrets verification failed:', error);
+      res.status(500).json({ error: 'Failed to verify Alpaca secrets' });
+    }
+  });
+
   // Alpaca Stock Trading API Endpoints
   app.post('/api/alpaca/execute-trade', async (req, res) => {
     try {
