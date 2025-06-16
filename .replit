@@ -9,7 +9,7 @@ packages = ["chromium", "glibcLocales"]
 [deployment]
 deploymentTarget = "autoscale"
 build = ["sh", "-c", "npm run build"]
-run = ["sh", "-c", "npm start"]
+run = ["sh", "-c", "NODE_ENV=production tsx server/nexus-startup-orchestrator.ts"]
 
 [[ports]]
 localPort = 5000
@@ -185,3 +185,20 @@ args = "npm run build"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "NODE_ENV=production tsx server/minimal-server.ts"
+
+[[workflows.workflow]]
+name = "NEXUS TRIFECTA DEPLOYMENT"
+author = 42738758
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install --legacy-peer-deps"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run build"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "NODE_ENV=production tsx server/nexus-startup-orchestrator.ts"
