@@ -1,5 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+
+export async function registerAPIRoutes(app: Express): Promise<void> {
+  const httpServer = await registerRoutes(app);
+  console.log('✅ API routes registered successfully');
+}
 import { cryptoTradingEngine } from "./crypto-trading-engine";
 import { nexusObserver } from "./nexus-observer-core";
 import { robinhoodLegendClient } from "./robinhood-legend-client";
