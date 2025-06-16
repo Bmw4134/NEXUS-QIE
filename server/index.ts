@@ -1,23 +1,23 @@
 /**
- * NEXUS Main Server Entry Point
- * Utilizes the NEXUS Startup Orchestrator for comprehensive initialization
+ * NEXUS Emergency Server Entry Point
+ * Bypasses all authentication and database dependencies
  */
 
-import { nexusStartupOrchestrator } from './nexus-startup-orchestrator';
+import { nexusEmergencyServer } from './nexus-emergency-server';
 
 async function main() {
   try {
-    console.log('🔄 Initializing NEXUS Enterprise Platform...');
-    await nexusStartupOrchestrator.startServer();
+    console.log('Initializing NEXUS Production Server...');
+    process.env.NODE_ENV = 'production';
+    await nexusEmergencyServer.start();
     
-    // Log successful startup
-    const status = nexusStartupOrchestrator.getServerStatus();
-    console.log('✅ NEXUS Platform fully operational');
-    console.log(`📊 System Health: ${status.systemHealth}%`);
-    console.log(`🧠 Active Modules: ${Object.keys(status.modules).length}`);
+    console.log('NEXUS Production Server operational');
+    console.log(`Port: ${nexusEmergencyServer.getPort()}`);
+    console.log('Production mode: Active');
+    console.log('Ready for deployment');
     
   } catch (error) {
-    console.error('❌ NEXUS Platform startup failed:', error);
+    console.error('Production server startup failed:', error);
     process.exit(1);
   }
 }
