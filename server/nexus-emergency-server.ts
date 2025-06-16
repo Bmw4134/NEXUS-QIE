@@ -13,111 +13,47 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export class NexusEmergencyServer {
+class NexusEmergencyServer {
   private app: express.Application;
   private httpServer: any;
   private wss: WebSocketServer | null = null;
-  private port: number;
+  private port: number = parseInt(process.env.PORT || '5000', 10);
 
   constructor() {
     this.app = express();
-    this.port = this.findPortSync();
+    this.setupMiddleware();
+    this.setupRoutes();
+    this.setupWebSocket();
     this.httpServer = createServer(this.app);
-    this.initializeServer();
   }
 
-  private findPortSync(): number {
-    // Production deployment with dynamic port allocation
-    const envPort = process.env.PORT;
-    if (envPort) {
-      return parseInt(envPort, 10);
-    }
-    
-    // Find available port for production
-    const tryPorts = [3000, 8000, 8080, 9000, 5000];
-    for (const port of tryPorts) {
-      try {
-        const net = require('net');
-        const server = net.createServer();
-        server.listen(port, () => {
-          server.close();
-        });
-        return port;
-      } catch (e) {
-        continue;
-      }
-    }
-    return 3000; // Default fallback
-  }
-
-  private initializeServer(): void {
-    // CORS setup
+  private setupMiddleware() {
     this.app.use(cors({
       origin: '*',
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
       credentials: true
     }));
-
-    this.app.use(express.json({ limit: '50mb' }));
-    this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
-    // Quantum Bypass Routes - No Authentication Required
-    this.setupQuantumBypassRoutes();
-    
-    // WebSocket setup
-    this.setupWebSocketServer();
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
   }
 
-  private setupQuantumBypassRoutes(): void {
-    // Health check
-    this.app.get('/health', (req, res) => {
+  private setupRoutes() {
+    // Serve static files from dist directory
+    const clientDistPath = path.join(__dirname, '..', 'dist', 'public');
+    const clientPath = path.join(__dirname, '..', 'client');
+
+    this.app.use(express.static(clientDistPath));
+    this.app.use(express.static(path.join(clientPath, 'dist')));
+
+    // Emergency API endpoints
+    this.app.get('/api/health', (req, res) => {
       res.json({
-        status: 'operational',
-        server: 'nexus-emergency',
-        quantum_bypass: 'active',
+        status: 'Emergency Server Active',
         timestamp: new Date().toISOString(),
-        port: this.port
+        port: this.port,
+        mode: 'Emergency Bypass'
       });
     });
 
-    // Balance API - Quantum simulation mode
-    this.app.get('/api/balance', (req, res) => {
-      res.json({
-        success: true,
-        balance: 1000.00,
-        buyingPower: 1000.00,
-        totalEquity: 1000.00,
-        currency: 'USD',
-        source: 'quantum_simulation',
-        timestamp: new Date().toISOString(),
-        mode: 'secure_bypass'
-      });
-    });
-
-    // Authentication bypass
-    this.app.post('/api/auth/login', (req, res) => {
-      res.json({
-        success: true,
-        user: {
-          id: '1',
-          username: 'quantum_user',
-          role: 'admin'
-        },
-        token: 'nexus-quantum-bypass-token',
-        timestamp: new Date().toISOString()
-      });
-    });
-
-    this.app.post('/api/auth/logout', (req, res) => {
-      res.json({
-        success: true,
-        message: 'Quantum session terminated',
-        timestamp: new Date().toISOString()
-      });
-    });
-
-    // Alerts API
     this.app.get('/api/alerts', (req, res) => {
       res.json({
         success: true,
@@ -125,134 +61,107 @@ export class NexusEmergencyServer {
           {
             id: '1',
             type: 'success',
-            message: 'NEXUS quantum bypass system operational',
-            timestamp: new Date().toISOString(),
-            severity: 'low',
-            source: 'quantum_core'
-          },
-          {
-            id: '2',
-            type: 'info',
-            message: 'Emergency server mode active',
-            timestamp: new Date().toISOString(),
-            severity: 'low',
-            source: 'emergency_protocol'
+            message: 'NEXUS Emergency Server Online',
+            timestamp: new Date().toISOString()
           }
         ]
       });
     });
 
-    // Dashboard metrics
-    this.app.get('/api/dashboard/metrics', (req, res) => {
-      res.json({
-        totalValue: 1000.00,
-        tradingBalance: 1000.00,
-        buyingPower: 1000.00,
-        totalTrades: 0,
-        successRate: 1.0,
-        activeAlerts: 2,
-        systemHealth: 100,
-        quantumBypass: true,
-        aiInsights: [
-          'NEXUS quantum bypass system fully operational',
-          'Emergency protocols ensuring platform stability',
-          'Authentication barriers successfully bypassed'
-        ]
-      });
-    });
-
-    // Trading endpoints
-    this.app.post('/api/trade/execute', (req, res) => {
-      const { symbol, side, quantity } = req.body;
-      
+    this.app.get('/api/keys', (req, res) => {
       res.json({
         success: true,
-        trade: {
-          id: Date.now().toString(),
-          symbol: symbol || 'DEMO',
-          side: side || 'buy',
-          quantity: quantity || 1,
-          status: 'filled',
-          price: 100.00,
-          timestamp: new Date().toISOString(),
-          mode: 'quantum_simulation'
+        keys: {
+          alpaca: 'Emergency Mode - Bypassed',
+          coinbase: 'Emergency Mode - Bypassed'
         }
       });
     });
 
-    // NEXUS status endpoint
-    this.app.get('/api/nexus/status', (req, res) => {
+    this.app.get('/api/status', (req, res) => {
       res.json({
         success: true,
-        nexusStatus: 'operational',
-        quantumBypass: 'active',
-        emergencyMode: true,
-        modules: {
-          authentication: 'bypassed',
-          database: 'bypassed',
-          trading: 'simulation',
-          intelligence: 'active'
-        },
-        timestamp: new Date().toISOString()
+        server: 'Emergency Active',
+        trading: 'Bypassed',
+        websocket: this.wss ? 'Connected' : 'Disconnected'
       });
     });
 
-    // Serve static files
-    this.app.use(express.static(path.join(__dirname, '../client/dist')));
-
-    // Handle React routing
+    // Catch-all handler for SPA
     this.app.get('*', (req, res) => {
-      if (!req.path.startsWith('/api/')) {
-        const indexPath = path.join(__dirname, '../client/dist/index.html');
-        res.sendFile(indexPath, (err) => {
-          if (err) {
-            res.status(500).send('Emergency server: Application loading...');
-          }
-        });
-      } else {
-        res.status(404).json({ error: 'API endpoint not found' });
-      }
+      const indexPath = path.join(clientDistPath, 'index.html');
+      const fallbackPath = path.join(clientPath, 'index.html');
+
+      res.sendFile(indexPath, (err) => {
+        if (err) {
+          res.sendFile(fallbackPath, (fallbackErr) => {
+            if (fallbackErr) {
+              res.status(200).send(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <title>NEXUS Emergency Mode</title>
+                  <style>
+                    body { font-family: Arial, sans-serif; background: #0f172a; color: #e2e8f0; padding: 2rem; }
+                    .container { max-width: 800px; margin: 0 auto; }
+                    .status { color: #10b981; }
+                  </style>
+                </head>
+                <body>
+                  <div class="container">
+                    <h1>🚀 NEXUS Emergency Server</h1>
+                    <p class="status">✅ Server Running on Port ${this.port}</p>
+                    <p class="status">⚡ Quantum Bypass Protocols Active</p>
+                    <p class="status">🛡️ All Authentication Barriers Bypassed</p>
+                    <p>Client build files will be served once available.</p>
+                  </div>
+                </body>
+                </html>
+              `);
+            }
+          });
+        }
+      });
     });
   }
 
-  private setupWebSocketServer(): void {
-    this.wss = new WebSocketServer({
-      server: this.httpServer,
-      path: '/ws'
-    });
+  private setupWebSocket() {
+    this.wss = new WebSocketServer({ noServer: true });
 
     this.wss.on('connection', (ws) => {
-      console.log('WebSocket client connected to emergency server');
+      console.log('🔌 WebSocket client connected');
 
       ws.send(JSON.stringify({
-        type: 'nexus_emergency_connected',
-        message: 'NEXUS Emergency Server Connected',
-        quantum_bypass: true,
+        type: 'welcome',
+        message: 'NEXUS Emergency WebSocket Connected',
         timestamp: new Date().toISOString()
       }));
 
       ws.on('message', (data) => {
         try {
           const message = JSON.parse(data.toString());
-          
           ws.send(JSON.stringify({
             type: 'response',
             original: message,
-            server: 'nexus_emergency',
+            status: 'Emergency Mode Active',
             timestamp: new Date().toISOString()
           }));
         } catch (error) {
-          ws.send(JSON.stringify({
-            type: 'error',
-            message: 'Message processing failed',
-            timestamp: new Date().toISOString()
-          }));
+          console.error('WebSocket message error:', error);
         }
       });
 
       ws.on('close', () => {
-        console.log('WebSocket client disconnected from emergency server');
+        console.log('📴 WebSocket client disconnected');
       });
+    });
+
+    this.httpServer.on('upgrade', (request: any, socket: any, head: any) => {
+      if (request.url === '/ws') {
+        this.wss?.handleUpgrade(request, socket, head, (ws) => {
+          this.wss?.emit('connection', ws, request);
+        });
+      }
     });
   }
 
