@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import WatsonEnterpriseApp from "./WatsonEnterpriseApp";
+import App from "./App";
 import "./index.css";
 
-createRoot(document.getElementById("root")!).render(<WatsonEnterpriseApp />);
+createRoot(document.getElementById("root")!).render(<App />);

@@ -1,35 +1,15 @@
 import React from 'react';
 import { Route, Switch, useLocation } from 'wouter';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+// import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
-// Import all your sophisticated pages
-import QIEIntelligenceHub from './pages/QIEIntelligenceHub';
+// Import core components
+import { Dashboard } from '@/pages/Dashboard';
 import { LandingPage } from '@/pages/LandingPage';
 import { LoginPage } from '@/pages/LoginPage';
-import { Dashboard } from '@/pages/Dashboard';
-import { EnhancedDashboard } from '@/pages/EnhancedDashboard';
-import LiveTradingPanel from '@/components/LiveTradingPanel';
-import { TradingDashboard } from '@/pages/Dashboard';
-import NexusQuantumDashboard from '@/components/dashboard/nexus-quantum-dashboard';
-import InvestorMode from '@/components/InvestorMode';
-import AIAssistant from '@/pages/AIAssistant';
-import QuantumInsights from '@/pages/QuantumInsights';
-import WealthPulse from '@/pages/WealthPulse';
-import SmartPlanner from '@/pages/SmartPlanner';
-import NexusNotes from '@/pages/NexusNotes';
-import FamilySync from '@/pages/FamilySync';
-import CanvasBoards from '@/pages/CanvasBoards';
-import AdminPanel from '@/pages/AdminPanel';
-import AIConfiguration from '@/pages/AIConfiguration';
-
-// Import trading components
-import CoinbaseIntegration from '@/pages/CoinbaseIntegration';
-import TradingBotPage from '@/pages/trading-bot';
-import QuantumTradingDashboard from '@/pages/quantum-trading-dashboard';
 
 // Create query client
 const queryClient = new QueryClient({
@@ -251,7 +231,7 @@ function App() {
           <Toaster />
         </div>
       </ThemeProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   );
 }

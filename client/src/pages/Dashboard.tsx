@@ -109,9 +109,9 @@ export function Dashboard() {
                     <Users className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold text-gray-900 dark:text-white">Family Platform</h1>
+                    <h1 className="text-xl font-bold text-gray-900 dark:text-white">NEXUS-QIE</h1>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Welcome back, {user?.firstName || "Family Member"}
+                      Welcome back, {user?.firstName || "Quantum Trader"}
                     </p>
                   </div>
                 </div>
@@ -139,9 +139,9 @@ export function Dashboard() {
           {/* Main Content */}
           <main className="container mx-auto px-4 py-8">
             <div className="mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Quantum Trading Dashboard</h2>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">NEXUS-QIE Intelligence Hub</h2>
               <p className="text-gray-600 dark:text-gray-400">
-                Real-time market intelligence with quantum nexus bypass technology
+                Quantum Intelligence Enterprise Platform with live trading capabilities
               </p>
             </div>
 
