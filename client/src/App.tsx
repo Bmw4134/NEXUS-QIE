@@ -33,6 +33,9 @@ import QIEEmbeddedPanel from "./components/QIEEmbeddedPanel";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import "./index.css";
 
+// Lazy load API Vault page
+const APIVaultPageLazy = React.lazy(() => import('./pages/APIVaultPage'));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -205,7 +208,7 @@ function Router() {
         </Route>
         <Route path="/api-vault">
           <AsyncComponentWrapper>
-            {React.lazy(() => import('./pages/APIVaultPage'))}
+            <APIVaultPageLazy />
           </AsyncComponentWrapper>
         </Route>
         <Route component={NotFound} />
