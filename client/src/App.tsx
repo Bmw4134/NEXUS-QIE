@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
 // Import all your sophisticated pages
+import QIEIntelligenceHub from './pages/QIEIntelligenceHub';
 import { LandingPage } from '@/pages/LandingPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { Dashboard } from '@/pages/Dashboard';
@@ -92,7 +93,8 @@ function App() {
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900">
           <Switch>
             {/* Landing Page - Public */}
-            <Route path="/" component={LandingPage} />
+            <Route path="/" component={QIEIntelligenceHub} />
+            <Route path="/qie" component={QIEIntelligenceHub} />
 
             {/* Login Page - Public */}
             <Route path="/login" component={LoginPage} />
