@@ -98,6 +98,7 @@ function Router() {
         {!isAuthenticated ? (
           <>
             <Route path="/" component={LandingPage} />
+            <Route path="/simple" component={Landing} />
             <Route path="/login" component={LoginPage} />
             <Route path="/join/:token" component={JoinFamily} />
           </>

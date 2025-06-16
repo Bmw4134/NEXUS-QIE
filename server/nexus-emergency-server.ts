@@ -127,6 +127,16 @@ class NexusEmergencyServer {
         }
       });
     });
+
+    // Serve static files from client build with proper headers
+    this.app.use(express.static(path.join(__dirname, '../client/dist'), {
+      maxAge: '1h',
+      setHeaders: (res, path) => {
+        if (path.endsWith('.html')) {
+          res.setHeader('Cache-Control', 'no-cache');
+        }
+      }
+    }));
   }
 
   private setupWebSocket() {
