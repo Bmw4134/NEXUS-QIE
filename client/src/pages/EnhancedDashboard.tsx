@@ -1,28 +1,19 @@
-import React, { Suspense, useRef } from 'react';
+import React, { Suspense } from 'react';
 import { AppSidebar } from '@/components/AppSidebar';
 import { ErrorBoundary as CustomErrorBoundary } from '@/components/ErrorBoundary';
 import { Toaster } from '@/components/ui/toaster';
 import { useQuery } from '@tanstack/react-query';
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 // Lazy load components to prevent hook violations
 const Dashboard = React.lazy(() => import('./Dashboard'));
 const LiveTradingPanel = React.lazy(() => import('@/components/LiveTradingPanel'));
 const QuantumInsights = React.lazy(() => import('./QuantumInsights'));
 const InvestorMode = React.lazy(() => import('@/components/InvestorMode'));
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
 
 export default function EnhancedDashboard() {
   // Fetch system status
@@ -57,13 +48,14 @@ export default function EnhancedDashboard() {
           {/* Sidebar */}
           <AppSidebar />
 
-          {/* Main Content */}
-          <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Main Content Area */}
+          <SidebarInset>
             {/* Header */}
-            <header className="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50 p-4">
-              <div className="flex items-center justify-between">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-700/50 bg-gray-800/50 backdrop-blur-sm px-4">
+              <SidebarTrigger className="-ml-1" />
+              <div className="flex items-center justify-between w-full">
                 <div className="flex items-center space-x-4">
-                  <h1 className="text-2xl font-bold text-white">
+                  <h1 className="text-xl font-bold text-white">
                     NEXUS Intelligence Dashboard
                   </h1>
                   {systemStatus && (
@@ -73,7 +65,7 @@ export default function EnhancedDashboard() {
                         systemStatus.systemHealth > 60 ? 'bg-yellow-500' : 'bg-red-500'
                       } animate-pulse`}></div>
                       <span className="text-sm text-gray-300">
-                        System Health: {systemStatus.systemHealth?.toFixed(1)}%
+                        Health: {systemStatus.systemHealth?.toFixed(1)}%
                       </span>
                     </div>
                   )}
@@ -91,7 +83,7 @@ export default function EnhancedDashboard() {
             </header>
 
             {/* Main Dashboard Content */}
-            <main className="flex-1 overflow-auto p-6">
+            <div className="flex-1 overflow-auto p-6">
               <Suspense fallback={
                 <div className="flex items-center justify-center h-64">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -120,8 +112,8 @@ export default function EnhancedDashboard() {
                   <QuantumInsights />
                 </div>
               </Suspense>
-            </main>
-          </div>
+            </div>
+          </SidebarInset>
         </div>
 
         <Toaster />
