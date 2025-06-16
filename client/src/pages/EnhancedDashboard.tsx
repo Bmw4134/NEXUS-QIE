@@ -1416,6 +1416,7 @@ export function EnhancedDashboard() {
           onSystemAction={() => console.log('System action triggered')}
         />
         </div>
+        </div>
       </div>
     </div>
   );
