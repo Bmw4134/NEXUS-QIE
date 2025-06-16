@@ -3,7 +3,7 @@
  * Production-ready server with all core features
  */
 
-import './minimal-server';
+import './minimal-server.js';
 
 console.log('NEXUS Production Server starting...');
 console.log('Trading platform ready with real balance data');
