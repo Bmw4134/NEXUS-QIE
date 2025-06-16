@@ -76,7 +76,7 @@ localPort = 5083
 externalPort = 8099
 
 [workflows]
-runButton = "NEXUS Full Build"
+runButton = "NEXUS Production Ready"
 
 [[workflows.workflow]]
 name = "Project"
@@ -151,3 +151,20 @@ args = "npm run build"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "NODE_ENV=production node server/minimal-server.ts"
+
+[[workflows.workflow]]
+name = "NEXUS Production Ready"
+author = 42738758
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install --legacy-peer-deps"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run build"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "NODE_ENV=production tsx server/minimal-server.ts"
