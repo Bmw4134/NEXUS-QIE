@@ -743,16 +743,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Alpaca Stock Trading API Endpoints
   app.post('/api/alpaca/execute-trade', async (req, res) => {
     try {
-      const { symbol, side, quantity, orderType, limitPrice } = req.body;
+      const { symbol, side, quantity, orderType, limitPrice, mode } = req.body;
       
-      console.log(`🔮 NEXUS Alpaca: Executing ${side.toUpperCase()} ${quantity} ${symbol}`);
+      const tradingMode = mode || 'paper';
+      console.log(`🔮 NEXUS Alpaca ${tradingMode.toUpperCase()}: Executing ${side.toUpperCase()} ${quantity} ${symbol}`);
       
       const result = await alpacaTradeEngine.executeTrade({
         symbol,
         side,
         quantity,
         orderType: orderType || 'market',
-        limitPrice
+        limitPrice,
+        mode: tradingMode
       });
       
       res.json(result);
@@ -807,10 +809,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/alpaca/account', async (req, res) => {
     try {
-      const accountInfo = await alpacaTradeEngine.getAccountInfo();
+      const mode = (req.query.mode as string) || 'paper';
+      const accountInfo = await alpacaTradeEngine.getAccountInfo(mode as 'paper' | 'live');
       res.json(accountInfo);
     } catch (error) {
       console.error('Failed to fetch Alpaca account:', error);
+      res.status(500).json({ error: 'Failed to fetch account information' });
+    }
+  });
+
+  app.get('/api/alpaca/accounts/both', async (req, res) => {
+    try {
+      const paperAccount = await alpacaTradeEngine.getAccountInfo('paper');
+      let liveAccount = null;
+      
+      try {
+        liveAccount = await alpacaTradeEngine.getAccountInfo('live');
+      } catch (error) {
+        console.log('Live account not available:', error.message);
+      }
+      
+      res.json({
+        paper: paperAccount,
+        live: liveAccount,
+        status: alpacaTradeEngine.getConnectionStatus()
+      });
+    } catch (error) {
+      console.error('Failed to fetch Alpaca accounts:', error);
       res.status(500).json({ error: 'Failed to fetch account information' });
     }
   });

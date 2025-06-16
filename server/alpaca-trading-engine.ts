@@ -187,7 +187,7 @@ try:
     client = TradingClient(
         api_key=os.getenv("ALPACA_API_KEY"),
         secret_key=os.getenv("ALPACA_SECRET_KEY"),
-        paper=False
+        paper=True  # Use paper trading API
     )
 
     side = OrderSide.BUY if "${request.side}" == "buy" else OrderSide.SELL
@@ -312,7 +312,7 @@ try:
     client = TradingClient(
         api_key=os.getenv("ALPACA_API_KEY"),
         secret_key=os.getenv("ALPACA_SECRET_KEY"),
-        paper=False
+        paper=True  # Use paper trading API
     )
 
     side = OrderSide.BUY if "${request.side}" == "buy" else OrderSide.SELL
@@ -543,7 +543,7 @@ try:
     client = TradingClient(
         api_key=os.getenv("ALPACA_API_KEY"),
         secret_key=os.getenv("ALPACA_SECRET_KEY"),
-        paper=False
+        paper=True  # Use paper trading account
     )
 
     account = client.get_account()
