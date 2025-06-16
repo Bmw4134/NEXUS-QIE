@@ -116,11 +116,7 @@ args = "npm install"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd client && npm install && npm run build && cd .."
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd server && npm install --production && cd .."
+args = "npm run build"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
