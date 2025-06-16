@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
-import { Loader2, Key, Search, Browser, BookOpen } from 'lucide-react';
+import { Loader2, Key, Search, Globe, BookOpen } from 'lucide-react';
 
 interface AlpacaCredentials {
   apiKey: string;
@@ -92,7 +92,7 @@ export default function AlpacaAPIKeyFinder() {
           {/* Session Status */}
           <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
             <div className="flex items-center gap-2">
-              <Browser className="h-4 w-4" />
+              <Globe className="h-4 w-4" />
               <span className="text-sm font-medium">Browser Session Status</span>
             </div>
             <div className="flex items-center gap-2">
