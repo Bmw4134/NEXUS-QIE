@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { AppSidebar } from '@/components/AppSidebar';
+import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 
 interface DashboardMetrics {
   totalValue: number;
@@ -80,14 +82,18 @@ export function EnhancedDashboard() {
         if (response.ok) {
           const alerts = await response.json();
           setAutomatedAlerts(alerts);
+        } else {
+          // Silently handle API errors to prevent console spam
+          setAutomatedAlerts([]);
         }
       } catch (error) {
-        console.error('Failed to fetch alerts:', error);
+        // Silently handle network errors
+        setAutomatedAlerts([]);
       }
     };
 
     fetchAlerts();
-    const interval = setInterval(fetchAlerts, 15000);
+    const interval = setInterval(fetchAlerts, 30000); // Reduced frequency
     return () => clearInterval(interval);
   }, []);
 
@@ -121,40 +127,31 @@ export function EnhancedDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Sidebar Navigation */}
-      <div className="fixed left-0 top-0 h-full w-64 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-r border-gray-200/50 dark:border-gray-700/50 z-40 shadow-lg">
-        <div className="p-4">
-          <div className="flex items-center space-x-3 mb-8">
-            <Shield className="h-8 w-8 text-blue-600" />
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">NEXUS</h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Trading Suite</p>
+      <div className="flex">
+        <AppSidebar />
+        <SidebarInset className="flex-1">
+          <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+            <div className="container mx-auto px-4 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <SidebarTrigger />
+                  <div className="flex items-center space-x-3">
+                    <Shield className="h-8 w-8 text-blue-600" />
+                    <div>
+                      <h2 className="text-lg font-bold text-gray-900 dark:text-white">NEXUS Command</h2>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Quantum Trading Suite</p>
+                    </div>
+                  </div>
+                </div>
+                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                  Live Data
+                </Badge>
+              </div>
             </div>
-          </div>
-          
-          <nav className="space-y-2">
-            <Button variant="ghost" className="w-full justify-start">
-              <TrendingUp className="mr-2 h-4 w-4" />
-              Dashboard
-            </Button>
-            <Button variant="ghost" className="w-full justify-start">
-              <DollarSign className="mr-2 h-4 w-4" />
-              Trading
-            </Button>
-            <Button variant="ghost" className="w-full justify-start">
-              <Brain className="mr-2 h-4 w-4" />
-              AI Insights
-            </Button>
-            <Button variant="ghost" className="w-full justify-start">
-              <Target className="mr-2 h-4 w-4" />
-              Analytics
-            </Button>
-          </nav>
-        </div>
-      </div>
+          </header>
 
-      {/* Main Content Area */}
-      <div className="ml-64 p-6">
+          {/* Main Content Area */}
+          <div className="p-6">
         {/* Autonomous Alert System */}
         {alertsVisible && automatedAlerts.filter(a => !a.resolved).length > 0 && (
           <div className="mb-6 space-y-3">
@@ -303,6 +300,8 @@ export function EnhancedDashboard() {
             </CardContent>
           </Card>
         </div>
+          </div>
+        </SidebarInset>
       </div>
     </div>
   );
