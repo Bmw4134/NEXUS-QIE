@@ -283,6 +283,7 @@ export default function LiveTradingPage() {
 
       </div>
     </div>
+  </div>
   );
 }
 
