@@ -42,6 +42,9 @@ interface NEXUSQIEState {
   totalEquity: number;
   dailyGain: number;
   portfolioValue: number;
+  dayGainPercent: number;
+  systemHealth: number;
+  quantumAccuracy: number;
   positions: Array<{
     symbol: string;
     quantity: number;
@@ -55,8 +58,12 @@ interface NEXUSQIEState {
     alpaca: boolean;
     coinbase: boolean;
   };
-  systemHealth: number;
-  quantumAccuracy: number;
+  realTimeMetrics: {
+    activeTrades: number;
+    totalVolume: number;
+    successRate: number;
+    riskLevel: string;
+  };
 }
 
 export default function App() {
@@ -65,6 +72,9 @@ export default function App() {
     totalEquity: 2034.07,
     dailyGain: 421.1,
     portfolioValue: 855,
+    dayGainPercent: 15.2,
+    systemHealth: 97,
+    quantumAccuracy: 99.7,
     positions: [
       {
         symbol: 'AAPL',
@@ -96,18 +106,25 @@ export default function App() {
       alpaca: true,
       coinbase: true
     },
-    systemHealth: 97,
-    quantumAccuracy: 99.7
+    realTimeMetrics: {
+      activeTrades: 12,
+      totalVolume: 45000,
+      successRate: 94.2,
+      riskLevel: 'Low'
+    }
   });
 
   useEffect(() => {
     console.log('🚀 NEXUS-QIE Production Interface Loading...');
     console.log('⚡ Quantum Intelligence Enterprise trading platform initializing...');
     
-    // Simulate real-time updates
+    // Simulate real-time updates with more sophisticated data
     const interval = setInterval(() => {
       setNexusState(prev => ({
         ...prev,
+        accountBalance: prev.accountBalance + (Math.random() - 0.5) * 10,
+        totalEquity: prev.totalEquity + (Math.random() - 0.5) * 25,
+        dailyGain: prev.dailyGain + (Math.random() - 0.5) * 5,
         positions: prev.positions.map(pos => ({
           ...pos,
           currentPrice: pos.currentPrice + (Math.random() - 0.5) * 2,
@@ -128,7 +145,7 @@ export default function App() {
       <ThemeProvider defaultTheme="dark" storageKey="nexus-qie-theme">
         <Router>
           <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
-            {/* NEXUS-QIE Header */}
+            {/* Advanced NEXUS-QIE Header with Real-time Data */}
             <div className="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-700">
               <div className="flex items-center justify-between px-6 py-3">
                 <div className="flex items-center space-x-4">
@@ -156,7 +173,13 @@ export default function App() {
                   
                   <div className="text-right">
                     <div className="text-lg font-bold text-green-400">+${nexusState.dailyGain.toFixed(2)}</div>
+                    <div className="text-xs text-green-400">+{nexusState.dayGainPercent.toFixed(1)}%</div>
                     <div className="text-xs text-gray-400">Day P&L</div>
+                  </div>
+
+                  <div className="text-right">
+                    <div className="text-lg font-bold text-blue-400">{nexusState.systemHealth}%</div>
+                    <div className="text-xs text-gray-400">System Health</div>
                   </div>
                   
                   <div className="flex items-center space-x-2">
@@ -177,6 +200,33 @@ export default function App() {
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/enhanced-dashboard" element={
                       <div className="space-y-6">
+                        {/* Top Metrics Row */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                          <div className="bg-slate-800/50 backdrop-blur-md rounded-xl border border-slate-700 p-6">
+                            <h3 className="text-gray-400 text-sm mb-2">Total Equity</h3>
+                            <div className="text-3xl font-bold text-white">${nexusState.totalEquity.toFixed(2)}</div>
+                            <div className="text-green-400 text-sm">+$421.1 ({nexusState.dayGainPercent.toFixed(1)}%)</div>
+                          </div>
+                          
+                          <div className="bg-slate-800/50 backdrop-blur-md rounded-xl border border-slate-700 p-6">
+                            <h3 className="text-gray-400 text-sm mb-2">Day P&L</h3>
+                            <div className="text-3xl font-bold text-green-400">+$421.1</div>
+                            <div className="text-white text-sm">All Devices: +$534.87</div>
+                          </div>
+                          
+                          <div className="bg-slate-800/50 backdrop-blur-md rounded-xl border border-slate-700 p-6">
+                            <h3 className="text-gray-400 text-sm mb-2">At Close</h3>
+                            <div className="text-3xl font-bold text-white">{nexusState.portfolioValue}</div>
+                            <div className="text-gray-400 text-sm">Portfolio Value</div>
+                          </div>
+                          
+                          <div className="bg-slate-800/50 backdrop-blur-md rounded-xl border border-slate-700 p-6">
+                            <h3 className="text-gray-400 text-sm mb-2">System Health</h3>
+                            <div className="text-3xl font-bold text-blue-400">{nexusState.systemHealth}%</div>
+                            <div className="text-green-400 text-sm">All Systems Operational</div>
+                          </div>
+                        </div>
+
                         {/* Live Positions Card */}
                         <div className="bg-slate-800/50 backdrop-blur-md rounded-xl border border-slate-700 p-6">
                           <h2 className="text-xl font-bold text-white mb-4 flex items-center">
@@ -275,6 +325,29 @@ export default function App() {
                             <div className="bg-orange-900/50 p-4 rounded-lg border border-orange-700">
                               <div className="text-orange-400 text-sm font-medium">Market Sentiment</div>
                               <div className="text-white text-lg font-bold">Monitoring</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Real-Time Metrics */}
+                        <div className="bg-slate-800/50 backdrop-blur-md rounded-xl border border-slate-700 p-6">
+                          <h2 className="text-xl font-bold text-white mb-4">Real-Time Metrics</h2>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-white">{nexusState.realTimeMetrics.activeTrades}</div>
+                              <div className="text-gray-400 text-sm">Active Trades</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-white">${nexusState.realTimeMetrics.totalVolume.toLocaleString()}</div>
+                              <div className="text-gray-400 text-sm">Total Volume</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-green-400">{nexusState.realTimeMetrics.successRate}%</div>
+                              <div className="text-gray-400 text-sm">Success Rate</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-blue-400">{nexusState.realTimeMetrics.riskLevel}</div>
+                              <div className="text-gray-400 text-sm">Risk Level</div>
                             </div>
                           </div>
                         </div>
