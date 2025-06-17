@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -10,6 +9,7 @@ import QIEEmbeddedPanel from '@/components/QIEEmbeddedPanel';
 
 // Import all pages
 import Dashboard from '@/pages/Dashboard';
+import TrifectaPage from '@/pages/trifecta';
 import EnhancedDashboard from '@/pages/EnhancedDashboard';
 import SmartPlanner from '@/pages/SmartPlanner';
 import WealthPulse from '@/pages/WealthPulse';
@@ -122,7 +122,7 @@ export default function App() {
   useEffect(() => {
     console.log('🚀 NEXUS-QIE Production Interface Loading...');
     console.log('⚡ Quantum Intelligence Enterprise trading platform initializing...');
-    
+
     // Simulate real-time updates with more sophisticated data
     const interval = setInterval(() => {
       setNexusState(prev => ({
@@ -175,18 +175,18 @@ export default function App() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-6">
                   <div className="text-right">
                     <div className="text-2xl font-bold text-green-400">${nexusState.accountBalance.toFixed(2)}</div>
                     <div className="text-xs text-gray-400">Available Balance</div>
                   </div>
-                  
+
                   <div className="text-right">
                     <div className="text-lg font-bold text-white">${nexusState.totalEquity.toFixed(2)}</div>
                     <div className="text-xs text-gray-400">Total Equity</div>
                   </div>
-                  
+
                   <div className="text-right">
                     <div className="text-lg font-bold text-green-400">+${nexusState.dailyGain.toFixed(2)}</div>
                     <div className="text-xs text-green-400">+{nexusState.dayGainPercent.toFixed(1)}%</div>
@@ -197,7 +197,7 @@ export default function App() {
                     <div className="text-lg font-bold text-blue-400">{nexusState.systemHealth}%</div>
                     <div className="text-xs text-gray-400">System Health</div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                     <span className="text-green-400 text-sm font-medium">NEXUS ONLINE</span>
@@ -209,11 +209,12 @@ export default function App() {
             <SidebarProvider>
               <div className="flex pt-20">
                 <AppSidebar />
-                
+
                 <main className="flex-1 p-6 space-y-6">
                   <Routes>
                     <Route path="/" element={<Navigate to="/enhanced-dashboard" replace />} />
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/trifecta" element={<TrifectaPage />} />
                     <Route path="/enhanced-dashboard" element={
                       <div className="space-y-6">
                         {/* Top Metrics Row */}
@@ -223,19 +224,19 @@ export default function App() {
                             <div className="text-3xl font-bold text-white">${nexusState.totalEquity.toFixed(2)}</div>
                             <div className="text-green-400 text-sm">+$421.1 ({nexusState.dayGainPercent.toFixed(1)}%)</div>
                           </div>
-                          
+
                           <div className="bg-slate-800/50 backdrop-blur-md rounded-xl border border-slate-700 p-6">
                             <h3 className="text-gray-400 text-sm mb-2">Day P&L</h3>
                             <div className="text-3xl font-bold text-green-400">+$421.1</div>
                             <div className="text-white text-sm">All Devices: +$534.87</div>
                           </div>
-                          
+
                           <div className="bg-slate-800/50 backdrop-blur-md rounded-xl border border-slate-700 p-6">
                             <h3 className="text-gray-400 text-sm mb-2">At Close</h3>
                             <div className="text-3xl font-bold text-white">{nexusState.portfolioValue}</div>
                             <div className="text-gray-400 text-sm">Portfolio Value</div>
                           </div>
-                          
+
                           <div className="bg-slate-800/50 backdrop-blur-md rounded-xl border border-slate-700 p-6">
                             <h3 className="text-gray-400 text-sm mb-2">System Health</h3>
                             <div className="text-3xl font-bold text-blue-400">{nexusState.systemHealth}%</div>
@@ -411,11 +412,11 @@ export default function App() {
             />
           </div>
         </Router>
-        
+
         {/* Debug and Error Overlays */}
         <DebugOverlay />
         <ErrorOverlay />
-        
+
         <Toaster />
       </ThemeProvider>
     </QueryClientProvider>
