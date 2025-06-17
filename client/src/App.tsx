@@ -66,6 +66,10 @@ interface NEXUSQIEState {
   };
 }
 
+import { KaizenAssistantCore } from '@/components/KaizenAssistantCore';
+import { DebugOverlay } from '@/components/debug-overlay';
+import { ErrorOverlay } from '@/components/error-overlay';
+
 export default function App() {
   const [nexusState, setNexusState] = useState<NEXUSQIEState>({
     accountBalance: 834.97,
@@ -141,8 +145,19 @@ export default function App() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="nexus-qie-theme">
+    <KaizenAssistantCore 
+      dashboard="enhanced_dashboard"
+      config={{
+        enableFirebaseSync: true,
+        enableMetricsStreaming: true,
+        enableDebugOverlay: true,
+        enableErrorOverlay: true,
+        enableStateSnapshot: true,
+        enableWidgetPerfTracker: true
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider defaultTheme="dark" storageKey="nexus-qie-theme">
         <Router>
           <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
             {/* Advanced NEXUS-QIE Header with Real-time Data */}
@@ -394,8 +409,14 @@ export default function App() {
             />
           </div>
         </Router>
+        
+        {/* Debug and Error Overlays */}
+        <DebugOverlay />
+        <ErrorOverlay />
+        
         <Toaster />
       </ThemeProvider>
     </QueryClientProvider>
+    </KaizenAssistantCore>
   );
 }
