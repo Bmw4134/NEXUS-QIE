@@ -178,9 +178,9 @@ export default function FamilyHub() {
     }
   };
 
-  const onlineMembers = familyMembers.filter((member: FamilyMember) => member.status === 'online');
-  const recentActivities = familyActivities.slice(0, 6);
-  const recentMessages = familyMessages.slice(0, 4);
+  const onlineMembers = Array.isArray(familyMembers) ? familyMembers.filter((member: FamilyMember) => member.status === 'online') : [];
+  const recentActivities = Array.isArray(familyActivities) ? familyActivities.slice(0, 6) : [];
+  const recentMessages = Array.isArray(familyMessages) ? familyMessages.slice(0, 4) : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-blue-900 dark:to-slate-800">
@@ -305,7 +305,7 @@ export default function FamilyHub() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {familyMembers.length > 0 ? (
+                  {Array.isArray(familyMembers) && familyMembers.length > 0 ? (
                     familyMembers.map((member: FamilyMember) => (
                       <div key={member.id} className="flex items-center space-x-3">
                         <div className="relative">

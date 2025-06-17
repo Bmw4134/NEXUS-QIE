@@ -27,7 +27,8 @@ import {
   Crown,
   Activity,
   BarChart3,
-  Target
+  Target,
+  Home
 } from 'lucide-react';
 
 const menuItems = [
@@ -36,6 +37,12 @@ const menuItems = [
     url: "/",
     icon: Activity,
     description: "Main overview"
+  },
+  {
+    title: "Family Hub",
+    url: "/family-hub",
+    icon: Home,
+    description: "Central family dashboard"
   },
   {
     title: "SmartPlanner",
