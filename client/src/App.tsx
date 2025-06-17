@@ -15,6 +15,7 @@ import SmartPlanner from '@/pages/SmartPlanner';
 import WealthPulse from '@/pages/WealthPulse';
 import QuantumInsights from '@/pages/QuantumInsights';
 import NexusNotes from '@/pages/NexusNotes';
+import FamilyHub from '@/pages/FamilyHub';
 import FamilySync from '@/pages/FamilySync';
 import FamilyBoards from '@/pages/FamilyBoards';
 import CanvasBoards from '@/pages/CanvasBoards';
@@ -372,6 +373,7 @@ export default function App() {
                     <Route path="/wealth-pulse" element={<WealthPulse />} />
                     <Route path="/quantum-insights" element={<QuantumInsights />} />
                     <Route path="/nexus-notes" element={<NexusNotes />} />
+                    <Route path="/family-hub" element={<FamilyHub />} />
                     <Route path="/family-sync" element={<FamilySync />} />
                     <Route path="/family-boards" element={<FamilyBoards />} />
                     <Route path="/canvas-boards" element={<CanvasBoards />} />
