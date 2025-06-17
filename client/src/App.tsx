@@ -1,286 +1,328 @@
 
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
+import QIEEmbeddedPanel from '@/components/QIEEmbeddedPanel';
 
-// Enterprise Trading Components
+// Import all pages
 import Dashboard from '@/pages/Dashboard';
+import EnhancedDashboard from '@/pages/EnhancedDashboard';
+import SmartPlanner from '@/pages/SmartPlanner';
+import WealthPulse from '@/pages/WealthPulse';
+import QuantumInsights from '@/pages/QuantumInsights';
+import NexusNotes from '@/pages/NexusNotes';
+import FamilySync from '@/pages/FamilySync';
+import FamilyBoards from '@/pages/FamilyBoards';
+import CanvasBoards from '@/pages/CanvasBoards';
+import AIConfiguration from '@/pages/AIConfiguration';
+import QNISAdmin from '@/pages/QNISAdmin';
 import QIEIntelligenceHub from '@/pages/QIEIntelligenceHub';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { 
-  Brain, 
-  TrendingUp, 
-  BarChart3, 
-  Shield, 
-  Globe, 
-  Cpu,
-  Zap,
-  Target,
-  Star,
-  Rocket,
-  DollarSign,
-  Activity
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import QIESignalPanel from '@/pages/QIESignalPanel';
+import QIEPromptDNA from '@/pages/QIEPromptDNA';
+import LiveTrading from '@/pages/live-trading';
+import NexusTradingTerminal from '@/pages/nexus-trading-terminal';
+import QuantumTradingDashboard from '@/pages/quantum-trading-dashboard';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 1000,
-      refetchInterval: 30 * 1000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000,
     },
   },
 });
 
-// Enterprise Trading Terminal Landing
-const EnterpriseTradingTerminal = () => {
-  const [liveData, setLiveData] = useState({
-    balance: 834.97,
-    buyingPower: 2034.97,
-    totalEquity: 2034.97,
-    daysPnL: 421.10,
-    aiScore: 855,
-    systemHealth: 97
+interface NEXUSQIEState {
+  accountBalance: number;
+  totalEquity: number;
+  dailyGain: number;
+  portfolioValue: number;
+  positions: Array<{
+    symbol: string;
+    quantity: number;
+    currentPrice: number;
+    marketValue: number;
+    dayChange: number;
+    dayChangePercent: number;
+  }>;
+  tradingEngines: {
+    robinhood: boolean;
+    alpaca: boolean;
+    coinbase: boolean;
+  };
+  systemHealth: number;
+  quantumAccuracy: number;
+}
+
+export default function App() {
+  const [nexusState, setNexusState] = useState<NEXUSQIEState>({
+    accountBalance: 834.97,
+    totalEquity: 2034.07,
+    dailyGain: 421.1,
+    portfolioValue: 855,
+    positions: [
+      {
+        symbol: 'AAPL',
+        quantity: 5,
+        currentPrice: 185.43,
+        marketValue: 927.15,
+        dayChange: 8.21,
+        dayChangePercent: 4.5
+      },
+      {
+        symbol: 'TSLA',
+        quantity: 2,
+        currentPrice: 243.87,
+        marketValue: 487.74,
+        dayChange: -12.43,
+        dayChangePercent: -2.4
+      },
+      {
+        symbol: 'NVDA',
+        quantity: 3,
+        currentPrice: 431.22,
+        marketValue: 1293.66,
+        dayChange: 15.67,
+        dayChangePercent: 3.8
+      }
+    ],
+    tradingEngines: {
+      robinhood: true,
+      alpaca: true,
+      coinbase: true
+    },
+    systemHealth: 97,
+    quantumAccuracy: 99.7
   });
 
-  const [positions] = useState([
-    { symbol: 'AAPL', shares: 15, currentPrice: 185.43, change: '+$2.13' },
-    { symbol: 'TSLA', shares: 8, currentPrice: 243.87, change: '+$5.21' },
-    { symbol: 'NVDA', shares: 12, currentPrice: 431.22, change: '-$1.45' }
-  ]);
-
-  const [tradingEngines] = useState([
-    { name: 'Robinhood', status: 'Active', color: 'green' },
-    { name: 'Alpaca', status: 'Active', color: 'green' },
-    { name: 'Coinbase', status: 'Active', color: 'green' }
-  ]);
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white">
-      {/* Header */}
-      <div className="border-b border-blue-800/30 bg-slate-900/80 backdrop-blur-xl">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Zap className="h-8 w-8 text-blue-400" />
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                  NEXUS-QIE
-                </h1>
-              </div>
-              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                Quantum Intelligence Enterprise Platform
-              </Badge>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <div className="text-2xl font-bold text-green-400">${liveData.balance}</div>
-                <div className="text-sm text-gray-400">Live Account Balance</div>
-                <div className="text-xs text-blue-400">Buying Power: ${liveData.buyingPower.toLocaleString()}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-6 py-8">
-        {/* Metrics Dashboard */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-green-900/40 to-green-800/20 border-green-500/30">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-green-400">Total Equity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">${liveData.totalEquity.toLocaleString()}</div>
-              <div className="text-xs text-green-400">+${(liveData.totalEquity - 1500).toFixed(2)} (+24.52%)</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-blue-900/40 to-blue-800/20 border-blue-500/30">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-blue-400">Day's P&L</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">+${liveData.daysPnL}</div>
-              <div className="text-xs text-blue-400">+2.45% today</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-purple-900/40 to-purple-800/20 border-purple-500/30">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-purple-400">AI Score</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{liveData.aiScore}</div>
-              <div className="text-xs text-purple-400">Quantum Analysis</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-cyan-900/40 to-cyan-800/20 border-cyan-500/30">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-cyan-400">System Health</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{liveData.systemHealth}%</div>
-              <div className="text-xs text-cyan-400">All Systems Operational</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Live Positions */}
-          <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
-            <CardHeader>
-              <CardTitle className="flex items-center text-white">
-                <Activity className="mr-2 h-5 w-5 text-blue-400" />
-                Live Positions
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {positions.map((position) => (
-                <div key={position.symbol} className="flex items-center justify-between p-4 rounded-lg bg-slate-800/50 border border-slate-700/30">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-lg bg-blue-600/20 flex items-center justify-center">
-                      <span className="text-blue-400 font-bold text-sm">{position.symbol}</span>
-                    </div>
-                    <div>
-                      <div className="text-white font-medium">{position.symbol}</div>
-                      <div className="text-gray-400 text-sm">{position.shares} shares</div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-white font-bold">${position.currentPrice}</div>
-                    <div className={`text-sm ${position.change.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>
-                      {position.change}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Quick Trading Actions */}
-          <div className="space-y-6">
-            <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
-              <CardHeader>
-                <CardTitle className="text-green-400">Quick Buy Orders</CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-3">
-                <Button className="bg-green-600 hover:bg-green-700 text-white">Buy AAPL</Button>
-                <Button className="bg-green-600 hover:bg-green-700 text-white">Buy TSLA</Button>
-                <Button className="bg-green-600 hover:bg-green-700 text-white">Buy NVDA</Button>
-                <Button className="bg-green-600 hover:bg-green-700 text-white">Buy SPY</Button>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
-              <CardHeader>
-                <CardTitle className="text-red-400">Quick Sell Orders</CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-3">
-                <Button className="bg-red-600 hover:bg-red-700 text-white">Sell AAPL</Button>
-                <Button className="bg-red-600 hover:bg-red-700 text-white">Sell TSLA</Button>
-                <Button className="bg-red-600 hover:bg-red-700 text-white">Sell NVDA</Button>
-                <Button className="bg-red-600 hover:bg-red-700 text-white">Sell All</Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Trading Engines Status */}
-        <Card className="mt-8 bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
-          <CardHeader>
-            <CardTitle className="text-white">Trading Engines Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {tradingEngines.map((engine) => (
-                <div key={engine.name} className="flex items-center justify-between p-4 rounded-lg bg-slate-800/50">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-3 h-3 rounded-full bg-${engine.color}-500`}></div>
-                    <span className="text-white font-medium">{engine.name}</span>
-                  </div>
-                  <Badge className={`bg-${engine.color}-500/20 text-${engine.color}-400 border-${engine.color}-500/30`}>
-                    {engine.status}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* NEXUS Intelligence Modules */}
-        <Card className="mt-8 bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
-          <CardHeader>
-            <CardTitle className="text-white">NEXUS Intelligence Modules</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Button variant="outline" className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
-                <Brain className="mr-2 h-4 w-4" />
-                AI Analysis
-              </Button>
-              <Button variant="outline" className="border-green-500/30 text-green-400 hover:bg-green-500/10">
-                <TrendingUp className="mr-2 h-4 w-4" />
-                Market Trends
-              </Button>
-              <Button variant="outline" className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10">
-                <Target className="mr-2 h-4 w-4" />
-                Risk Analysis
-              </Button>
-              <Button variant="outline" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
-                <Rocket className="mr-2 h-4 w-4" />
-                Auto Trading
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Status Indicator */}
-      <div className="fixed bottom-6 right-6">
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-green-500/30 rounded-lg p-3 flex items-center space-x-2">
-          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="text-green-400 text-sm font-medium">NEXUS ONLINE</span>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-function App() {
-  const [currentPath, setCurrentPath] = useState(window.location.pathname);
-
   useEffect(() => {
-    const handleLocationChange = () => {
-      setCurrentPath(window.location.pathname);
-    };
+    console.log('🚀 NEXUS-QIE Production Interface Loading...');
+    console.log('⚡ Quantum Intelligence Enterprise trading platform initializing...');
+    
+    // Simulate real-time updates
+    const interval = setInterval(() => {
+      setNexusState(prev => ({
+        ...prev,
+        positions: prev.positions.map(pos => ({
+          ...pos,
+          currentPrice: pos.currentPrice + (Math.random() - 0.5) * 2,
+          dayChange: pos.dayChange + (Math.random() - 0.5) * 0.5,
+          dayChangePercent: pos.dayChangePercent + (Math.random() - 0.5) * 0.1
+        }))
+      }));
+    }, 3000);
 
-    window.addEventListener('popstate', handleLocationChange);
-    return () => window.removeEventListener('popstate', handleLocationChange);
+    console.log('✅ NEXUS-QIE Production Interface Loaded');
+    console.log('🌌 Quantum Intelligence Enterprise trading platform operational');
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="nexus-ui-theme">
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="dark" storageKey="nexus-qie-theme">
         <Router>
-          <div className="min-h-screen">
-            <Routes>
-              <Route path="/" element={<EnterpriseTradingTerminal />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/qie-intelligence-hub" element={<QIEIntelligenceHub />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+          <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
+            {/* NEXUS-QIE Header */}
+            <div className="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-700">
+              <div className="flex items-center justify-between px-6 py-3">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">⚡</span>
+                    </div>
+                    <div>
+                      <h1 className="text-white text-lg font-bold">NEXUS-QIE</h1>
+                      <p className="text-blue-400 text-xs">Quantum Intelligence Enterprise Platform</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-6">
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-green-400">${nexusState.accountBalance.toFixed(2)}</div>
+                    <div className="text-xs text-gray-400">Available Balance</div>
+                  </div>
+                  
+                  <div className="text-right">
+                    <div className="text-lg font-bold text-white">${nexusState.totalEquity.toFixed(2)}</div>
+                    <div className="text-xs text-gray-400">Total Equity</div>
+                  </div>
+                  
+                  <div className="text-right">
+                    <div className="text-lg font-bold text-green-400">+${nexusState.dailyGain.toFixed(2)}</div>
+                    <div className="text-xs text-gray-400">Day P&L</div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-green-400 text-sm font-medium">NEXUS ONLINE</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <SidebarProvider>
+              <div className="flex pt-20">
+                <AppSidebar />
+                
+                <main className="flex-1 p-6 space-y-6">
+                  <Routes>
+                    <Route path="/" element={<Navigate to="/enhanced-dashboard" replace />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/enhanced-dashboard" element={
+                      <div className="space-y-6">
+                        {/* Live Positions Card */}
+                        <div className="bg-slate-800/50 backdrop-blur-md rounded-xl border border-slate-700 p-6">
+                          <h2 className="text-xl font-bold text-white mb-4 flex items-center">
+                            <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                            Live Positions
+                          </h2>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {nexusState.positions.map((position) => (
+                              <div key={position.symbol} className="bg-slate-700/50 rounded-lg p-4">
+                                <div className="flex items-center justify-between mb-2">
+                                  <h3 className="text-white font-bold text-lg">{position.symbol}</h3>
+                                  <span className="text-gray-400 text-sm">{position.quantity} shares</span>
+                                </div>
+                                <div className="text-2xl font-bold text-white mb-1">
+                                  ${position.currentPrice.toFixed(2)}
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-lg text-gray-300">
+                                    ${position.marketValue.toFixed(2)}
+                                  </span>
+                                  <span className={`text-sm font-medium ${
+                                    position.dayChange >= 0 ? 'text-green-400' : 'text-red-400'
+                                  }`}>
+                                    {position.dayChange >= 0 ? '+' : ''}${position.dayChange.toFixed(2)}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Quick Buy Orders */}
+                        <div className="bg-slate-800/50 backdrop-blur-md rounded-xl border border-slate-700 p-6">
+                          <h2 className="text-xl font-bold text-white mb-4">Quick Buy Orders</h2>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {['AAPL', 'TSLA', 'NVDA', 'SPY'].map((symbol) => (
+                              <button
+                                key={`buy-${symbol}`}
+                                className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                              >
+                                Buy {symbol}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Quick Sell Orders */}
+                        <div className="bg-slate-800/50 backdrop-blur-md rounded-xl border border-slate-700 p-6">
+                          <h2 className="text-xl font-bold text-white mb-4">Quick Sell Orders</h2>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {['AAPL', 'TSLA', 'NVDA', 'SPY'].map((symbol) => (
+                              <button
+                                key={`sell-${symbol}`}
+                                className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                              >
+                                Sell {symbol}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Trading Engines Status */}
+                        <div className="bg-slate-800/50 backdrop-blur-md rounded-xl border border-slate-700 p-6">
+                          <h2 className="text-xl font-bold text-white mb-4">Trading Engines Status</h2>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {Object.entries(nexusState.tradingEngines).map(([engine, status]) => (
+                              <div key={engine} className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg">
+                                <span className="text-white font-medium capitalize">{engine}</span>
+                                <div className="flex items-center space-x-2">
+                                  <div className={`w-3 h-3 rounded-full ${status ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                  <span className={`text-sm font-medium ${status ? 'text-green-400' : 'text-red-400'}`}>
+                                    {status ? 'Active' : 'Inactive'}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* NEXUS Intelligence Modules */}
+                        <div className="bg-slate-800/50 backdrop-blur-md rounded-xl border border-slate-700 p-6">
+                          <h2 className="text-xl font-bold text-white mb-4">NEXUS Intelligence Modules</h2>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="bg-blue-900/50 p-4 rounded-lg border border-blue-700">
+                              <div className="text-blue-400 text-sm font-medium">AI Analytics</div>
+                              <div className="text-white text-lg font-bold">Active</div>
+                            </div>
+                            <div className="bg-green-900/50 p-4 rounded-lg border border-green-700">
+                              <div className="text-green-400 text-sm font-medium">Risk Analysis</div>
+                              <div className="text-white text-lg font-bold">Running</div>
+                            </div>
+                            <div className="bg-purple-900/50 p-4 rounded-lg border border-purple-700">
+                              <div className="text-purple-400 text-sm font-medium">Auto Trading</div>
+                              <div className="text-white text-lg font-bold">Enabled</div>
+                            </div>
+                            <div className="bg-orange-900/50 p-4 rounded-lg border border-orange-700">
+                              <div className="text-orange-400 text-sm font-medium">Market Sentiment</div>
+                              <div className="text-white text-lg font-bold">Monitoring</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    } />
+                    <Route path="/smart-planner" element={<SmartPlanner />} />
+                    <Route path="/wealth-pulse" element={<WealthPulse />} />
+                    <Route path="/quantum-insights" element={<QuantumInsights />} />
+                    <Route path="/nexus-notes" element={<NexusNotes />} />
+                    <Route path="/family-sync" element={<FamilySync />} />
+                    <Route path="/family-boards" element={<FamilyBoards />} />
+                    <Route path="/canvas-boards" element={<CanvasBoards />} />
+                    <Route path="/ai-configuration" element={<AIConfiguration />} />
+                    <Route path="/qnis-admin" element={<QNISAdmin />} />
+                    <Route path="/qie-intelligence-hub" element={<QIEIntelligenceHub />} />
+                    <Route path="/qie-signal-panel" element={<QIESignalPanel />} />
+                    <Route path="/qie-prompt-dna" element={<QIEPromptDNA />} />
+                    <Route path="/live-trading" element={<LiveTrading />} />
+                    <Route path="/nexus-trading-terminal" element={<NexusTradingTerminal />} />
+                    <Route path="/quantum-trading-dashboard" element={<QuantumTradingDashboard />} />
+                  </Routes>
+                </main>
+              </div>
+            </SidebarProvider>
+
+            {/* QIE Embedded Panels */}
+            <QIEEmbeddedPanel 
+              panelId="enhanced_dashboard_intelligence" 
+              type="mini_intelligence" 
+              position="top_right"
+              dashboard="enhanced_dashboard"
+            />
+            <QIEEmbeddedPanel 
+              panelId="enhanced_dashboard_signals" 
+              type="signal_feed" 
+              position="bottom_left"
+              dashboard="enhanced_dashboard"
+            />
+            <QIEEmbeddedPanel 
+              panelId="enhanced_dashboard_ops" 
+              type="ops_daemon" 
+              position="floating"
+              dashboard="enhanced_dashboard"
+            />
           </div>
         </Router>
         <Toaster />
-      </QueryClientProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
-
-export default App;
