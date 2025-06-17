@@ -48,242 +48,89 @@ export default function LiveTradingPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username: 'bm.watson34@gmail.com',
-          password: 'Panthers3477'
+          apiKey: 'your-api-key',
+          apiSecret: 'your-api-secret'
         })
       });
 
       const result = await response.json();
       
       if (result.success) {
-        setCoinbaseData(result.accountInfo);
+        setCoinbaseData(result.accounts);
+        setStatus('Successfully connected to Coinbase');
+      } else {
+        setStatus(`Coinbase connection failed: ${result.message}`);
       }
     } catch (error) {
-      console.error('Coinbase connection failed');
+      setStatus('Coinbase network error - please try again');
     } finally {
       setConnectingCoinbase(false);
     }
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
+    <div className="flex min-h-screen bg-background">
       <Sidebar />
-      <div style={{ 
-        marginLeft: '280px',
-        flex: 1,
-        minHeight: '100vh', 
-        backgroundColor: '#111', 
-        color: 'white', 
-        padding: '40px',
-        fontFamily: 'Arial, sans-serif'
-      }}>
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        
-        <h1 style={{ fontSize: '36px', marginBottom: '40px', textAlign: 'center' }}>
-          LIVE ROBINHOOD TRADING
-        </h1>
-
-        <div style={{ 
-          backgroundColor: '#222', 
-          padding: '30px', 
-          borderRadius: '8px',
-          marginBottom: '30px'
-        }}>
-          <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>Account Connection</h2>
+      <div className="flex-1 p-6">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold mb-6">Live Trading Dashboard</h1>
           
-          <div style={{ marginBottom: '20px' }}>
-            <strong>Email:</strong> bm.watson34@gmail.com<br/>
-            <strong>Password:</strong> Panthers3477<br/>
-            <strong>PIN:</strong> 4134
+          {/* Connection Status */}
+          <div className="mb-8 p-4 bg-card rounded-lg border">
+            <h2 className="text-xl font-semibold mb-4">Connection Status</h2>
+            <p className="mb-4">{status}</p>
+            
+            <div className="flex gap-4 mb-4">
+              <button
+                onClick={connectRobinhood}
+                disabled={isConnecting}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50"
+              >
+                {isConnecting ? 'Connecting...' : 'Connect Robinhood'}
+              </button>
+              
+              <button
+                onClick={connectCoinbase}
+                disabled={connectingCoinbase}
+                className="px-4 py-2 bg-secondary text-secondary-foreground rounded hover:bg-secondary/90 disabled:opacity-50"
+              >
+                {connectingCoinbase ? 'Connecting...' : 'Connect Coinbase'}
+              </button>
+            </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-            <button 
-              onClick={connectRobinhood}
-              disabled={isConnecting}
-              style={{
-                backgroundColor: isConnecting ? '#666' : '#00ff00',
-                color: 'black',
-                padding: '15px 30px',
-                fontSize: '18px',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: isConnecting ? 'not-allowed' : 'pointer',
-                fontWeight: 'bold'
-              }}
-            >
-              {isConnecting ? 'CONNECTING...' : 'CONNECT ROBINHOOD'}
-            </button>
+          {/* Account Information */}
+          {accountData && (
+            <div className="mb-8 p-4 bg-card rounded-lg border">
+              <h2 className="text-xl font-semibold mb-4">Account Information</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="font-medium">Total Equity:</p>
+                  <p className="text-2xl font-bold text-green-600">${accountData.totalEquity}</p>
+                </div>
+                <div>
+                  <p className="font-medium">Buying Power:</p>
+                  <p className="text-lg">${accountData.buyingPower}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
-            <button 
-              onClick={connectCoinbase}
-              disabled={connectingCoinbase}
-              style={{
-                backgroundColor: connectingCoinbase ? '#666' : '#0052ff',
-                color: 'white',
-                padding: '15px 30px',
-                fontSize: '18px',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: connectingCoinbase ? 'not-allowed' : 'pointer',
-                fontWeight: 'bold'
-              }}
-            >
-              {connectingCoinbase ? 'CONNECTING...' : 'CONNECT COINBASE'}
-            </button>
-          </div>
-
-          <div style={{ 
-            marginTop: '20px', 
-            padding: '15px',
-            backgroundColor: '#333',
-            borderRadius: '5px'
-          }}>
-            <strong>Status:</strong> {status}
+          {/* Trading Panels */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="bg-card rounded-lg border p-4">
+              <LiveTradingPanel />
+            </div>
+            <div className="bg-card rounded-lg border p-4">
+              <CryptoTradingPanel />
+            </div>
+            <div className="bg-card rounded-lg border p-4">
+              <NexusBrowserView />
+            </div>
           </div>
         </div>
-
-        {accountData && (
-          <div style={{ 
-            backgroundColor: '#004400', 
-            padding: '30px', 
-            borderRadius: '8px',
-            marginBottom: '20px'
-          }}>
-            <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>ROBINHOOD LIVE ACCOUNT</h2>
-            
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '20px',
-              fontSize: '18px'
-            }}>
-              <div>
-                <div style={{ fontSize: '14px', opacity: 0.8 }}>Account Number</div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                  {accountData.accountNumber}
-                </div>
-              </div>
-              
-              <div>
-                <div style={{ fontSize: '14px', opacity: 0.8 }}>Buying Power</div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#00ff00' }}>
-                  ${accountData.buyingPower}
-                </div>
-              </div>
-              
-              <div>
-                <div style={{ fontSize: '14px', opacity: 0.8 }}>Total Equity</div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#ffff00' }}>
-                  ${accountData.totalEquity}
-                </div>
-              </div>
-              
-              <div>
-                <div style={{ fontSize: '14px', opacity: 0.8 }}>Day Trades</div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                  {accountData.dayTradeCount}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {coinbaseData && (
-          <div style={{ 
-            backgroundColor: '#000044', 
-            padding: '30px', 
-            borderRadius: '8px'
-          }}>
-            <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>COINBASE LIVE ACCOUNT</h2>
-            
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '20px',
-              fontSize: '18px'
-            }}>
-              <div>
-                <div style={{ fontSize: '14px', opacity: 0.8 }}>Account ID</div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                  {coinbaseData.accountId}
-                </div>
-              </div>
-              
-              <div>
-                <div style={{ fontSize: '14px', opacity: 0.8 }}>Available Balance</div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#0052ff' }}>
-                  ${coinbaseData.availableBalance}
-                </div>
-              </div>
-              
-              <div>
-                <div style={{ fontSize: '14px', opacity: 0.8 }}>Total Balance</div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#00aaff' }}>
-                  ${coinbaseData.totalBalance}
-                </div>
-              </div>
-              
-              <div>
-                <div style={{ fontSize: '14px', opacity: 0.8 }}>Portfolio Value</div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                  ${coinbaseData.portfolioValue}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Nexus Quantum Trading Mode */}
-        {accountData && (
-          <div style={{ 
-            backgroundColor: '#001122', 
-            padding: '30px', 
-            borderRadius: '8px',
-            marginTop: '20px',
-            border: '2px solid #00ffff'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '24px', margin: 0, color: '#00ffff' }}>
-                NEXUS QUANTUM TRADING - NO PDT RESTRICTIONS
-              </h2>
-              <a 
-                href="/quantum-trading-dashboard" 
-                style={{
-                  backgroundColor: '#005555',
-                  border: '1px solid #00aaaa',
-                  borderRadius: '4px',
-                  color: '#00ffff',
-                  padding: '8px 16px',
-                  textDecoration: 'none',
-                  fontSize: '14px',
-                  fontWeight: 'bold'
-                }}
-              >
-                FULL DASHBOARD
-              </a>
-            </div>
-            <div style={{ color: '#aaaaff', marginBottom: '20px', fontSize: '16px' }}>
-              After-hours trading enabled • Quantum execution algorithms active • $834.97 available
-            </div>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
-              <div>
-                <LiveTradingPanel />
-              </div>
-              <div>
-                <CryptoTradingPanel />
-              </div>
-              <div>
-                <NexusBrowserView />
-              </div>
-            </div>
-          </div>
-        )}
-
       </div>
     </div>
-  </div>
   );
 }
 
@@ -324,145 +171,102 @@ function LiveTradingPanel() {
 
   return (
     <div>
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-        gap: '15px',
-        marginBottom: '20px'
-      }}>
+      <h3 className="text-lg font-semibold mb-4">Stock Trading</h3>
+      
+      <div className="space-y-4">
         <div>
-          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Symbol</label>
+          <label className="block text-sm font-medium mb-2">Symbol</label>
           <input
             type="text"
             value={symbol}
             onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-            style={{
-              width: '100%',
-              padding: '8px',
-              backgroundColor: '#333',
-              border: '1px solid #666',
-              borderRadius: '4px',
-              color: 'white'
-            }}
+            className="w-full px-3 py-2 border rounded"
+            placeholder="AAPL"
           />
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Side</label>
+          <label className="block text-sm font-medium mb-2">Side</label>
           <select
             value={side}
             onChange={(e) => setSide(e.target.value as 'buy' | 'sell')}
-            style={{
-              width: '100%',
-              padding: '8px',
-              backgroundColor: '#333',
-              border: '1px solid #666',
-              borderRadius: '4px',
-              color: 'white'
-            }}
+            className="w-full px-3 py-2 border rounded"
           >
-            <option value="buy">BUY</option>
-            <option value="sell">SELL</option>
+            <option value="buy">Buy</option>
+            <option value="sell">Sell</option>
           </select>
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Quantity</label>
+          <label className="block text-sm font-medium mb-2">Quantity</label>
           <input
             type="number"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px',
-              backgroundColor: '#333',
-              border: '1px solid #666',
-              borderRadius: '4px',
-              color: 'white'
-            }}
+            className="w-full px-3 py-2 border rounded"
+            min="1"
           />
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Order Type</label>
+          <label className="block text-sm font-medium mb-2">Order Type</label>
           <select
             value={orderType}
             onChange={(e) => setOrderType(e.target.value as 'market' | 'limit')}
-            style={{
-              width: '100%',
-              padding: '8px',
-              backgroundColor: '#333',
-              border: '1px solid #666',
-              borderRadius: '4px',
-              color: 'white'
-            }}
+            className="w-full px-3 py-2 border rounded"
           >
-            <option value="market">MARKET</option>
-            <option value="limit">LIMIT</option>
+            <option value="market">Market</option>
+            <option value="limit">Limit</option>
           </select>
         </div>
 
         {orderType === 'limit' && (
           <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Price</label>
+            <label className="block text-sm font-medium mb-2">Limit Price</label>
             <input
               type="number"
-              step="0.01"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '8px',
-                backgroundColor: '#333',
-                border: '1px solid #666',
-                borderRadius: '4px',
-                color: 'white'
-              }}
+              className="w-full px-3 py-2 border rounded"
+              placeholder="0.00"
+              step="0.01"
             />
           </div>
         )}
-      </div>
 
-      <button
-        onClick={executeTrade}
-        disabled={isExecuting}
-        style={{
-          backgroundColor: isExecuting ? '#666' : (side === 'buy' ? '#00aa00' : '#aa0000'),
-          color: 'white',
-          padding: '12px 24px',
-          fontSize: '16px',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: isExecuting ? 'not-allowed' : 'pointer',
-          fontWeight: 'bold',
-          marginRight: '15px'
-        }}
-      >
-        {isExecuting ? 'EXECUTING...' : `${side.toUpperCase()} ${quantity} ${symbol}`}
-      </button>
+        <button
+          onClick={executeTrade}
+          disabled={isExecuting}
+          className={`w-full py-2 px-4 rounded font-medium ${
+            isExecuting
+              ? 'bg-gray-400 cursor-not-allowed'
+              : side === 'buy'
+              ? 'bg-green-600 hover:bg-green-700 text-white'
+              : 'bg-red-600 hover:bg-red-700 text-white'
+          }`}
+        >
+          {isExecuting ? 'Executing...' : `${side.toUpperCase()} ${quantity} ${symbol}`}
+        </button>
 
-      {lastTrade && (
-        <div style={{
-          marginTop: '20px',
-          padding: '15px',
-          backgroundColor: lastTrade.success ? '#003300' : '#330000',
-          borderRadius: '5px',
-          border: `1px solid ${lastTrade.success ? '#00ff00' : '#ff0000'}`
-        }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>
-            {lastTrade.success ? '✓ TRADE EXECUTED' : '✗ TRADE FAILED'}
-          </div>
-          <div style={{ fontSize: '14px' }}>{lastTrade.message}</div>
-          {lastTrade.success && lastTrade.orderId && (
-            <div style={{ fontSize: '14px', marginTop: '5px' }}>
-              Order ID: {lastTrade.orderId}
-              {lastTrade.executedPrice && (
-                <span> | Price: ${lastTrade.executedPrice.toFixed(2)}</span>
-              )}
+        {lastTrade && (
+          <div className={`p-3 rounded ${
+            lastTrade.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
+            <div className="font-bold">
+              {lastTrade.success ? '✓ TRADE EXECUTED' : '✗ TRADE FAILED'}
             </div>
-          )}
-        </div>
-      )}
+            <div className="text-sm">{lastTrade.message}</div>
+            {lastTrade.success && lastTrade.orderId && (
+              <div className="text-sm mt-1">
+                Order ID: {lastTrade.orderId}
+                {lastTrade.executedPrice && (
+                  <span> | Price: ${lastTrade.executedPrice.toFixed(2)}</span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -519,383 +323,177 @@ function CryptoTradingPanel() {
     cryptoTradeMutation.mutate(tradeData);
   };
 
-  const selectedAsset = cryptoAssets?.find((asset: any) => asset.symbol === selectedCrypto);
-  const currentPosition = cryptoPositions?.find((pos: any) => pos.symbol === selectedCrypto);
+  const selectedAsset = Array.isArray(cryptoAssets) ? cryptoAssets.find((asset: any) => asset.symbol === selectedCrypto) : null;
+  const currentPosition = Array.isArray(cryptoPositions) ? cryptoPositions.find((pos: any) => pos.symbol === selectedCrypto) : null;
 
   return (
-    <div style={{
-      backgroundColor: '#001122',
-      border: '1px solid #ff6600',
-      borderRadius: '8px',
-      padding: '15px',
-      height: '600px',
-      overflow: 'auto'
-    }}>
-      <h3 style={{
-        color: '#ff6600',
-        fontSize: '16px',
-        marginBottom: '15px',
-        textAlign: 'center'
-      }}>
-        ₿ CRYPTO TRADING
-      </h3>
+    <div>
+      <h3 className="text-lg font-semibold mb-4">Crypto Trading</h3>
+      
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-2">Crypto Asset</label>
+          <select
+            value={selectedCrypto}
+            onChange={(e) => setSelectedCrypto(e.target.value)}
+            className="w-full px-3 py-2 border rounded"
+          >
+            <option value="BTC">Bitcoin (BTC)</option>
+            <option value="ETH">Ethereum (ETH)</option>
+            <option value="DOGE">Dogecoin (DOGE)</option>
+          </select>
+        </div>
 
-      {/* Crypto Selection */}
-      <div style={{ marginBottom: '15px' }}>
-        <label style={{ color: '#ff6600', fontSize: '12px', display: 'block', marginBottom: '5px' }}>
-          Select Crypto
-        </label>
-        <select
-          value={selectedCrypto}
-          onChange={(e) => setSelectedCrypto(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '8px',
-            backgroundColor: '#000011',
-            border: '1px solid #ff6600',
-            borderRadius: '4px',
-            color: '#ffffff',
-            fontSize: '12px'
-          }}
+        {selectedAsset && (
+          <div className="p-3 bg-gray-50 rounded">
+            <div className="text-sm font-medium">Current Price</div>
+            <div className="text-lg font-bold">
+              ${selectedAsset.price || '0.00'}
+            </div>
+          </div>
+        )}
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Order Side</label>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setOrderSide('buy')}
+              className={`flex-1 py-2 px-4 rounded ${
+                orderSide === 'buy' ? 'bg-green-600 text-white' : 'bg-gray-200'
+              }`}
+            >
+              Buy
+            </button>
+            <button
+              onClick={() => setOrderSide('sell')}
+              className={`flex-1 py-2 px-4 rounded ${
+                orderSide === 'sell' ? 'bg-red-600 text-white' : 'bg-gray-200'
+              }`}
+            >
+              Sell
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Quantity ({selectedCrypto})</label>
+          <input
+            type="number"
+            value={orderQuantity}
+            onChange={(e) => setOrderQuantity(e.target.value)}
+            className="w-full px-3 py-2 border rounded"
+            placeholder={selectedAsset ? `Max: ${selectedAsset.balance || '0'}` : '0.00'}
+            step="0.00001"
+          />
+        </div>
+
+        <button
+          onClick={handleCryptoTrade}
+          disabled={cryptoTradeMutation.isPending || !orderQuantity}
+          className={`w-full py-2 px-4 rounded font-medium ${
+            cryptoTradeMutation.isPending
+              ? 'bg-gray-400 cursor-not-allowed'
+              : orderSide === 'buy'
+              ? 'bg-green-600 hover:bg-green-700 text-white'
+              : 'bg-red-600 hover:bg-red-700 text-white'
+          }`}
         >
-          <option value="BTC">Bitcoin (BTC)</option>
-          <option value="ETH">Ethereum (ETH)</option>
-          <option value="DOGE">Dogecoin (DOGE)</option>
-          <option value="SOL">Solana (SOL)</option>
-          <option value="ADA">Cardano (ADA)</option>
-          <option value="MATIC">Polygon (MATIC)</option>
-          <option value="AVAX">Avalanche (AVAX)</option>
-          <option value="LINK">Chainlink (LINK)</option>
-          <option value="UNI">Uniswap (UNI)</option>
-          <option value="LTC">Litecoin (LTC)</option>
-        </select>
-      </div>
+          {cryptoTradeMutation.isPending ? 'Processing...' : `${orderSide.toUpperCase()} ${selectedCrypto}`}
+        </button>
 
-      {/* Current Price */}
-      {selectedAsset && (
-        <div style={{
-          backgroundColor: '#002211',
-          border: '1px solid #ff6600',
-          borderRadius: '4px',
-          padding: '10px',
-          marginBottom: '15px'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ color: '#ffffff', fontSize: '14px', fontWeight: 'bold' }}>
-              {selectedAsset.name}
+        {currentPosition && (
+          <div className="p-3 bg-blue-50 rounded">
+            <div className="text-sm font-medium">Current Position</div>
+            <div className="text-sm">
+              Quantity: {currentPosition.quantity} {selectedCrypto}
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ color: '#ff6600', fontSize: '16px', fontWeight: 'bold' }}>
-                ${selectedAsset.price?.toFixed(selectedCrypto === 'BTC' || selectedCrypto === 'ETH' ? 2 : 6)}
-              </div>
-              <div style={{ 
-                color: selectedAsset.change24h >= 0 ? '#00ff00' : '#ff6666', 
-                fontSize: '10px' 
-              }}>
-                {selectedAsset.change24h >= 0 ? '+' : ''}{selectedAsset.change24h?.toFixed(2)}%
-              </div>
+            <div className="text-sm">
+              Value: ${currentPosition.marketValue || '0.00'}
+            </div>
+            <div className="text-sm">
+              P&L: ${currentPosition.unrealizedPnl || '0.00'}
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Order Side */}
-      <div style={{ marginBottom: '15px' }}>
-        <div style={{ display: 'flex', gap: '5px' }}>
-          <button
-            onClick={() => setOrderSide('buy')}
-            style={{
-              flex: 1,
-              padding: '8px',
-              backgroundColor: orderSide === 'buy' ? '#006600' : '#003333',
-              border: '1px solid #ff6600',
-              borderRadius: '4px',
-              color: '#ffffff',
-              cursor: 'pointer',
-              fontSize: '12px'
-            }}
-          >
-            BUY
-          </button>
-          <button
-            onClick={() => setOrderSide('sell')}
-            style={{
-              flex: 1,
-              padding: '8px',
-              backgroundColor: orderSide === 'sell' ? '#660000' : '#003333',
-              border: '1px solid #ff6600',
-              borderRadius: '4px',
-              color: '#ffffff',
-              cursor: 'pointer',
-              fontSize: '12px'
-            }}
-          >
-            SELL
-          </button>
-        </div>
-      </div>
-
-      {/* Quantity Input */}
-      <div style={{ marginBottom: '15px' }}>
-        <label style={{ color: '#ff6600', fontSize: '12px', display: 'block', marginBottom: '5px' }}>
-          Quantity ({selectedCrypto})
-        </label>
-        <input
-          type="number"
-          value={orderQuantity}
-          onChange={(e) => setOrderQuantity(e.target.value)}
-          placeholder={`Min: ${selectedAsset?.minOrderSize || 0.00001}`}
-          step={selectedAsset?.minOrderSize || 0.00001}
-          style={{
-            width: '100%',
-            padding: '8px',
-            backgroundColor: '#000011',
-            border: '1px solid #ff6600',
-            borderRadius: '4px',
-            color: '#ffffff',
-            fontSize: '12px'
-          }}
-        />
-      </div>
-
-      {/* Execute Trade Button */}
-      <button
-        onClick={handleCryptoTrade}
-        disabled={cryptoTradeMutation.isPending || !orderQuantity}
-        style={{
-          width: '100%',
-          padding: '10px',
-          backgroundColor: cryptoTradeMutation.isPending ? '#333333' : 
-                          orderSide === 'buy' ? '#006600' : '#660000',
-          border: '1px solid #ff6600',
-          borderRadius: '4px',
-          color: '#ffffff',
-          cursor: cryptoTradeMutation.isPending ? 'not-allowed' : 'pointer',
-          fontSize: '14px',
-          fontWeight: 'bold',
-          marginBottom: '15px'
-        }}
-      >
-        {cryptoTradeMutation.isPending ? 
-          'EXECUTING...' : 
-          `${orderSide.toUpperCase()} ${selectedCrypto}`
-        }
-      </button>
-
-      {/* Current Position */}
-      {currentPosition && (
-        <div style={{
-          backgroundColor: '#002211',
-          border: '1px solid #ff6600',
-          borderRadius: '4px',
-          padding: '10px',
-          marginBottom: '15px'
-        }}>
-          <h4 style={{ color: '#ff6600', fontSize: '12px', marginBottom: '8px' }}>
-            {selectedCrypto} Position
-          </h4>
-          <div style={{ fontSize: '10px' }}>
-            <div style={{ color: '#aaaaaa', marginBottom: '2px' }}>
-              Quantity: <span style={{ color: '#ffffff' }}>{currentPosition.quantity?.toFixed(6)}</span>
-            </div>
-            <div style={{ color: '#aaaaaa', marginBottom: '2px' }}>
-              Avg Cost: <span style={{ color: '#ffffff' }}>${currentPosition.avgCost?.toFixed(2)}</span>
-            </div>
-            <div style={{ color: '#aaaaaa', marginBottom: '2px' }}>
-              Value: <span style={{ color: '#00ffff' }}>${currentPosition.totalValue?.toFixed(2)}</span>
-            </div>
-            <div style={{ color: '#aaaaaa' }}>
-              P&L: <span style={{ 
-                color: currentPosition.unrealizedPnL >= 0 ? '#00ff00' : '#ff6666' 
-              }}>
-                ${currentPosition.unrealizedPnL?.toFixed(2)}
-              </span>
+        {/* Positions Summary */}
+        {Array.isArray(cryptoPositions) && cryptoPositions.length > 0 && (
+          <div className="mt-4">
+            <h4 className="font-medium mb-2">All Crypto Positions</h4>
+            <div className="space-y-2">
+              {cryptoPositions.map((position: any, index: number) => (
+                <div key={index} className="text-sm p-2 bg-gray-50 rounded">
+                  <span className="font-medium">{position.symbol}</span>: {position.quantity} 
+                  (${position.marketValue || '0.00'})
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Portfolio Summary */}
-      <div style={{
-        backgroundColor: '#002211',
-        border: '1px solid #ff6600',
-        borderRadius: '4px',
-        padding: '10px',
-        fontSize: '10px'
-      }}>
-        <div style={{ color: '#ff6600', marginBottom: '5px', fontSize: '12px' }}>Portfolio</div>
-        <div style={{ color: '#aaaaaa', marginBottom: '2px' }}>
-          Total Value: <span style={{ color: '#00ff00' }}>
-            ${cryptoPositions?.reduce((sum: number, pos: any) => sum + (pos.totalValue || 0), 0)?.toFixed(2) || '0.00'}
-          </span>
-        </div>
-        <div style={{ color: '#aaaaaa', marginBottom: '2px' }}>
-          Available: <span style={{ color: '#00ffff' }}>$834.97</span>
-        </div>
-        <div style={{ color: '#aaaaaa' }}>
-          Positions: <span style={{ color: '#ffaa00' }}>{cryptoPositions?.length || 0}</span>
-        </div>
+        )}
       </div>
     </div>
   );
 }
 
 function NexusBrowserView() {
-  const [activeUrl, setActiveUrl] = useState('https://robinhood.com/stocks/AAPL');
-  const [browserHistory, setBrowserHistory] = useState<string[]>([]);
+  const [activeUrl, setActiveUrl] = useState('https://robinhood.com');
+  
+  const quickLinks = [
+    { name: 'Robinhood', url: 'https://robinhood.com' },
+    { name: 'Coinbase', url: 'https://www.coinbase.com' },
+    { name: 'Yahoo Finance', url: 'https://finance.yahoo.com' },
+    { name: 'MarketWatch', url: 'https://www.marketwatch.com' }
+  ];
 
   const navigateTo = (url: string) => {
     setActiveUrl(url);
-    setBrowserHistory(prev => [...prev, url]);
   };
 
-  const quickLinks = [
-    { name: 'RH Portfolio', url: 'https://robinhood.com/account' },
-    { name: 'Market Watch', url: 'https://finance.yahoo.com/quote/AAPL' },
-    { name: 'After Hours', url: 'https://robinhood.com/collections/after-hours-movers' },
-    { name: 'Crypto', url: 'https://robinhood.com/crypto' },
-    { name: 'Options', url: 'https://robinhood.com/options' }
-  ];
-
   return (
-    <div style={{
-      backgroundColor: '#000022',
-      border: '1px solid #00aaaa',
-      borderRadius: '8px',
-      height: '600px',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
-      {/* Browser Header */}
-      <div style={{
-        backgroundColor: '#003333',
-        padding: '10px',
-        borderBottom: '1px solid #00aaaa',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px'
-      }}>
-        <div style={{ fontSize: '14px', color: '#00ffff', fontWeight: 'bold' }}>
-          NEXUS BROWSER
+    <div>
+      <h3 className="text-lg font-semibold mb-4">Market Browser</h3>
+      
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-2">URL</label>
+          <input
+            type="url"
+            value={activeUrl}
+            onChange={(e) => setActiveUrl(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && navigateTo(activeUrl)}
+            className="w-full px-3 py-2 border rounded"
+            placeholder="https://example.com"
+          />
         </div>
-        <input
-          type="text"
-          value={activeUrl}
-          onChange={(e) => setActiveUrl(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && navigateTo(activeUrl)}
-          style={{
-            flex: 1,
-            padding: '5px 10px',
-            backgroundColor: '#001111',
-            border: '1px solid #00aaaa',
-            borderRadius: '4px',
-            color: '#ffffff',
-            fontSize: '12px'
-          }}
-        />
+
         <button
           onClick={() => navigateTo(activeUrl)}
-          style={{
-            padding: '5px 15px',
-            backgroundColor: '#005555',
-            border: '1px solid #00aaaa',
-            borderRadius: '4px',
-            color: '#ffffff',
-            cursor: 'pointer',
-            fontSize: '12px'
-          }}
+          className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          GO
+          Navigate
         </button>
-      </div>
 
-      {/* Quick Links */}
-      <div style={{
-        backgroundColor: '#002222',
-        padding: '8px',
-        borderBottom: '1px solid #00aaaa',
-        display: 'flex',
-        gap: '8px',
-        flexWrap: 'wrap'
-      }}>
-        {quickLinks.map((link, idx) => (
-          <button
-            key={idx}
-            onClick={() => navigateTo(link.url)}
-            style={{
-              padding: '4px 8px',
-              backgroundColor: '#004444',
-              border: '1px solid #00aaaa',
-              borderRadius: '3px',
-              color: '#00ffff',
-              cursor: 'pointer',
-              fontSize: '11px'
-            }}
-          >
-            {link.name}
-          </button>
-        ))}
-      </div>
-
-      {/* Browser Content */}
-      <div style={{
-        flex: 1,
-        backgroundColor: '#000011',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <iframe
-          src={activeUrl}
-          style={{
-            width: '100%',
-            height: '100%',
-            border: 'none',
-            backgroundColor: '#ffffff'
-          }}
-          title="Nexus Trading Browser"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
-        />
-        
-        {/* Quantum overlay */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'linear-gradient(45deg, transparent 0%, rgba(0,255,255,0.05) 25%, transparent 50%, rgba(0,255,255,0.05) 75%, transparent 100%)',
-          pointerEvents: 'none',
-          zIndex: 1
-        }} />
-        
-        {/* Status indicator */}
-        <div style={{
-          position: 'absolute',
-          top: '10px',
-          right: '10px',
-          backgroundColor: 'rgba(0,0,0,0.8)',
-          color: '#00ffff',
-          padding: '5px 10px',
-          borderRadius: '4px',
-          fontSize: '11px',
-          zIndex: 2
-        }}>
-          NEXUS SECURE TRADING VIEW
+        <div>
+          <h4 className="font-medium mb-2">Quick Links</h4>
+          <div className="space-y-1">
+            {quickLinks.map((link, idx) => (
+              <button
+                key={idx}
+                onClick={() => navigateTo(link.url)}
+                className="w-full text-left px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded"
+              >
+                {link.name}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Browser Footer */}
-      <div style={{
-        backgroundColor: '#003333',
-        padding: '5px 10px',
-        borderTop: '1px solid #00aaaa',
-        fontSize: '11px',
-        color: '#aaaaaa',
-        display: 'flex',
-        justifyContent: 'space-between'
-      }}>
-        <span>Quantum-encrypted connection</span>
-        <span>After-hours trading active</span>
+        <div className="mt-4 p-4 bg-gray-100 rounded min-h-[300px]">
+          <div className="text-sm text-gray-600 mb-2">Current URL: {activeUrl}</div>
+          <div className="text-center text-gray-500 mt-20">
+            Browser view would display content from: {activeUrl}
+          </div>
+        </div>
       </div>
     </div>
   );
