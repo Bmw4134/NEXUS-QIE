@@ -98,8 +98,12 @@ export const KaizenAssistantCore: React.FC<KaizenAssistantCoreProps> = ({
 
         // Initialize state snapshot system if enabled
         if (config.enableStateSnapshot) {
-          const stateSnapshot = await import('@/lib/state-snapshot');
-          stateSnapshot.initialize(eventBus);
+          try {
+            const stateSnapshot = await import('@/lib/state-snapshot');
+            stateSnapshot.initialize(eventBus);
+          } catch (error) {
+            console.warn('State snapshot module failed to load:', error);
+          }
         }
 
         systemRef.current = {
