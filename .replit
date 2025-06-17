@@ -8,8 +8,8 @@ packages = ["chromium", "glibcLocales"]
 
 [deployment]
 deploymentTarget = "autoscale"
-build = ["sh", "-c", "npm run build"]
-run = ["sh", "-c", "NODE_ENV=production tsx server/nexus-startup-orchestrator.ts"]
+build = ["sh", "-c", "npm install --legacy-peer-deps && npm run build && npx tsc server/production-startup.ts --outDir server --target es2020 --module commonjs"]
+run = ["sh", "-c", "NODE_ENV=production node server/production-startup.js"]
 
 [[ports]]
 localPort = 5000
