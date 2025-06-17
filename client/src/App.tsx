@@ -5,12 +5,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
 
-// Enterprise Dashboard Pages
+// Enterprise Trading Components
 import Dashboard from '@/pages/Dashboard';
 import QIEIntelligenceHub from '@/pages/QIEIntelligenceHub';
-import LandingPage from '@/pages/LandingPage';
-
-// Enterprise Landing Component
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,7 +21,9 @@ import {
   Zap,
   Target,
   Star,
-  Rocket
+  Rocket,
+  DollarSign,
+  Activity
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -37,201 +36,217 @@ const queryClient = new QueryClient({
   },
 });
 
-// Enterprise Animated Counter Component
-const EnterpriseCounter = ({ value, prefix = '', suffix = '', duration = 2000 }) => {
-  const [count, setCount] = useState(0);
+// Enterprise Trading Terminal Landing
+const EnterpriseTradingTerminal = () => {
+  const [liveData, setLiveData] = useState({
+    balance: 834.97,
+    buyingPower: 2034.97,
+    totalEquity: 2034.97,
+    daysPnL: 421.10,
+    aiScore: 855,
+    systemHealth: 97
+  });
 
-  useEffect(() => {
-    let startTime;
-    const animate = (timestamp) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      setCount(Math.floor(progress * value));
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-    requestAnimationFrame(animate);
-  }, [value, duration]);
+  const [positions] = useState([
+    { symbol: 'AAPL', shares: 15, currentPrice: 185.43, change: '+$2.13' },
+    { symbol: 'TSLA', shares: 8, currentPrice: 243.87, change: '+$5.21' },
+    { symbol: 'NVDA', shares: 12, currentPrice: 431.22, change: '-$1.45' }
+  ]);
 
-  return (
-    <motion.span 
-      className="font-bold text-3xl bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 bg-clip-text text-transparent"
-      animate={{ scale: [1, 1.05, 1] }}
-      transition={{ duration: 3, repeat: Infinity }}
-    >
-      {prefix}{count.toLocaleString()}{suffix}
-    </motion.span>
-  );
-};
-
-// Enterprise Landing Page Component
-const EnterpriseLanding = () => {
-  const [activeMetric, setActiveMetric] = useState(0);
-
-  const enterpriseMetrics = [
-    { value: 778.19, prefix: '$', suffix: '', label: 'Live Balance', color: 'text-green-400' },
-    { value: 99.2, prefix: '', suffix: '%', label: 'AI Accuracy', color: 'text-blue-400' },
-    { value: 247000, prefix: '$', suffix: '', label: 'Monthly Volume', color: 'text-purple-400' },
-    { value: 5, prefix: '', suffix: '', label: 'Data Sources', color: 'text-orange-400' }
-  ];
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveMetric(prev => (prev + 1) % enterpriseMetrics.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+  const [tradingEngines] = useState([
+    { name: 'Robinhood', status: 'Active', color: 'green' },
+    { name: 'Alpaca', status: 'Active', color: 'green' },
+    { name: 'Coinbase', status: 'Active', color: 'green' }
+  ]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Enterprise Particle Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(50)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-green-400 rounded-full opacity-30"
-            animate={{
-              x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
-              y: [Math.random() * window.innerHeight, Math.random() * window.innerHeight],
-            }}
-            transition={{
-              duration: Math.random() * 20 + 10,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          />
-        ))}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white">
+      {/* Header */}
+      <div className="border-b border-blue-800/30 bg-slate-900/80 backdrop-blur-xl">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <Zap className="h-8 w-8 text-blue-400" />
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                  NEXUS-QIE
+                </h1>
+              </div>
+              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                Quantum Intelligence Enterprise Platform
+              </Badge>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="text-right">
+                <div className="text-2xl font-bold text-green-400">${liveData.balance}</div>
+                <div className="text-sm text-gray-400">Live Account Balance</div>
+                <div className="text-xs text-blue-400">Buying Power: ${liveData.buyingPower.toLocaleString()}</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="relative z-10 container mx-auto px-6 py-20">
-        {/* Enterprise Hero Section */}
-        <motion.div 
-          className="text-center mb-20"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-        >
-          <motion.h1 
-            className="text-8xl font-black mb-8 tracking-wider"
-            style={{
-              background: 'linear-gradient(45deg, #00ff64, #00d4ff, #ff6b35)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              textShadow: '0 0 40px rgba(0, 255, 100, 0.5)'
-            }}
-            animate={{ 
-              textShadow: [
-                '0 0 40px rgba(0, 255, 100, 0.5)',
-                '0 0 60px rgba(0, 255, 100, 0.8)',
-                '0 0 40px rgba(0, 255, 100, 0.5)'
-              ]
-            }}
-            transition={{ duration: 3, repeat: Infinity }}
-          >
-            NEXUS QIE
-          </motion.h1>
-          
-          <motion.h2 
-            className="text-4xl font-bold text-white mb-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 1 }}
-          >
-            Quantum Intelligence Enterprise
-          </motion.h2>
-          
-          <motion.p 
-            className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1, duration: 1 }}
-          >
-            The world's most advanced AI-powered trading platform. Quantum-enhanced decision making, 
-            autonomous trading algorithms, and enterprise-grade security for the modern financial elite.
-          </motion.p>
-        </motion.div>
+      <div className="container mx-auto px-6 py-8">
+        {/* Metrics Dashboard */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-gradient-to-br from-green-900/40 to-green-800/20 border-green-500/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-green-400">Total Equity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">${liveData.totalEquity.toLocaleString()}</div>
+              <div className="text-xs text-green-400">+${(liveData.totalEquity - 1500).toFixed(2)} (+24.52%)</div>
+            </CardContent>
+          </Card>
 
-        {/* Enterprise Metrics Banner */}
-        <motion.div 
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5, duration: 1 }}
-        >
-          {enterpriseMetrics.map((metric, index) => (
-            <motion.div
-              key={index}
-              className="relative"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <div className="bg-black/20 backdrop-blur-xl border border-green-500/20 rounded-2xl p-6 text-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent" />
-                <div className="relative z-10">
-                  <EnterpriseCounter 
-                    value={metric.value} 
-                    prefix={metric.prefix} 
-                    suffix={metric.suffix} 
-                  />
-                  <p className="text-gray-300 mt-2 font-medium">{metric.label}</p>
+          <Card className="bg-gradient-to-br from-blue-900/40 to-blue-800/20 border-blue-500/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-blue-400">Day's P&L</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">+${liveData.daysPnL}</div>
+              <div className="text-xs text-blue-400">+2.45% today</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-900/40 to-purple-800/20 border-purple-500/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-purple-400">AI Score</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{liveData.aiScore}</div>
+              <div className="text-xs text-purple-400">Quantum Analysis</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-cyan-900/40 to-cyan-800/20 border-cyan-500/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-cyan-400">System Health</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{liveData.systemHealth}%</div>
+              <div className="text-xs text-cyan-400">All Systems Operational</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Live Positions */}
+          <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
+            <CardHeader>
+              <CardTitle className="flex items-center text-white">
+                <Activity className="mr-2 h-5 w-5 text-blue-400" />
+                Live Positions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {positions.map((position) => (
+                <div key={position.symbol} className="flex items-center justify-between p-4 rounded-lg bg-slate-800/50 border border-slate-700/30">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-600/20 flex items-center justify-center">
+                      <span className="text-blue-400 font-bold text-sm">{position.symbol}</span>
+                    </div>
+                    <div>
+                      <div className="text-white font-medium">{position.symbol}</div>
+                      <div className="text-gray-400 text-sm">{position.shares} shares</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-white font-bold">${position.currentPrice}</div>
+                    <div className={`text-sm ${position.change.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>
+                      {position.change}
+                    </div>
+                  </div>
                 </div>
-                {activeMetric === index && (
-                  <motion.div
-                    className="absolute inset-0 border-2 border-green-400 rounded-2xl"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                  />
-                )}
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
+              ))}
+            </CardContent>
+          </Card>
 
-        {/* Enterprise Action Buttons */}
-        <motion.div 
-          className="flex flex-col sm:flex-row gap-6 justify-center items-center"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2, duration: 1 }}
-        >
-          <Button 
-            size="lg" 
-            className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-bold py-4 px-12 rounded-full text-lg shadow-2xl transform transition-all duration-300 hover:scale-105"
-            onClick={() => window.location.href = '/dashboard'}
-          >
-            <Rocket className="mr-3 h-6 w-6" />
-            Launch Dashboard
-          </Button>
-          
-          <Button 
-            size="lg" 
-            variant="outline" 
-            className="border-2 border-green-400 text-green-400 hover:bg-green-400 hover:text-black font-bold py-4 px-12 rounded-full text-lg backdrop-blur-sm"
-            onClick={() => window.location.href = '/qie-intelligence-hub'}
-          >
-            <Brain className="mr-3 h-6 w-6" />
-            Intelligence Hub
-          </Button>
-        </motion.div>
+          {/* Quick Trading Actions */}
+          <div className="space-y-6">
+            <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
+              <CardHeader>
+                <CardTitle className="text-green-400">Quick Buy Orders</CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 gap-3">
+                <Button className="bg-green-600 hover:bg-green-700 text-white">Buy AAPL</Button>
+                <Button className="bg-green-600 hover:bg-green-700 text-white">Buy TSLA</Button>
+                <Button className="bg-green-600 hover:bg-green-700 text-white">Buy NVDA</Button>
+                <Button className="bg-green-600 hover:bg-green-700 text-white">Buy SPY</Button>
+              </CardContent>
+            </Card>
 
-        {/* Enterprise Status Indicator */}
-        <motion.div 
-          className="fixed bottom-8 right-8"
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 3, duration: 0.5 }}
-        >
-          <div className="bg-black/40 backdrop-blur-xl border border-green-500/30 rounded-2xl p-4 flex items-center space-x-3">
-            <motion.div 
-              className="w-3 h-3 bg-green-400 rounded-full"
-              animate={{ opacity: [1, 0.5, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-            <span className="text-green-400 font-medium">NEXUS ONLINE</span>
+            <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
+              <CardHeader>
+                <CardTitle className="text-red-400">Quick Sell Orders</CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 gap-3">
+                <Button className="bg-red-600 hover:bg-red-700 text-white">Sell AAPL</Button>
+                <Button className="bg-red-600 hover:bg-red-700 text-white">Sell TSLA</Button>
+                <Button className="bg-red-600 hover:bg-red-700 text-white">Sell NVDA</Button>
+                <Button className="bg-red-600 hover:bg-red-700 text-white">Sell All</Button>
+              </CardContent>
+            </Card>
           </div>
-        </motion.div>
+        </div>
+
+        {/* Trading Engines Status */}
+        <Card className="mt-8 bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
+          <CardHeader>
+            <CardTitle className="text-white">Trading Engines Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {tradingEngines.map((engine) => (
+                <div key={engine.name} className="flex items-center justify-between p-4 rounded-lg bg-slate-800/50">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-3 h-3 rounded-full bg-${engine.color}-500`}></div>
+                    <span className="text-white font-medium">{engine.name}</span>
+                  </div>
+                  <Badge className={`bg-${engine.color}-500/20 text-${engine.color}-400 border-${engine.color}-500/30`}>
+                    {engine.status}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* NEXUS Intelligence Modules */}
+        <Card className="mt-8 bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
+          <CardHeader>
+            <CardTitle className="text-white">NEXUS Intelligence Modules</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Button variant="outline" className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
+                <Brain className="mr-2 h-4 w-4" />
+                AI Analysis
+              </Button>
+              <Button variant="outline" className="border-green-500/30 text-green-400 hover:bg-green-500/10">
+                <TrendingUp className="mr-2 h-4 w-4" />
+                Market Trends
+              </Button>
+              <Button variant="outline" className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10">
+                <Target className="mr-2 h-4 w-4" />
+                Risk Analysis
+              </Button>
+              <Button variant="outline" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
+                <Rocket className="mr-2 h-4 w-4" />
+                Auto Trading
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Status Indicator */}
+      <div className="fixed bottom-6 right-6">
+        <div className="bg-slate-900/80 backdrop-blur-xl border border-green-500/30 rounded-lg p-3 flex items-center space-x-2">
+          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+          <span className="text-green-400 text-sm font-medium">NEXUS ONLINE</span>
+        </div>
       </div>
     </div>
   );
@@ -249,29 +264,16 @@ function App() {
     return () => window.removeEventListener('popstate', handleLocationChange);
   }, []);
 
-  // Show Enterprise Landing for root path
-  if (currentPath === '/' || currentPath === '') {
-    return (
-      <ThemeProvider defaultTheme="dark" storageKey="nexus-ui-theme">
-        <QueryClientProvider client={queryClient}>
-          <EnterpriseLanding />
-          <Toaster />
-        </QueryClientProvider>
-      </ThemeProvider>
-    );
-  }
-
   return (
     <ThemeProvider defaultTheme="dark" storageKey="nexus-ui-theme">
       <QueryClientProvider client={queryClient}>
         <Router>
-          <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+          <div className="min-h-screen">
             <Routes>
-              <Route path="/" element={<EnterpriseLanding />} />
-              <Route path="/landing" element={<LandingPage />} />
+              <Route path="/" element={<EnterpriseTradingTerminal />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/qie-intelligence-hub" element={<QIEIntelligenceHub />} />
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
         </Router>
