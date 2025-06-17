@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { EventBus } from '@/lib/event-bus';
@@ -56,7 +55,7 @@ export const KaizenAssistantCore: React.FC<KaizenAssistantCoreProps> = ({
   useEffect(() => {
     const initializeKaizenSystem = async () => {
       console.log('🚀 KaizenAssistantCore: Initializing system...');
-      
+
       try {
         // Initialize core systems
         const eventBus = new EventBus();
@@ -93,6 +92,16 @@ export const KaizenAssistantCore: React.FC<KaizenAssistantCoreProps> = ({
           metricsStreaming.start();
         }
 
+        if (config.enableWidgetPerfTracker) {
+          metricsStreaming.start();
+        }
+
+        // Initialize state snapshot system if enabled
+        if (config.enableStateSnapshot) {
+          const stateSnapshot = await import('@/lib/state-snapshot');
+          stateSnapshot.initialize(eventBus);
+        }
+
         systemRef.current = {
           eventBus,
           promptDNA,
@@ -106,12 +115,12 @@ export const KaizenAssistantCore: React.FC<KaizenAssistantCoreProps> = ({
         };
 
         setIsInitialized(true);
-        
+
         // Emit system ready event
         eventBus.emit('kaizen_system_ready', { dashboard, timestamp: new Date() });
-        
+
         console.log('✅ KaizenAssistantCore: System initialized successfully');
-        
+
       } catch (error) {
         console.error('❌ KaizenAssistantCore: Initialization failed:', error);
       }

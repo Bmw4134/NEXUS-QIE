@@ -146,7 +146,7 @@ export default function App() {
 
   return (
     <KaizenAssistantCore 
-      dashboard="enhanced_dashboard"
+      dashboard="nexus_qie_production"
       config={{
         enableFirebaseSync: true,
         enableMetricsStreaming: true,

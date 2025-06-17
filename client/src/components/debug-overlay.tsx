@@ -107,6 +107,15 @@ export const DebugOverlay: React.FC = () => {
           />
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto p-2">
+          {/* Performance Summary */}
+          <div className="mb-3 p-2 bg-slate-800 rounded border">
+            <div className="text-xs font-semibold mb-1">Performance Summary</div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div>Events: {eventLogs.length}</div>
+              <div>Memory: {(performance.memory?.usedJSHeapSize / 1024 / 1024 || 0).toFixed(1)}MB</div>
+            </div>
+          </div>
+
           <div className="space-y-1">
             {filteredLogs.map(log => (
               <div key={log.id} className="text-xs border-l-2 border-blue-500 pl-2 py-1">
